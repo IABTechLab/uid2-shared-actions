@@ -8,6 +8,10 @@ inputs:
   failure_severity:
     description: 'The severity to fail on. Must be [CRITICAL,HIGH,MEDIUM]'
     required: true
+  github_token:
+    description: 'Github access token for calling repo'
+    required: true
+
 runs:
   using: "composite" 
 
@@ -25,7 +29,7 @@ runs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.github_token }}
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
