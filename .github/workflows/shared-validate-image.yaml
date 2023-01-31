@@ -39,3 +39,4 @@ jobs:
         with:
           cloud_provider: ${{ inputs.cloud_provider }}
           failure_severity: ${{ inputs. failure_severity }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
