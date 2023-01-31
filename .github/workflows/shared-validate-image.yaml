@@ -35,7 +35,7 @@ jobs:
       - name: Restore Timestamps
         uses: thetradedesk/git-restore-mtime-action@v1.2
 
-      - uses: ./.github/workflows/build_scan_image
+      - uses: ./.github/actions/build_scan_image
         with:
           cloud_provider: ${{ inputs.cloud_provider }}
           failure_severity: ${{ inputs. failure_severity }}
