@@ -1,0 +1,42 @@
+name: Shared Validation of Docker image
+on:
+  workflow_call:
+    inputs:
+      failure_severity:
+        description: 'Must be one of CRITICAL, HIGH, MEDIUM'
+        required: false
+        default: 'HIGH'
+        type: string
+      cloud_provider:
+        description: 'Must be one of [aws, gcp, azure, default]'
+        required: false
+        default: 'default'
+        type: string
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-publish-docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      packages: write
+    outputs:
+      jar_version: ${{ steps.package.outputs.jar_version }}
+    steps:
+      - name: Checkout Full history
+        uses: actions/checkout@v3
+        with:
+          # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
+          fetch-depth: 0
+
+      - name: Restore Timestamps
+        uses: thetradedesk/git-restore-mtime-action@v1.2
+
+      - uses: IABTechLab/uid2-shared-actions/actions/build_scan_image@main
+        with:
+          cloud_provider: ${{ inputs.cloud_provider }}
+          failure_severity: ${{ inputs. failure_severity }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
