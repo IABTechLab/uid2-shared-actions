@@ -1,0 +1,76 @@
+name: Shared Pipeline to build and publish JAR Packages to Maven Repos
+on:
+  workflow_call:
+    inputs:
+      release_type:
+        description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
+        required: true
+        type: string
+      publish_to_maven:
+        description: 'True to publish the artifacts to maven repository, false to skip the step'
+        default: true
+        required: false
+        type: boolean
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: IABTechLab/uid2-shared-actions/actions/download_gpg_key
+        with:
+          key: ${{ secrets.GPG_KEY }}
+
+      - name: Local vulnerability scanner 
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+          hide-progress: true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          format: 'sarif'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL'
+          output: 'trivy-results.sarif'
+          hide-progress: true
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Set version number
+        id: version
+        uses: thomasm-ttd/SharedWorkflows/actions/version_number@main
+        with:
+          type: ${{ inputs.release_type }}
+
+      - name: Update pom.xml
+        run: |
+          current_version=$(grep -o '<version>.*</version>' pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
+          new_version=${{ steps.version.outputs.new_version }} 
+          sed -i "s/$current_version/$new_version/g" pom.xml
+          echo "Version number updated from $current_version to $new_version"
+
+      - name: Publish
+        if: ${{ inputs.upload_to_maven }}
+        run: mvn -B -Drepo.id=ossrh -Drepo.login=uidadmin -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
+
+      - name: Commit Pom.xml and version.json
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'pom.xml version.json'
+          author_name: Release Workflow
+          author_email: unifiedid-admin+release@thetradedesk.com
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+
