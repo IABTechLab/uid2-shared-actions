@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: IABTechLab/uid2-shared-actions/actions/download_gpg_key
+      - uses: IABTechLab/uid2-shared-actions/actions/download_gpg_key@main
         with:
           key: ${{ secrets.GPG_KEY }}
 
@@ -51,7 +51,7 @@ jobs:
 
       - name: Set version number
         id: version
-        uses: thomasm-ttd/SharedWorkflows/actions/version_number@main
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@main
         with:
           type: ${{ inputs.release_type }}
 
