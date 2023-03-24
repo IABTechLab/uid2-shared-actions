@@ -1,0 +1,53 @@
+name: Get Version number
+description: Returns the version number to use as an output
+# This action uses Nerdbank.Gitversioning to determine the version number
+# Outputs a value: new_version that is the complete version number
+inputs:
+  type:
+    description: The type of version number to return. Must be one of Snapshot, Patch, Minor or Major
+    required: true
+outputs:
+  new_version:
+    description: The complete version number 
+    value: ${{ steps.version.outputs.new_version }}
+runs:
+  using: "composite"
+  steps:
+    - name: Update Major Version
+      if: inputs.type == 'Major'
+      shell: bash
+      run: |
+        old_ver=$(jq '.version' version.json | tr -d '"')
+        new_ver=$(echo $old_ver | cut -d'.' -f 1) #get the major number
+        new_ver=$(echo $(expr $new_ver + 1))      #increment
+        new_ver=$(echo $new_ver.0)                #set minor version to 0
+        new_ver=\"$new_ver\"
+        echo $(jq ".version=$new_ver" version.json) > version.json
+    - name: Update Minor Version
+      if: inputs.type == 'Minor'
+      shell: bash
+      run: |
+        old_ver=$(jq '.version' version.json | tr -d '"')
+        new_ver=$(echo $old_ver | awk -F. -v OFS=. '{$NF++; print $0}') # minor
+        new_ver=\"$new_ver\"
+        echo $(jq ".version=$new_ver" version.json) > version.json
+
+    - name: Set Version
+      uses: dotnet/nbgv@master
+      with:
+        setAllVars: true
+    
+    - run: echo "NBGV_SemVer2 $NBGV_SemVer2"
+      shell: bash
+    - run: env
+      shell: bash
+
+    - name: Set version number for snapshot
+      id: version
+      shell: bash
+      run: |
+        if [[ "${{ inputs.type }}" == "Snapshot" ]]; then
+          echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
+        else
+          echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort" >> $GITHUB_OUTPUT
+        fi
