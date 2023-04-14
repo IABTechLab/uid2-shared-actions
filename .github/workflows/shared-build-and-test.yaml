@@ -2,6 +2,10 @@ name: Shared Maven Build And Test
 
 on:
   workflow_call:
+    inputs:
+      java-version:
+        type: string
+        default: '11'
     
 jobs:
   build:
@@ -15,9 +19,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: |
-            11
-            17
+          java-version: ${{ inputs.java-version }}
 
       - name: Build and Run Unit Tests
         run: mvn -B clean compile test
