@@ -11,11 +11,20 @@ inputs:
   github_token:
     description: 'Github access token for calling repo'
     required: true
+  java_version:
+    type: string
+    default: '11'
 
 runs:
   using: "composite" 
 
   steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: ${{ inputs.java_version }}
+  
     - name: Package Jar 
       id: package
       shell: bash
