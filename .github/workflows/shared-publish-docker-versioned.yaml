@@ -14,6 +14,9 @@ on:
         description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
         required: true
         type: string
+      java_version:
+        type: string
+        default: '11'
       
 env:
   REGISTRY: ghcr.io
@@ -51,10 +54,16 @@ jobs:
           sed -i "s/$current_version/$new_version/g" pom.xml
           echo "Version number updated from $current_version to $new_version"
 
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java_version }}
+
       - name: Package Jar 
         id: package
         run: |
-          mvn -B package -P ${{ github.event.inputs.cloud_provider }} 
+          mvn -B package -P ${{ inputs.cloud_provider }} 
           echo "jar_version=$(mvn help:evaluate -Dexpression=project.version | grep -e '^[1-9][^\[]')" >> $GITHUB_OUTPUT
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 
@@ -79,8 +88,8 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix=${{ steps.version.outputs.new_versio }}-,suffix=-${{ github.event.inputs.cloud_provider }},format=short
-            type=raw,value=${{ github.event.inputs.tag }}
+            type=sha,prefix=${{ steps.version.outputs.new_version }}-,suffix=-${{ inputs.cloud_provider }},format=short
+            type=raw,value=${{ inputs.tag }}
 
       - name: Build and export to Docker
         uses: docker/build-push-action@v3
