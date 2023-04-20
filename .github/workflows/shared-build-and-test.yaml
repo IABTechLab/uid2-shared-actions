@@ -22,7 +22,7 @@ jobs:
           java-version: ${{ inputs.java-version }}
 
       - name: Build and Run Unit Tests
-        run: mvn -B clean compile test
+        run: mvn -B -e -X clean compile test
 
       - name: Generate Code Coverage
         run: mvn jacoco:report
