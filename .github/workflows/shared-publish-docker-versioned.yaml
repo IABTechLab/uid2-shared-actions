@@ -79,7 +79,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix=${{ steps.version.outputs.new_version }}-,suffix=-${{ github.event.inputs.cloud_provider }},format=short
+            type=raw,value=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}
             type=raw,value=${{ github.event.inputs.tag }}
 
       - name: Build and export to Docker
