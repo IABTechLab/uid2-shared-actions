@@ -23,7 +23,7 @@ jobs:
   build-publish-docker:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       security-events: write
       packages: write
     outputs:
