@@ -38,5 +38,5 @@ jobs:
       - uses: IABTechLab/uid2-shared-actions/actions/build_scan_image@main
         with:
           cloud_provider: ${{ inputs.cloud_provider }}
-          failure_severity: ${{ inputs. failure_severity }}
+          failure_severity: ${{ inputs.failure_severity }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
