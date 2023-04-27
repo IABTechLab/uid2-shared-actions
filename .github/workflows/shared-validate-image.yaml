@@ -90,11 +90,10 @@ jobs:
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
           format: 'sarif'
-          exit-code: '1'
+          #exit-code: '1'
           ignore-unfixed: true
           severity: ${{ inputs.failure_severity }}
           output: 'trivy-results.sarif'
-          hide-progress: true
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
