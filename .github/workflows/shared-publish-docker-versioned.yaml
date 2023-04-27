@@ -23,11 +23,11 @@ jobs:
   build-publish-docker:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       security-events: write
       packages: write
     outputs:
-      jar_version: ${{ steps.version.outputs.new_versio }}
+      jar_version: ${{ steps.version.outputs.new_version }}
     steps:
       - name: Checkout Full history
         uses: actions/checkout@v3
@@ -54,7 +54,7 @@ jobs:
       - name: Package Jar 
         id: package
         run: |
-          mvn -B package -P ${{ github.event.inputs.cloud_provider }} 
+          mvn -B package -P ${{ inputs.cloud_provider }} 
           echo "jar_version=$(mvn help:evaluate -Dexpression=project.version | grep -e '^[1-9][^\[]')" >> $GITHUB_OUTPUT
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 
@@ -79,7 +79,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,prefix=${{ steps.version.outputs.new_versio }}-,suffix=-${{ github.event.inputs.cloud_provider }},format=short
+            type=raw,value=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}
             type=raw,value=${{ github.event.inputs.tag }}
 
       - name: Build and export to Docker
@@ -90,8 +90,8 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            JAR_VERSION=${{ steps.version.outputs.new_versio }}
-            IMAGE_VERSION=${{ steps.version.outputs.new_versio }}-${{ steps.package.outputs.git_commit }}
+            JAR_VERSION=${{ steps.version.outputs.new_version }}
+            IMAGE_VERSION=${{ steps.version.outputs.new_version }}
 
       - name: Local vulnerability scanner
         uses: aquasecurity/trivy-action@master
@@ -128,6 +128,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            JAR_VERSION=${{ steps.version.outputs.new_versio }}
-            IMAGE_VERSION=${{ steps.version.outputs.new_versio }}-${{ steps.package.outputs.git_commit }}
+            JAR_VERSION=${{ steps.version.outputs.new_version }}
+            IMAGE_VERSION=${{ steps.version.outputs.new_version }}
 
