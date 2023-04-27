@@ -7,6 +7,10 @@ on:
         required: false
         default: 'HIGH'
         type: string
+      fail_on_error:
+        description: 'If true, will fail the build if vulnerabilities are found'
+        default: true
+        type: boolean
       cloud_provider:
         description: 'Must be one of [aws, gcp, azure, default]'
         required: false
@@ -97,6 +101,7 @@ jobs:
 
       - name: Local vulnerability scanner fail for given severity
         uses: aquasecurity/trivy-action@master
+        if: inputs.fail_on_error
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
           format: 'table'
