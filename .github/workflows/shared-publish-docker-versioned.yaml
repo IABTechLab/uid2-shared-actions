@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: ${{ inputs.java-version }}
+          java-version: ${{ inputs.java_version }}
 
       - name: Checkout Full history
         uses: actions/checkout@v3
