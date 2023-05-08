@@ -14,7 +14,7 @@ on:
         description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
         required: true
         type: string
-      java-version:
+      java_version:
         type: string
         default: '11'
       
@@ -57,7 +57,7 @@ jobs:
         run: |
           current_version=$(grep -o '<version>.*</version>' pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
           new_version=${{ steps.version.outputs.new_version }} 
-          sed -i "s/$current_version/$new_version/g" pom.xml
+          sed -i "s/$current_version/$new_version/1" pom.xml
           echo "Version number updated from $current_version to $new_version"
 
       - name: Package Jar 
