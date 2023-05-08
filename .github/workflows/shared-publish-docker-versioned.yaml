@@ -14,6 +14,9 @@ on:
         description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
         required: true
         type: string
+      java-version:
+        type: string
+        default: '11'
       
 env:
   REGISTRY: ghcr.io
@@ -29,6 +32,12 @@ jobs:
     outputs:
       jar_version: ${{ steps.version.outputs.new_version }}
     steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java-version }}
+
       - name: Checkout Full history
         uses: actions/checkout@v3
         with:
