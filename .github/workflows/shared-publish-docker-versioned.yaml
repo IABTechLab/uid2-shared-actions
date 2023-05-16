@@ -92,7 +92,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}
-            type=raw,value=${{ github.event.inputs.tag }}
+            type=raw,value=${{ inputs.tag }}
 
       - name: Build and export to Docker
         uses: docker/build-push-action@v3
@@ -117,7 +117,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
-        if: github.event.inputs.publish_vulnerabilities == 'true' 
+        if: inputs.publish_vulnerabilities == 'true' 
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
           format: 'sarif'
@@ -129,7 +129,7 @@ jobs:
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
-        if: github.event.inputs.publish_vulnerabilities == 'true' 
+        if: inputs.publish_vulnerabilities == 'true' 
         with:
           sarif_file: 'trivy-results.sarif'
 
