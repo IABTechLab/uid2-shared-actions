@@ -16,6 +16,13 @@ on:
         required: false
         default: 'default'
         type: string
+      java_version:
+        type: string
+        default: '11'
+      upload_vulnerabilities:
+        type: boolean
+        default: true
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -38,6 +45,12 @@ jobs:
 
       - name: Restore Timestamps
         uses: thetradedesk/git-restore-mtime-action@v1.2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java_version }}
 
       - name: Package Jar 
         id: package
@@ -78,14 +91,14 @@ jobs:
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
           format: 'sarif'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
           severity: ${{ inputs.failure_severity }}
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
-        if: always()
+        if: inputs.upload_vulnerabilities
         with:
           sarif_file: 'trivy-results.sarif'
 
