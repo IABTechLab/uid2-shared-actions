@@ -101,7 +101,7 @@ jobs:
 
       - name: Local vulnerability scanner fail for given severity
         uses: aquasecurity/trivy-action@master
-        if: inputs.fail_on_error
+        if: inputs.fail_on_error == 'true'
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
           format: 'table'
