@@ -12,6 +12,9 @@ on:
         default: true
         required: false
         type: boolean
+      java_version:
+        type: string
+        default: '11'
 
 jobs:
   release:
@@ -27,6 +30,12 @@ jobs:
         uses: ./.github/workflows/check_version
         with:
           needs_snapshot: 'true'
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ inputs.java_version }}
 
       - name: Local vulnerability scanner 
         uses: aquasecurity/trivy-action@master
