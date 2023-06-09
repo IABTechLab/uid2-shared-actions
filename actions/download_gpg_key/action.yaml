@@ -10,19 +10,19 @@ runs:
   using: "composite"
   steps:
     - name: maven-settings-xml-action
-      uses: whelk-io/maven-settings-xml-action@v20
+      uses: whelk-io/maven-settings-xml-action@v21
       with:    
         servers: >
           [
             {
               "id": "${repo.id}",
               "username": "${repo.login}",
-              "password": "${repo.pwd}"
             }
           ]      
     - name: Import GPG key 
       shell: bash
       run: |
+        cat ~/.m2/settings.xml
         echo -n "$GPG_SIGNING_KEY" | base64 --decode > private.key 
         gpg --batch --import private.key
       env:
