@@ -5,6 +5,12 @@ inputs:
     description: 'The Key to be imported'
     required: true
     type: string
+  account:
+    description: the repo account
+    required: true
+  password:
+    description: the repo password
+    required: true
 
 runs:
   using: "composite"
@@ -18,7 +24,7 @@ runs:
           [
             {
               "id": "ossrh",
-              "username": "${{ secrets.SONATYPE_REPO_ACCOUNT }}"
+              "username": "${inputs.account}"
             }
           ]      
     - name: Import GPG key 
