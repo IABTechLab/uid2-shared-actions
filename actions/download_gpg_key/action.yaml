@@ -23,7 +23,9 @@ runs:
         servers: >
           [
             {
-              "id": "ossrh"
+              "id": "$repo.id",
+              "username": "$repo.login",
+              "password": "$repo.pwd"
             }
           ]      
     - name: Import GPG key 
