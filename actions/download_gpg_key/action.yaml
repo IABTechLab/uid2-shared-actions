@@ -17,8 +17,8 @@ runs:
         servers: >
           [
             {
-              "id": ${repo.id},
-              "username": ${repo.login}
+              "id": "ossrh",
+              "username": "${secrets.SONATYPE_REPO_ACCOUNT}"
             }
           ]      
     - name: Import GPG key 
