@@ -5,12 +5,6 @@ inputs:
     description: 'The Key to be imported'
     required: true
     type: string
-  account:
-    description: the repo account
-    required: true
-  password:
-    description: the repo password
-    required: true
 
 runs:
   using: "composite"
@@ -27,7 +21,7 @@ runs:
               "username": "$repo.login",
               "password": "$repo.pwd"
             }
-          ]      
+          ]
     - name: Import GPG key 
       shell: bash
       run: |

@@ -79,7 +79,7 @@ jobs:
 
       - name: Publish
         if: ${{ inputs.publish_to_maven }}
-        run: mvn -B -Drepo.id=ossrh -Drepo.login="{{ secrets.SONATYPE_REPO_ACCOUNT }}" -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
+        run: mvn -B -Drepo.id=ossrh -Drepo.login="${{ secrets.SONATYPE_REPO_ACCOUNT }}" -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
 
       - name: Commit Pom.xml and version.json
         uses: EndBug/add-and-commit@v9
