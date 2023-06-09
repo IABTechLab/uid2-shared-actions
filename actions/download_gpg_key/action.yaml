@@ -24,13 +24,13 @@ runs:
           [
             {
               "id": "ossrh",
-              "username": "${{ inputs.account }}"
+              "username": "${{ inputs.account }}",
+              "password": "${{ inputs.password }}"
             }
           ]      
     - name: Import GPG key 
       shell: bash
       run: |
-        cat ~/.m2/settings.xml
         echo -n "$GPG_SIGNING_KEY" | base64 --decode > private.key 
         gpg --batch --import private.key
       env:
