@@ -23,9 +23,7 @@ runs:
         servers: >
           [
             {
-              "id": "ossrh",
-              "username": "${{ inputs.account }}",
-              "password": "${{ inputs.password }}"
+              "id": "ossrh"
             }
           ]      
     - name: Import GPG key 
