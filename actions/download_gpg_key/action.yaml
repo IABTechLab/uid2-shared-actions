@@ -16,7 +16,7 @@ runs:
           [
             {
               "id": "${repo.id}",
-              "username": "${repo.login}",
+              "username": "${repo.login}"
             }
           ]      
     - name: Import GPG key 
