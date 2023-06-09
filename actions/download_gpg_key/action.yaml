@@ -24,7 +24,7 @@ runs:
           [
             {
               "id": "ossrh",
-              "username": "${inputs.account}"
+              "username": "${{ inputs.account }}"
             }
           ]      
     - name: Import GPG key 
