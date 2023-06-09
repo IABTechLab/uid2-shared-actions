@@ -11,12 +11,14 @@ runs:
   steps:
     - name: maven-settings-xml-action
       uses: whelk-io/maven-settings-xml-action@v21
-      with:    
+      with: 
+        repositories: >
+          []  
         servers: >
           [
             {
-              "id": "${repo.id}",
-              "username": "${repo.login}"
+              "id": "\${repo.id}",
+              "username": "\${repo.login}"
             }
           ]      
     - name: Import GPG key 
