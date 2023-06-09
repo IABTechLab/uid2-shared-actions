@@ -9,20 +9,17 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Setup settings.xml
-      shell: bash
-      run: |
-        mkdir -p ~/.m2
-        ls -l ~/.m2
-        echo "<settings>" >> ~/.m2/settings.xml
-        echo "  <servers>" >> ~/.m2/settings.xml
-        echo "    <server>" >> ~/.m2/settings.xml
-        echo "      <id>\${repo.id}</id>" >> ~/.m2/settings.xml
-        echo "      <username>\${repo.login}</username>" >> ~/.m2/settings.xml
-        echo "      <password>\${repo.pwd}</password>" >> ~/.m2/settings.xml
-        echo "    </server>" >> ~/.m2/settings.xml
-        echo "  </servers>" >> ~/.m2/settings.xml
-        echo "</settings>" >> ~/.m2/settings.xml
+    - name: maven-settings-xml-action
+      uses: whelk-io/maven-settings-xml-action@v20
+      with:    
+        servers: >
+          [
+            {
+              "id": "${repo.id}",
+              "username": "${repo.login}",
+              "password": "${repo.pwd}"
+            }
+          ]      
     - name: Import GPG key 
       shell: bash
       run: |
