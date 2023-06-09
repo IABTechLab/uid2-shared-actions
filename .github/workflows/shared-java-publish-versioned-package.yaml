@@ -34,8 +34,6 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/download_gpg_key@main
         with:
           key: ${{ secrets.GPG_KEY }}
-          account: ${{ secrets.SONATYPE_REPO_ACCOUNT }}
-          password: ${{ secrets.SONATYPE_REPO_PASSWORD }}
 
       - name: Local vulnerability scanner 
         uses: aquasecurity/trivy-action@master
