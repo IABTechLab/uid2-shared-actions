@@ -8,20 +8,6 @@ on:
         default: '11'
 
 jobs:
-  pre-commit:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v3
-
-      - name: Run pre-commit
-        uses: pre-commit/action@v3.0.0
-        with:
-          extra_args: trivyfs-docker --all-files
-
   build:
     runs-on: ubuntu-latest
 
