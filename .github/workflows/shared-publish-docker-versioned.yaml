@@ -18,8 +18,8 @@ on:
         type: string
         default: '11'
       publish_vulnerabilities:
-        type: boolean
-        default: true
+        type: string
+        default: 'true'
       
 env:
   REGISTRY: ghcr.io
@@ -107,7 +107,7 @@ jobs:
 
       - name: Generate Trivy vulnerability scan report
         uses: aquasecurity/trivy-action@master
-        if: inputs.publish_vulnerabilities
+        if: inputs.publish_vulnerabilities == 'true'
         with:
           scan-type: 'fs'
           format: 'sarif'
@@ -119,7 +119,7 @@ jobs:
 
       - name: Upload Trivy scan report to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v2
-        if: inputs.publish_vulnerabilities
+        if: inputs.publish_vulnerabilities == 'true'
         with:
           sarif_file: 'trivy-results.sarif'
 
