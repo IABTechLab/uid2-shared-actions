@@ -109,7 +109,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         if: inputs.publish_vulnerabilities == 'true'
         with:
-          scan-type: 'fs'
+          image-ref: ${{ steps.meta.outputs.tags }}
           format: 'sarif'
           exit-code: '0'
           ignore-unfixed: true
@@ -126,7 +126,7 @@ jobs:
       - name: Test with Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
+          image-ref: ${{ steps.meta.outputs.tags }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
