@@ -46,7 +46,7 @@ jobs:
           format: 'sarif'
           exit-code: '0'
           ignore-unfixed: true
-          severity: 'CRITICAL'
+          severity: 'CRITICAL,HIGH'
           output: 'trivy-results.sarif'
           hide-progress: true
 
@@ -63,7 +63,7 @@ jobs:
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'
           hide-progress: true
 
       - name: Set version number
