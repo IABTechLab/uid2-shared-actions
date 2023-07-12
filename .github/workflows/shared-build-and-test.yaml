@@ -1,11 +1,13 @@
 name: Shared Maven Build And Test
-
 on:
   workflow_call:
     inputs:
       java_version:
         type: string
         default: '11'
+      publish_vulnerabilities:
+        type: string
+        default: 'true'
 
 jobs:
   build:
@@ -33,29 +35,7 @@ jobs:
           name: code-coverage-report
           path: target/site/jacoco/*
 
-      - name: Local vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          severity: 'CRITICAL'
-          hide-progress: true
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          format: 'sarif'
-          exit-code: '1'
-          ignore-unfixed: true
-          severity: 'CRITICAL'
-          output: 'trivy-results.sarif'
-          hide-progress: true
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
+  scan:
+    uses: ./.github/workflows/shared-vulnerability-scanning.yaml
+    with:
+      publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
