@@ -87,7 +87,7 @@ jobs:
           tag: '${{ steps.check_version.outputs.version }}'
 
       - name: Publish
-        run: mvn -B -Drepo.id=ossrh -Drepo.login="{{ secrets.SONATYPE_REPO_ACCOUNT }}" -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
+        run: mvn -B -e -X -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
         if: ${{ inputs.upload_to_maven }}
 
       - name: Bump version for Major/Minor
