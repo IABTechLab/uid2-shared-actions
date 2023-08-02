@@ -6,6 +6,10 @@ inputs:
   type:
     description: The type of version number to return. Must be one of Snapshot, Patch, Minor or Major
     required: true
+  version_number:
+    description: The version number to use. Allows different actions to share a build number
+    required: false
+    default: ''
 outputs:
   new_version:
     description: The complete version number 
@@ -14,7 +18,7 @@ runs:
   using: "composite"
   steps:
     - name: Update Major Version
-      if: inputs.type == 'Major'
+      if: inputs.type == 'Major' && inputs.version_number == ''
       shell: bash
       run: |
         old_ver=$(jq '.version' version.json | tr -d '"')
@@ -24,7 +28,7 @@ runs:
         new_ver=\"$new_ver\"
         echo $(jq ".version=$new_ver" version.json) > version.json
     - name: Update Minor Version
-      if: inputs.type == 'Minor'
+      if: inputs.type == 'Minor' && inputs.version_number == ''
       shell: bash
       run: |
         old_ver=$(jq '.version' version.json | tr -d '"')
@@ -33,20 +37,26 @@ runs:
         echo $(jq ".version=$new_ver" version.json) > version.json
 
     - name: Set Version
+      if:  inputs.version_number == ''
       uses: dotnet/nbgv@master
       with:
         setAllVars: true
     
     - run: echo "NBGV_SemVer2 $NBGV_SemVer2"
+      if:  inputs.version_number == ''
       shell: bash
+      
     - run: env
+      if:  inputs.version_number == ''
       shell: bash
 
     - name: Set version number for snapshot
       id: version
       shell: bash
       run: |
-        if [[ "${{ inputs.type }}" == "Snapshot" ]]; then
+        if [[ "${{ inputs.version_number }}" != "" ]]; then
+          echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
+        elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
           echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
         else
           echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort" >> $GITHUB_OUTPUT
