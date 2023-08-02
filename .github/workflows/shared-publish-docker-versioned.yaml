@@ -79,6 +79,7 @@ jobs:
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 
       - name: Commit pom.xml and version.json
+        if: ${{ inputs.version_number_input == '' }}
         uses: EndBug/add-and-commit@v9
         with:
           add: 'pom.xml version.json'
