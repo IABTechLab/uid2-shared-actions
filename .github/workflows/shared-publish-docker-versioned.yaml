@@ -20,6 +20,13 @@ on:
       publish_vulnerabilities:
         type: string
         default: 'true'
+      version_number_input:
+        type: string
+        default: ''
+    outputs:
+      version_number_output:
+        description: The complete version number 
+        value: ${{ jobs.build-publish-docker.outputs.jar_version }}
       
 env:
   REGISTRY: ghcr.io
@@ -55,6 +62,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/version_number@main
         with:
           type: ${{ inputs.release_type }}
+          version_number: ${{ inputs.version_number_input }}
 
       - name: Update pom.xml
         run: |
