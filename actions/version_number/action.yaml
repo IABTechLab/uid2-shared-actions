@@ -59,7 +59,9 @@ runs:
       id: version
       shell: bash
       run: |
-        BRANCH_NAME=${{ inputs.branch_name }}
+        BRANCH_NAME_WITH_REF=${{ inputs.branch_name }}
+        REF_PREFIX="refs/heads/"
+        BRANCH_NAME=${BRANCH_NAME_WITH_REF#$REF_PREFIX}
         BRANCH_NAME_TRUNC=${BRANCH_NAME#50}
         if [[ "${{ inputs.version_number }}" != "" ]]; then
           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
