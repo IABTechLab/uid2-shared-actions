@@ -31,6 +31,7 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  BRANCH_NAME: ${{ github.ref }}
 
 jobs:
   build-publish-docker:
@@ -63,6 +64,7 @@ jobs:
         with:
           type: ${{ inputs.release_type }}
           version_number: ${{ inputs.version_number_input }}
+          branch_name: ${{ env.BRANCH_NAME }}
 
       - name: Update pom.xml
         run: |

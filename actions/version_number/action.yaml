@@ -10,6 +10,10 @@ inputs:
     description: The version number to use. Allows different actions to share a build number
     required: false
     default: ''
+  branch_name:
+    description: The name of the branch being built/deployed. If the branch is master or main, the branch name will not be included
+    required: false
+    default: ''
 outputs:
   new_version:
     description: The complete version number 
@@ -27,6 +31,7 @@ runs:
         new_ver=$(echo $new_ver.0)                #set minor version to 0
         new_ver=\"$new_ver\"
         echo $(jq ".version=$new_ver" version.json) > version.json
+
     - name: Update Minor Version
       if: inputs.type == 'Minor' && inputs.version_number == ''
       shell: bash
@@ -54,10 +59,14 @@ runs:
       id: version
       shell: bash
       run: |
+        BRANCH_NAME=${{ inputs.branch_name }}
+        BRANCH_NAME_TRUNC=${BRANCH_NAME#50}
         if [[ "${{ inputs.version_number }}" != "" ]]; then
           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
           echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
+        elif [[ "${{ inputs.branch_name }}" != "" && "${{ inputs.branch_name }}" != "master" && "${{ inputs.branch_name }}" != "main" ]]; then
+          echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
         else
           echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort" >> $GITHUB_OUTPUT
         fi

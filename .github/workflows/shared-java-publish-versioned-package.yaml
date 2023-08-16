@@ -18,6 +18,9 @@ on:
         type: string
         default: 'true'
 
+env:
+  BRANCH_NAME: ${{ github.ref }}
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -71,6 +74,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/version_number@main
         with:
           type: ${{ inputs.release_type }}
+          branch_name: ${{ env.BRANCH_NAME }}
 
       - name: Update pom.xml
         run: |
