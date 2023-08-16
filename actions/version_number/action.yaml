@@ -63,7 +63,7 @@ runs:
           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
           echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
-        elif [[ "${{ inputs.branch_name }}" == "" || "${{ inputs.branch_name }}" == "master" || "${{ inputs.branch_name }}" == "main" ]]; then
+        elif [[ "${{ inputs.branch_name }}" != "" && "${{ inputs.branch_name }}" != "master" && "${{ inputs.branch_name }}" != "main" ]]; then
           echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort-${{ inputs.branch_name }}" >> $GITHUB_OUTPUT
         else
           echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort" >> $GITHUB_OUTPUT
