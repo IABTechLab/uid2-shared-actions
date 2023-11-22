@@ -101,14 +101,12 @@ jobs:
         uses: mikepenz/release-changelog-builder-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
+
       - name: Create Release
         if: ${{ env.IS_RELEASE }}
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          release_name: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          name: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           body: ${{steps.github_release.outputs.changelog}}
           draft: true
           tag_name: v${{ steps.version.outputs.new_version }}
