@@ -1,4 +1,5 @@
 name: Shared Pipeline to build and publish JAR Packages to Maven Repos
+run-name: ${{ format('Package {0}', 'Release')}} by @${{ github.actor }}
 on:
   workflow_call:
     inputs:
