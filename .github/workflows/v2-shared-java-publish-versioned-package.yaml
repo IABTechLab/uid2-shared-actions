@@ -94,7 +94,7 @@ jobs:
           author_name: Release Workflow
           author_email: unifiedid-admin+release@thetradedesk.com
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-          tag: v$${{ steps.version.outputs.new_version }}
+          tag: v${{ steps.version.outputs.new_version }}
 
       - name: Build Changelog
         id: github_release
@@ -103,11 +103,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Show notes
+        run: |
+          echo ${{ steps.github_release.outputs.changelog }}
+
       - name: Create Release
         if: ${{ env.IS_RELEASE }}
         uses: softprops/action-gh-release@v1
         with:
           name: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-          body: ${{steps.github_release.outputs.changelog}}
+          body: ${{ steps.github_release.outputs.changelog }}
           draft: true
           tag_name: v${{ steps.version.outputs.new_version }}
