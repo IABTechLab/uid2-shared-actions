@@ -94,6 +94,7 @@ jobs:
           author_name: Release Workflow
           author_email: unifiedid-admin+release@thetradedesk.com
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          tag: v$${{ steps.version.outputs.new_version }}
 
       - name: Build Changelog
         id: github_release
