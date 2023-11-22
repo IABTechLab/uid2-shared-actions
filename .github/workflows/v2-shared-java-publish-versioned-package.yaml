@@ -8,7 +8,7 @@ on:
         type: string
       publish_to_maven:
         description: 'True to publish the artifacts to maven repository, false to skip the step'
-        default: true
+        default: false
         required: false
         type: boolean
       java_version:
@@ -103,23 +103,7 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}
-              # ${{ steps.version.outputs.new_version }}
-              
-              ## Maven
-              ```
-              <dependency>
-              <groupId>com.uid2</groupId>
-                  <artifactId>uid2-attestation-api</artifactId>
-                  <version>${{ steps.version.outputs.new_version }}</version>
-              </dependency>
-              ```
-              
-              ## Jar Files
-              - [uid2-attestation-api-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/uid2-attestation-api/${{ steps.version.outputs.new_version }}/uid2-attestation-api-${{ steps.version.outputs.new_version }}.jar)
-              
-              ## Changelog
-              #{{UNCATEGORIZED}}",
+              "template": "#{{CHANGELOG}}\n\n# ${{ steps.version.outputs.new_version }}\n\n## Maven\n```\n<dependency>\n<groupId>com.uid2</groupId>\n    <artifactId>uid2-attestation-api</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [uid2-attestation-api-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/uid2-attestation-api/${{ steps.version.outputs.new_version }}/uid2-attestation-api-${{ steps.version.outputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
               "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
