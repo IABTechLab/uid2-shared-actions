@@ -104,8 +104,11 @@ jobs:
   
       - name: Create Release
         if: ${{ env.IS_RELEASE }}
-        uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          release_name: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           body: ${{steps.github_release.outputs.changelog}}
-          prerelease: True
-          tag_name: ${{ steps.version.outputs.new_version }}
+          draft: true
+          tag_name: v${{ steps.version.outputs.new_version }}
