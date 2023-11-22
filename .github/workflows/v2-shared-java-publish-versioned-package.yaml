@@ -27,7 +27,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Show Context
-        run: echo "$GITHUB_CONTEXT"
+        run: |
+          printenv
+          echo "$GITHUB_CONTEXT"
         shell: bash
         env: 
             GITHUB_CONTEXT: ${{ toJson(github) }}
