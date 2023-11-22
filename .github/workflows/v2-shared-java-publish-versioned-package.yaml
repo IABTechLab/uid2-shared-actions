@@ -20,11 +20,18 @@ on:
 
 env:
   IS_RELEASE: ${{ inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch' }}
+  REPO: ${{ github.event.repository.name }}
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Show Context
+        run: echo "$GITHUB_CONTEXT"
+        shell: bash
+        env: 
+            GITHUB_CONTEXT: ${{ toJson(github) }}
+
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
@@ -103,7 +110,7 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}\n\n# ${{ steps.version.outputs.new_version }}\n\n## Maven\n```\n<dependency>\n<groupId>com.uid2</groupId>\n    <artifactId>uid2-attestation-api</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [uid2-attestation-api-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/uid2-attestation-api/${{ steps.version.outputs.new_version }}/uid2-attestation-api-${{ steps.version.outputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
+              "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/${{ env.REPO }}/${{ steps.version.outputs.new_version }}/${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
               "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
