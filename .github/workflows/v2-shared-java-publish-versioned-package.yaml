@@ -118,10 +118,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Show notes
-        run: |
-          echo ${{ steps.github_release.outputs.changelog }}
-
       - name: Create Release
         if: ${{ env.IS_RELEASE }}
         uses: softprops/action-gh-release@v1
