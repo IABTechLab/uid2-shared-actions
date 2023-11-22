@@ -107,3 +107,5 @@ jobs:
         uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
         with:
           body: ${{steps.github_release.outputs.changelog}}
+          prerelease: True
+          tag_name: ${{ steps.version.outputs.new_version }}
