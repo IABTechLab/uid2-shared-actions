@@ -103,17 +103,8 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
-              "categories": [
-                {
-                    "title": "## 💬 Other",
-                    "labels": ["other"]
-                },
-                {
-                    "title": "## 📦 Dependencies",
-                    "labels": ["dependencies"]
-                }
-              ]
+              "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n\t<groupId>test</groupId>\n</dependency>\n```\n\n## Jar Files\n\t-${{ steps.version.outputs.new_version }}/n/n ## Changelog\n#{{UNCATEGORIZED}}\n",
+              "pr_template": " - #{{TITLE}} - ( PR: #{{NUMBER}} )"
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -122,7 +113,6 @@ jobs:
         if: ${{ env.IS_RELEASE }}
         uses: softprops/action-gh-release@v1
         with:
-          name: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          name: ${{ steps.version.outputs.new_version }}
           body: ${{ steps.github_release.outputs.changelog }}
           draft: true
-          tag_name: v${{ steps.version.outputs.new_version }}
