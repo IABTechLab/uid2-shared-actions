@@ -103,8 +103,24 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n\t<groupId>test</groupId>\n</dependency>\n```\n\n## Jar Files\n\t-${{ steps.version.outputs.new_version }}/n/n ## Changelog\n#{{UNCATEGORIZED}}\n",
-              "pr_template": " - #{{TITLE}} - ( PR: #{{NUMBER}} )"
+              "template": "#{{CHANGELOG}}
+              # ${{ steps.version.outputs.new_version }}
+              
+              ## Maven
+              ```
+              <dependency>
+              <groupId>com.uid2</groupId>
+                  <artifactId>uid2-attestation-api</artifactId>
+                  <version>${{ steps.version.outputs.new_version }}</version>
+              </dependency>
+              ```
+              
+              ## Jar Files
+              - [uid2-attestation-api-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/uid2-attestation-api/${{ steps.version.outputs.new_version }}/uid2-attestation-api-${{ steps.version.outputs.new_version }}.jar)
+              
+              ## Changelog
+              #{{UNCATEGORIZED}}",
+              "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
