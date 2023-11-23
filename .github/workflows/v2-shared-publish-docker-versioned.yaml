@@ -49,8 +49,14 @@ jobs:
         env: 
             GITHUB_CONTEXT: ${{ toJson(github) }}
 
+      - name: Checkout full history
+        uses: actions/checkout@v3
+        with:
+          # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
+          fetch-depth: 0
+
       - name: Check branch and release type
-        uses: ./.github/actions/check_branch_and_release_type
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@tjm-UID2-2325-new-shared-docker-image-pipeline
         with:
           release_type: ${{ inputs.release_type }}
 
@@ -60,18 +66,12 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ inputs.java_version }}
 
-      - name: Checkout full history
-        uses: actions/checkout@v3
-        with:
-          # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
-          fetch-depth: 0
-
       - name: Restore timestamps
         uses: thetradedesk/git-restore-mtime-action@v1.2
 
       - name: Set version number
         id: version
-        uses: ./.github/actions/version_number
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@main
         with:
           type: ${{ inputs.release_type }}
           version_number: ${{ inputs.version_number_input }}
