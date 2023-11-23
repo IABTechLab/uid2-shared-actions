@@ -37,7 +37,10 @@ jobs:
 
       - name: Fail if Pre-release on Default branch
         if: ${{ inputs.release_type == 'Snapshot' && github.event.repository.default_branch != github.ref_name }}
-        run: exit 1
+        uses: actions/github-script@v3
+        with:
+            script: |
+              core.setFailed('Snapshot packages can not be created on the default branch')
 
       - name: Checkout repo
         uses: actions/checkout@v3
