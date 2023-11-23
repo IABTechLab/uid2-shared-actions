@@ -40,14 +40,14 @@ jobs:
         uses: actions/github-script@v7
         with:
             script: |
-              core.setFailed('Snapshot packages can not be created on the default branch')
+              core.setFailed('Snapshot packages can not be created on the default branch. Release Type: ${{ inputs.release_type }}, Branch: ${{ github.ref_name }}')
 
       - name: Fail if Release and not on Default branch
         if: ${{ inputs.release_type != 'Snapshot' && github.event.repository.default_branch != github.ref_name }}
         uses: actions/github-script@v7
         with:
             script: |
-              core.setFailed('Releases can not be created on a feature branch')
+              core.setFailed('Releases can not be created on a feature branch. Release Type: ${{ inputs.release_type }}, Branch: ${{ github.ref_name }}')
 
       - name: Checkout repo
         uses: actions/checkout@v3
