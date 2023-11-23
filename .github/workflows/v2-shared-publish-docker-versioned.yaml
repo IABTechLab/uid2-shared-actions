@@ -32,7 +32,7 @@ env:
 
 jobs:
   release:
-    name: ${{ github.env.IS_RELEASE == 'true' && 'Create Release' || 'Publish Pre-release' }}
+    name: ${{ ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) && 'Create Release' || 'Publish Pre-release' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -166,6 +166,11 @@ jobs:
             JAR_VERSION=${{ steps.version.outputs.new_version }}
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
 
+      - name: check context
+        run: |
+          printenv
+        shell: bash
+
       - name: Build Changelog
         id: github_release
         if: ${{ env.IS_RELEASE == 'true' }}
@@ -173,7 +178,7 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/${{ env.REPO }}/${{ steps.version.outputs.new_version }}/${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
+              "template": "#{{CHANGELOG}}\n## Installatoin\n```\ndocker pull ghcr.io/\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
               "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
