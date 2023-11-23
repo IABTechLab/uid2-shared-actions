@@ -24,7 +24,7 @@ env:
 
 jobs:
   release:
-    name: ${{ env.IS_RELEASE == 'true' && 'Release' || 'Pre-release' }}
+    name: ${{ github.env.IS_RELEASE == 'true' && 'Create Release' || 'Publish Pre-release' }}
     runs-on: ubuntu-latest
     steps:
       - name: Show Context
