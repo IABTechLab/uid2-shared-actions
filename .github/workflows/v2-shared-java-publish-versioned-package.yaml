@@ -24,7 +24,7 @@ env:
 
 jobs:
   release:
-    name: ${{ github.env.IS_RELEASE == 'true' && 'Create Release' || 'Publish Pre-release' }}
+    name: ${{ ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) && 'Create Release' || 'Publish Pre-release' }}
     runs-on: ubuntu-latest
     steps:
       - name: Show Context
