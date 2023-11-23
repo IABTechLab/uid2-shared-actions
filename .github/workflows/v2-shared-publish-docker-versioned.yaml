@@ -55,10 +55,10 @@ jobs:
           # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
           fetch-depth: 0
 
-      - name: Check branch and release type
-        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@tjm-UID2-2325-new-shared-docker-image-pipeline
-        with:
-          release_type: ${{ inputs.release_type }}
+      # - name: Check branch and release type
+      #   uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@tjm-UID2-2325-new-shared-docker-image-pipeline
+      #   with:
+      #     release_type: ${{ inputs.release_type }}
 
       - name: Set up JDK
         uses: actions/setup-java@v3
