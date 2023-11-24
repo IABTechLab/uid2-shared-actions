@@ -12,15 +12,19 @@ on:
         required: true
         type: string
       java_version:
+        description: The version of Java to use to compile the JAR. Defaults to 11
         type: string
         default: '11'
       publish_vulnerabilities:
+        description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
         type: string
         default: 'true'
       version_number_input:
+        description: If set, the version number will not be incremented and the given number will be used.
         type: string
         default: ''
       force_release:
+        description: If true, will create a release. Only used for testing.
         type: string
         default: ''
     outputs:
