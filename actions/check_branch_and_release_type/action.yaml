@@ -1,5 +1,5 @@
 name: Checks the branch and release type
-description: 'Enforces that pre-release builds are done on a release branch and release builds are done on the default branc'
+description: 'Enforces that pre-release builds are done on a release branch and release builds are done on the default branch'
 inputs:
   release_type:
     description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
