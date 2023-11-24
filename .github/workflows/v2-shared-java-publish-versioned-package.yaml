@@ -36,12 +36,12 @@ jobs:
             GITHUB_CONTEXT: ${{ toJson(github) }}
 
       - name: Check branch and release type
-        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@tjm-UID2-2325-new-shared-docker-image-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@main
         with:
           release_type: ${{ inputs.release_type }}
     
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -57,7 +57,7 @@ jobs:
           key: ${{ secrets.GPG_KEY }}
 
       - name: Generate Trivy vulnerability scan report
-        uses: aquasecurity/trivy-action@0.12.0
+        uses: aquasecurity/trivy-action@0.14.0
         if: inputs.publish_vulnerabilities == 'true'
         with:
           scan-type: 'fs'
@@ -75,7 +75,7 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: Test with Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.12.0
+        uses: aquasecurity/trivy-action@0.14.0
         with:
           scan-type: 'fs'
           format: 'table'

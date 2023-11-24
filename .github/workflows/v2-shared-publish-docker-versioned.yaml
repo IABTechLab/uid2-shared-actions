@@ -52,10 +52,10 @@ jobs:
         env: 
             GITHUB_CONTEXT: ${{ toJson(github) }}
 
-      # - name: Check branch and release type
-      #   uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@tjm-UID2-2325-new-shared-docker-image-pipeline
-      #   with:
-      #     release_type: ${{ inputs.release_type }}
+      - name: Check branch and release type
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@main
+        with:
+          release_type: ${{ inputs.release_type }}
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -64,7 +64,7 @@ jobs:
           java-version: ${{ inputs.java_version }}
 
       - name: Checkout full history
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
           fetch-depth: 0
@@ -105,7 +105,7 @@ jobs:
           tag: v${{ steps.version.outputs.new_version }}
 
       - name: Log in to the Docker container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -113,14 +113,14 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}
 
       - name: Build and export to Docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
@@ -131,7 +131,7 @@ jobs:
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
 
       - name: Generate Trivy vulnerability scan report
-        uses: aquasecurity/trivy-action@0.12.0
+        uses: aquasecurity/trivy-action@0.14.0
         if: inputs.publish_vulnerabilities == 'true'
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
@@ -149,7 +149,7 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: Test with Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.12.0
+        uses: aquasecurity/trivy-action@0.14.0
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
           format: 'table'
@@ -159,7 +159,7 @@ jobs:
           hide-progress: true
 
       - name: Push to Docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
