@@ -2,9 +2,6 @@ name: Shared Publish Docker
 on:
   workflow_call:
     inputs:
-      tag:
-        description: 'The tag to apply to the Docker file'
-        type: string
       cloud_provider:
         description: 'Must be one of [aws, gcp, azure, default]'
         required: false
@@ -15,12 +12,19 @@ on:
         required: true
         type: string
       java_version:
+        description: The version of Java to use to compile the JAR. Defaults to 11
         type: string
         default: '11'
       publish_vulnerabilities:
+        description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
         type: string
         default: 'true'
       version_number_input:
+        description: If set, the version number will not be incremented and the given number will be used.
+        type: string
+        default: ''
+      force_release:
+        description: If true, will create a release. Only used for testing.
         type: string
         default: ''
     outputs:
@@ -31,10 +35,11 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  BRANCH_NAME: ${{ github.ref }}
+  IS_RELEASE: ${{ ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || inputs.force_release == 'true' }}
 
 jobs:
-  build-publish-docker:
+  release:
+    name: ${{ (((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || inputs.force_release == 'true') && 'Create Release' || 'Publish Pre-release' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -43,6 +48,19 @@ jobs:
     outputs:
       jar_version: ${{ steps.version.outputs.new_version }}
     steps:
+      - name: Show Context
+        run: |
+          printenv
+          echo "$GITHUB_CONTEXT"
+        shell: bash
+        env: 
+            GITHUB_CONTEXT: ${{ toJson(github) }}
+
+      - name: Check branch and release type
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.0.0-pre
+        with:
+          release_type: ${{ inputs.release_type }}
+
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -50,7 +68,7 @@ jobs:
           java-version: ${{ inputs.java_version }}
 
       - name: Checkout full history
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
           fetch-depth: 0
@@ -64,13 +82,13 @@ jobs:
         with:
           type: ${{ inputs.release_type }}
           version_number: ${{ inputs.version_number_input }}
-          branch_name: ${{ env.BRANCH_NAME }}
+          branch_name: ${{ github.ref }}
 
       - name: Update pom.xml
         run: |
           current_version=$(grep -o '<version>.*</version>' pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
           new_version=${{ steps.version.outputs.new_version }} 
-          sed -i "0,/$current_version/s//$new_version/" pom.xml
+          sed -i "0,/$current_version/s/$current_version/$new_version/" pom.xml
           echo "Version number updated from $current_version to $new_version"
 
       - name: Package JAR
@@ -88,9 +106,10 @@ jobs:
           author_name: Release Workflow
           author_email: unifiedid-admin+release@thetradedesk.com
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          tag: v${{ steps.version.outputs.new_version }}
 
       - name: Log in to the Docker container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -98,15 +117,14 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}
-            type=raw,value=${{ inputs.tag }}
 
       - name: Build and export to Docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
@@ -117,7 +135,7 @@ jobs:
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
 
       - name: Generate Trivy vulnerability scan report
-        uses: aquasecurity/trivy-action@0.12.0
+        uses: aquasecurity/trivy-action@0.14.0
         if: inputs.publish_vulnerabilities == 'true'
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
@@ -135,7 +153,7 @@ jobs:
           sarif_file: 'trivy-results.sarif'
 
       - name: Test with Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.12.0
+        uses: aquasecurity/trivy-action@0.14.0
         with:
           image-ref: ${{ steps.meta.outputs.tags }}
           format: 'table'
@@ -145,7 +163,7 @@ jobs:
           hide-progress: true
 
       - name: Push to Docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
@@ -154,3 +172,24 @@ jobs:
           build-args: |
             JAR_VERSION=${{ steps.version.outputs.new_version }}
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
+
+      - name: Build Changelog
+        id: github_release
+        if: ${{ env.IS_RELEASE == 'true' }}
+        uses: mikepenz/release-changelog-builder-action@v3
+        with:
+          configurationJson: |
+            {
+              "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ steps.meta.outputs.tags }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
+              "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        if: ${{ env.IS_RELEASE == 'true' }}
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ steps.version.outputs.new_version }}
+          body: ${{ steps.github_release.outputs.changelog }}
+          draft: true
