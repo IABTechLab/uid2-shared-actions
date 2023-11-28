@@ -43,7 +43,7 @@ env:
 
 jobs:
   release:
-    name: ${{ github.env.IS_RELEASE == true && 'Is release' || 'Is not release' }}
+    name: ${{ github.env.IS_RELEASE && 'Create release' || 'Publish docker image' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -182,7 +182,7 @@ jobs:
 
       - name: Build Changelog
         id: github_release
-        if: ${{ env.IS_RELEASE == 'true' }}
+        if: ${{ github.env.IS_RELEASE }}
         uses: mikepenz/release-changelog-builder-action@v3
         with:
           configurationJson: |
@@ -194,7 +194,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        if: ${{ env.IS_RELEASE == 'true' }}
+        if: ${{ github.env.IS_RELEASE }}
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ steps.version.outputs.new_version }}
