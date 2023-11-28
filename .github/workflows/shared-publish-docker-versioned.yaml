@@ -39,7 +39,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   # if force_release = '', check the release type and branch; if force_release = 'true', always create a release; if force_release = 'false', never create a release 
   # in this case, the first && is the GitHub ternary operator. Most languages would use a ? instead
-  IS_RELEASE: ${{ inputs.force_release == '' && ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || ((inputs.force_release == 'true') || (inputs.force_release == 'false')) }}
+  IS_RELEASE: ${{ inputs.force_release == 'branch' && ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || ((inputs.force_release == 'yes') || (inputs.force_release == 'no')) }}
 
 jobs:
   release:
