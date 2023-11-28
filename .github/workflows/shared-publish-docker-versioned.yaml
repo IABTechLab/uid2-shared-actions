@@ -24,9 +24,9 @@ on:
         type: string
         default: ''
       force_release:
-        description: If true, will create a release, if false will not create a release. Empty will use release_type to determine if a release should be created.
+        description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
         type: string
-        default: ''
+        default: 'branch'
     outputs:
       version_number_output:
         description: The complete version number 
@@ -37,7 +37,6 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  # if force_release = '', check the release type and branch; if force_release = 'true', always create a release; if force_release = 'false', never create a release 
 jobs:
   buildImage:
     runs-on: ubuntu-latest
