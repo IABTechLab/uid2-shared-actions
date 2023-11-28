@@ -24,7 +24,7 @@ on:
         type: string
         default: ''
       force_release:
-        description: If true, will create a release. Only used for testing.
+        description: If true, will create a release, if false will not create a release. Empty will use release_type to determine if a release should be created.
         type: string
         default: ''
     outputs:
@@ -37,11 +37,13 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  IS_RELEASE: ${{ ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || inputs.force_release == 'true' }}
+  # if force_release = '', check the release type and branch; if force_release = 'true', always create a release; if force_release = 'false', never create a release 
+  # in this case, the first && is the GitHub ternary operator. Most languages would use a ? instead
+  IS_RELEASE: ${{ inputs.force_release == '' && ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || ((inputs.force_release == 'true') || (inputs.force_release == 'false')) }}
 
 jobs:
   release:
-    name: ${{ (((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || inputs.force_release == 'true') && 'Create Release' || 'Publish Pre-release' }}
+    name: ${{ github.env.IS_RELEASE == true && 'Is release' || 'Is not release' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
