@@ -30,8 +30,10 @@ on:
     outputs:
       version_number_output:
         description: The complete version number 
-        value: ${{ jobs.build-publish-docker.outputs.jar_version }}
-      
+        value: ${{ jobs.release.outputs.jar_version }}
+      image_tag:
+        description: The tag used to describe the image in docker
+        value: ${{ jobs.release.outputs.image_tag }}
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
@@ -47,6 +49,7 @@ jobs:
       packages: write
     outputs:
       jar_version: ${{ steps.version.outputs.new_version }}
+      image_tag: ${{ steps.updatePom.outputs.image_tag }}
     steps:
       - name: Show Context
         run: |
@@ -85,11 +88,13 @@ jobs:
           branch_name: ${{ github.ref }}
 
       - name: Update pom.xml
+        id: updatePom
         run: |
           current_version=$(grep -o '<version>.*</version>' pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
           new_version=${{ steps.version.outputs.new_version }} 
           sed -i "0,/$current_version/s/$current_version/$new_version/" pom.xml
           echo "Version number updated from $current_version to $new_version"
+          echo "image_tag=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}" >> $GITHUB_OUTPUT
 
       - name: Package JAR
         id: package
@@ -121,7 +126,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}
+            type=raw,value=${{ steps.updatePom.outputs.image_tag }}
 
       - name: Build and export to Docker
         uses: docker/build-push-action@v5
