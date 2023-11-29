@@ -24,22 +24,21 @@ on:
         type: string
         default: ''
       force_release:
-        description: If true, will create a release. Only used for testing.
+        description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
         type: string
-        default: ''
+        default: 'branch'
     outputs:
       version_number_output:
         description: The complete version number 
-        value: ${{ jobs.build-publish-docker.outputs.jar_version }}
-      
+        value: ${{ jobs.buildImage.outputs.jar_version }}
+      image_tag:
+        description: The tag used to describe the image in docker
+        value: ${{ jobs.buildImage.outputs.image_tag }}
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  IS_RELEASE: ${{ ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || inputs.force_release == 'true' }}
-
 jobs:
-  release:
-    name: ${{ (((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) || inputs.force_release == 'true') && 'Create Release' || 'Publish Pre-release' }}
+  buildImage:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -47,7 +46,27 @@ jobs:
       packages: write
     outputs:
       jar_version: ${{ steps.version.outputs.new_version }}
+      image_tag: ${{ steps.updatePom.outputs.image_tag }}
     steps:
+      - name: Check if Release
+        id: checkRelease
+        run: |
+            FORCE_RELEASE=${{ inputs.force_release == 'yes' }}
+            FORCE_NOT_RELEASE=${{ inputs.force_release == 'not' }}
+            CHECK_BRANCH_FOR_RELEASE=${{ inputs.force_release == 'branch' }}
+            BRANCH_ALLOWS_RELEASE=${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name) }}
+            if $FORCE_RELEASE; then
+              ISRELEASE=true
+            elif $FORCE_NOT_RELEASE; then
+              ISRELEASE=false
+            elif ($CHECK_BRANCH_FOR_RELEASE) && ($BRANCH_ALLOWS_RELEASE); then
+              ISRELEASE=true
+            else
+              ISRELEASE=false
+            fi
+            echo "Setting IS_RELEASE to $ISRELEASE"
+            echo "IS_RELEASE=$ISRELEASE" >> $GITHUB_OUTPUT
+
       - name: Show Context
         run: |
           printenv
@@ -55,6 +74,7 @@ jobs:
         shell: bash
         env: 
             GITHUB_CONTEXT: ${{ toJson(github) }}
+            IS_RELEASE: ${{ steps.checkRelease.outputs.IS_RELEASE }}
 
       - name: Check branch and release type
         uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.0.0-pre
@@ -85,11 +105,13 @@ jobs:
           branch_name: ${{ github.ref }}
 
       - name: Update pom.xml
+        id: updatePom
         run: |
           current_version=$(grep -o '<version>.*</version>' pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
           new_version=${{ steps.version.outputs.new_version }} 
           sed -i "0,/$current_version/s/$current_version/$new_version/" pom.xml
           echo "Version number updated from $current_version to $new_version"
+          echo "image_tag=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}" >> $GITHUB_OUTPUT
 
       - name: Package JAR
         id: package
@@ -99,7 +121,16 @@ jobs:
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 
       - name: Commit pom.xml and version.json
-        if: ${{ inputs.version_number_input == '' }}
+        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'pom.xml version.json'
+          author_name: Release Workflow
+          author_email: unifiedid-admin+release@thetradedesk.com
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+
+      - name: Commit pom.xml, version.json and set tag
+        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
         uses: EndBug/add-and-commit@v9
         with:
           add: 'pom.xml version.json'
@@ -121,7 +152,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}
+            type=raw,value=${{ steps.updatePom.outputs.image_tag }}
 
       - name: Build and export to Docker
         uses: docker/build-push-action@v5
@@ -175,19 +206,19 @@ jobs:
 
       - name: Build Changelog
         id: github_release
-        if: ${{ env.IS_RELEASE == 'true' }}
+        if: ${{ steps.checkRelease.outputs.IS_RELEASE == 'true' }}
         uses: mikepenz/release-changelog-builder-action@v3
         with:
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ steps.meta.outputs.tags }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
+              "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ steps.meta.outputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ steps.updatePom.outputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
               "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        if: ${{ env.IS_RELEASE == 'true' }}
+        if: ${{ steps.checkRelease.outputs.IS_RELEASE == 'true' }}
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ steps.version.outputs.new_version }}
