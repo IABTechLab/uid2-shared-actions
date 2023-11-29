@@ -65,7 +65,7 @@ jobs:
               ISRELEASE=false
             fi
             echo "Setting IS_RELEASE to $ISRELEASE"
-            echo "IS_RELEASE=$($ISRELEASE)" >> $GITHUB_OUTPUT
+            echo "IS_RELEASE=$ISRELEASE" >> $GITHUB_OUTPUT
 
       - name: Show Context
         run: |
