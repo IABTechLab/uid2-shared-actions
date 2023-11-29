@@ -64,6 +64,7 @@ jobs:
             else
               ISRELEASE=false
             fi
+            echo "Setting IS_RELEASE to $ISRELEASE"
             echo "IS_RELEASE=$($ISRELEASE)" >> $GITHUB_OUTPUT
 
       - name: Show Context
@@ -73,6 +74,7 @@ jobs:
         shell: bash
         env: 
             GITHUB_CONTEXT: ${{ toJson(github) }}
+            IS_RELEASE: ${{ steps.checkRelease.outputs.IS_RELEASE }}
 
       - name: Check branch and release type
         uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.0.0-pre
@@ -195,7 +197,7 @@ jobs:
 
       - name: Build Changelog
         id: github_release
-        if: ${{ steps.checkRelease.outputs.IS_RELEASE }}
+        if: ${{ steps.checkRelease.outputs.IS_RELEASE == 'true' }}
         uses: mikepenz/release-changelog-builder-action@v3
         with:
           configurationJson: |
@@ -207,7 +209,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        if: ${{ steps.checkRelease.outputs.IS_RELEASE }}
+        if: ${{ steps.checkRelease.outputs.IS_RELEASE == 'true' }}
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ steps.version.outputs.new_version }}
