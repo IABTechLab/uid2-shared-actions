@@ -160,9 +160,7 @@ jobs:
       - name: Extract First Image Tag
         id: extractImageTag
         run: |
-          echo "Output tags:" $DOCKER_METADATA_OUTPUT_TAGS "end"
           FIRST_TAG=${DOCKER_METADATA_OUTPUT_TAGS%%$'\n'*}
-          echo "First tag:" $FIRST_TAG "end"
           echo "firstTag=$FIRST_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and export to Docker
