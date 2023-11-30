@@ -171,7 +171,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         if: inputs.publish_vulnerabilities == 'true'
         with:
-          image-ref: ${{ steps.meta.outputs.tags }}
+          image-ref: ${{ steps.updatePom.outputs.image_tag }}
           format: 'sarif'
           exit-code: '0'
           ignore-unfixed: true
@@ -188,7 +188,7 @@ jobs:
       - name: Test with Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.14.0
         with:
-          image-ref: ${{ steps.meta.outputs.tags }}
+          image-ref: ${{ steps.updatePom.outputs.image_tag }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
