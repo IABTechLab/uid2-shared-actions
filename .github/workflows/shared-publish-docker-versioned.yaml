@@ -39,6 +39,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 jobs:
   buildImage:
+    name: Build Image
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -156,6 +157,13 @@ jobs:
             type=raw,value=${{ steps.updatePom.outputs.image_tag }}
             type=raw,value=${{ steps.checkRelease.outputs.NOT_SNAPSHOT == 'true' && 'latest' || '' }}
 
+      - name: Extract First Image Tag
+        id: extractImageTag
+        run: |
+          echo $DOCKER_METADATA_OUTPUT_TAGS
+          FIRST_TAG=${DOCKER_METADATA_OUTPUT_TAGS%% *}
+          echo "firstTag=$FIRST_TAG" >> $GITHUB_OUTPUT
+
       - name: Build and export to Docker
         uses: docker/build-push-action@v5
         with:
@@ -171,7 +179,7 @@ jobs:
         uses: aquasecurity/trivy-action@0.14.0
         if: inputs.publish_vulnerabilities == 'true'
         with:
-          image-ref: ${{ steps.updatePom.outputs.image_tag }}
+          image-ref: ${{ steps.extractImageTag.outputs.firstTag }}
           format: 'sarif'
           exit-code: '0'
           ignore-unfixed: true
@@ -188,7 +196,7 @@ jobs:
       - name: Test with Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.14.0
         with:
-          image-ref: ${{ steps.updatePom.outputs.image_tag }}
+          image-ref: ${{ steps.extractImageTag.outputs.firstTag }}
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
