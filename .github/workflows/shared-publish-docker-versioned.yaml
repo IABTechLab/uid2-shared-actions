@@ -161,7 +161,7 @@ jobs:
         id: extractImageTag
         run: |
           echo "Output tags:" $DOCKER_METADATA_OUTPUT_TAGS "end"
-          FIRST_TAG=${DOCKER_METADATA_OUTPUT_TAGS%% *}
+          FIRST_TAG=${DOCKER_METADATA_OUTPUT_TAGS%%$'\n'*}
           echo "First tag:" $FIRST_TAG "end"
           echo "firstTag=$FIRST_TAG" >> $GITHUB_OUTPUT
 
