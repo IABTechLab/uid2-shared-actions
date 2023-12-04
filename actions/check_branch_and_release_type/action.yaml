@@ -4,10 +4,41 @@ inputs:
   release_type:
     description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
     required: true
+  force_release:
+    description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
+    default: 'branch'
+outputs:
+  is_release: 
+    description: True if a release should be created
+    value: ${{ steps.checkRelease.outputs.IS_RELEASE }}
+  not_snapshot:
+    description: True if the release type is not a snapshot or pre-release build
+    value: ${{ steps.checkRelease.outputs.NOT_SNAPSHOT }}
 runs:
   using: "composite" 
 
   steps:
+    - name: Check if Release
+      id: checkRelease
+      shell: bash
+      run: |
+          FORCE_RELEASE=${{ inputs.force_release == 'yes' }}
+          FORCE_NOT_RELEASE=${{ inputs.force_release == 'not' }}
+          CHECK_BRANCH_FOR_RELEASE=${{ inputs.force_release == 'branch' }}
+          BRANCH_ALLOWS_RELEASE=${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name) }}
+          if $FORCE_RELEASE; then
+            ISRELEASE=true
+          elif $FORCE_NOT_RELEASE; then
+            ISRELEASE=false
+          elif ($CHECK_BRANCH_FOR_RELEASE) && ($BRANCH_ALLOWS_RELEASE); then
+            ISRELEASE=true
+          else
+            ISRELEASE=false
+          fi
+          echo "Setting IS_RELEASE to $ISRELEASE"
+          echo "IS_RELEASE=$ISRELEASE" >> $GITHUB_OUTPUT
+          echo "NOT_SNAPSHOT=$BRANCH_ALLOWS_RELEASE" >> $GITHUB_OUTPUT
+
     - name: Fail if Pre-release on Default branch
       if: ${{ inputs.release_type == 'Snapshot' && github.event.repository.default_branch == github.ref_name }}
       uses: actions/github-script@v7
