@@ -96,7 +96,7 @@ jobs:
           # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
           fetch-depth: 0
 
-      - name: Checkout full history at tag ${{ inputs.version_number_input }}
+      - name: Checkout full history at tag v${{ inputs.version_number_input }}
         uses: actions/checkout@v4
         if: ${{ inputs.version_number_input != ''}}
         with:
