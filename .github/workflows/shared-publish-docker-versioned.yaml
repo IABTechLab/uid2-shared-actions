@@ -49,7 +49,6 @@ jobs:
       jar_version: ${{ steps.version.outputs.new_version }}
       image_tag: ${{ steps.updatePom.outputs.image_tag }}
     steps:
-
       - name: Check branch and release type
         id: checkRelease
         uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.2.2-pre
