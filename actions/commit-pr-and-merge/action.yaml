@@ -1,0 +1,16 @@
+name: Commit, create PR, and merge it
+runs:
+  using: "composite"
+  steps:
+    - name: Commit and PR
+      uses: peter-evans/create-pull-request@v5
+      id: create-pr
+      with:
+        branch-suffix: short-commit-hash
+
+    - name: Merge PR
+      run: gh pr merge $PR_URL --merge
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
