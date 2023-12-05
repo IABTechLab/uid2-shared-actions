@@ -1,0 +1,25 @@
+name: Commit, create PR, and merge it
+inputs:
+  message:
+    description: 'Message for commit and PR title'
+    required: false
+    default: 'Automated update'
+runs:
+  using: "composite"
+  steps:
+    - name: Commit and PR
+      uses: peter-evans/create-pull-request@v5
+      id: create-pr
+      with:
+        commit-message: '[CI Pipeline] ${{ inputs.message }}'
+        title: '[CI Pipeline] ${{ inputs.message }}'
+        body: '[CI Pipeline] Automated update'
+        branch-suffix: short-commit-hash
+
+    - name: Merge PR
+      run: gh pr merge $PR_URL $MERGE_PR_STRATEGY
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
+        MERGE_PR_STRATEGY: ${{github.ref_protected == true && '--merge' || '--rebase' }}
