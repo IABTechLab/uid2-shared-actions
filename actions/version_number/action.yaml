@@ -18,8 +18,8 @@ inputs:
     description: Yes for a short name that does not include the git hash
     required: false
     default: ''
-  folder:
-    description: The folder that contains the version.json files
+  path:
+    description: The path that contains the version.json files
     required: false
     default: '.'
 outputs:
@@ -34,7 +34,7 @@ runs:
       if: inputs.type == 'Major' && inputs.version_number == ''
       shell: bash
       run: |
-        cd ${{ inputs.folder }}
+        cd ${{ inputs.path }}
         old_ver=$(jq '.version' version.json | tr -d '"')
         new_ver=$(echo $old_ver | cut -d'.' -f 1) #get the major number
         new_ver=$(echo $(expr $new_ver + 1))      #increment
@@ -46,7 +46,7 @@ runs:
       if: inputs.type == 'Minor' && inputs.version_number == ''
       shell: bash
       run: |
-        cd ${{ inputs.folder }}
+        cd ${{ inputs.path }}
         old_ver=$(jq '.version' version.json | tr -d '"')
         new_ver=$(echo $old_ver | awk -F. -v OFS=. '{$NF++; print $0}') # minor
         new_ver=\"$new_ver\"
@@ -57,7 +57,7 @@ runs:
       uses: dotnet/nbgv@master
       with:
         setAllVars: true
-        path: ${{ inputs.folder }}
+        path: ${{ inputs.path }}
     
     - run: echo "NBGV_SemVer2 $NBGV_SemVer2"
       if:  inputs.version_number == ''
