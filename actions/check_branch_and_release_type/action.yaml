@@ -23,7 +23,7 @@ runs:
       shell: bash
       run: |
           FORCE_RELEASE=${{ inputs.force_release == 'yes' }}
-          FORCE_NOT_RELEASE=${{ inputs.force_release == 'not' }}
+          FORCE_NOT_RELEASE=${{ inputs.force_release == 'no' }}
           CHECK_BRANCH_FOR_RELEASE=${{ inputs.force_release == 'branch' }}
           BRANCH_ALLOWS_RELEASE=${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name) }}
           if $FORCE_RELEASE; then
