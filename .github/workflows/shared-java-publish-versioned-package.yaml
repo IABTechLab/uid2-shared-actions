@@ -36,7 +36,7 @@ jobs:
             GITHUB_CONTEXT: ${{ toJson(github) }}
 
       - name: Check branch and release type
-        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.0.0-pre
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.2
         with:
           release_type: ${{ inputs.release_type }}
     
