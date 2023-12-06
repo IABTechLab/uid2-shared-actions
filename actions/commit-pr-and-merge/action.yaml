@@ -7,6 +7,10 @@ inputs:
   tag:
     description: 'If provided, this tag is applied to the commit'
     required: false
+  add:
+    description: 'Comma- or newline-separated list of paths to add. If omitted, all new and modified files will be added.'
+    required: false
+    default: ''
 runs:
   using: "composite"
   steps:
@@ -18,6 +22,7 @@ runs:
         title: '[CI Pipeline] ${{ inputs.message }}'
         body: '[CI Pipeline] Automated update'
         branch-suffix: short-commit-hash
+        add-paths: ${{ inputs.add }}
 
     - name: Merge PR
       run: gh pr merge $PR_URL $MERGE_PR_STRATEGY
