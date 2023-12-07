@@ -103,11 +103,9 @@ jobs:
         run: mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
 
       - name: Commit pom.xml and version.json
-        uses: EndBug/add-and-commit@v9
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2.3.4
         with:
-          add: 'pom.xml version.json'
-          author_name: Release Workflow
-          author_email: unifiedid-admin+release@thetradedesk.com
+          add: 'pom.xml,version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
 
