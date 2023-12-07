@@ -27,6 +27,10 @@ on:
         description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
         type: string
         default: 'branch'
+      skip_tests:
+        description: If true, will skip tests when packaging JAR. Defaults to false. Set to true for test-only repos.
+        type: boolean
+        default: false
     outputs:
       version_number_output:
         description: The complete version number 
@@ -108,7 +112,11 @@ jobs:
       - name: Package JAR
         id: package
         run: |
-          mvn -B package -P ${{ inputs.cloud_provider }} 
+          if [[ "${{ inputs.skip_tests }}" == "false" ]]; then
+            mvn -B package -P ${{ inputs.cloud_provider }}
+          else
+            mvn -B package -P ${{ inputs.cloud_provider }} -DskipTests
+          fi
           echo "jar_version=$(mvn help:evaluate -Dexpression=project.version | grep -e '^[1-9][^\[]')" >> $GITHUB_OUTPUT
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 

@@ -22,6 +22,10 @@ on:
       upload_vulnerabilities:
         type: boolean
         default: true
+      skip_tests:
+        description: If true, will skip tests when packaging JAR. Defaults to false. Set to true for test-only repos.
+        type: boolean
+        default: false
 
 env:
   REGISTRY: ghcr.io
@@ -57,7 +61,11 @@ jobs:
         id: package
         shell: bash
         run: |
-          mvn -B package -P ${{ inputs.cloud_provider }} 
+          if [[ "${{ inputs.skip_tests }}" == "false" ]]; then
+            mvn -B package -P ${{ inputs.cloud_provider }}
+          else
+            mvn -B package -P ${{ inputs.cloud_provider }} -DskipTests
+          fi
           echo "jar_version=$(mvn help:evaluate -Dexpression=project.version | grep -e '^[1-9][^\[]')" >> $GITHUB_OUTPUT
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 
