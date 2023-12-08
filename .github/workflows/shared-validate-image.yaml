@@ -3,9 +3,9 @@ on:
   workflow_call:
     inputs:
       failure_severity:
-        description: 'Must be one of CRITICAL, HIGH, MEDIUM'
+        description: 'Must be any of, or more than one of CRITICAL,HIGH,MEDIUM'
         required: false
-        default: 'HIGH'
+        default: 'HIGH,CRITICAL'
         type: string
       fail_on_error:
         description: 'If true, will fail the build if vulnerabilities are found'
