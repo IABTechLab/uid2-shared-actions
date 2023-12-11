@@ -1,0 +1,35 @@
+name: Increment version and update via PR
+on: 
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag'
+        required: false
+        default: ''
+      add:
+        description: 'Add files'
+        required: false
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Bump version file
+        shell: bash
+        run: |
+          awk '{$1=$1+1;print}' version.txt > version.tmp
+          cp version.tmp version.txt
+          cp version.tmp version-extra.txt
+          rm version.tmp
+
+      - name: Commit-PR-merge
+        uses: ./.github/actions/commit-pr-and-merge
+        with:
+          message: 'Update the version file'
+          tag: ${{ inputs.tag }}
+          add: ${{ inputs.add }}
