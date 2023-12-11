@@ -27,6 +27,10 @@ on:
         description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
         type: string
         default: 'branch'
+      skip_tests:
+        description: If true, will skip tests when packaging JAR. Defaults to false. Set to true for test-only repos.
+        type: boolean
+        default: false
     outputs:
       version_number_output:
         description: The complete version number 
@@ -49,25 +53,11 @@ jobs:
       jar_version: ${{ steps.version.outputs.new_version }}
       image_tag: ${{ steps.updatePom.outputs.image_tag }}
     steps:
-      - name: Check if Release
+      - name: Check branch and release type
         id: checkRelease
-        run: |
-            FORCE_RELEASE=${{ inputs.force_release == 'yes' }}
-            FORCE_NOT_RELEASE=${{ inputs.force_release == 'not' }}
-            CHECK_BRANCH_FOR_RELEASE=${{ inputs.force_release == 'branch' }}
-            BRANCH_ALLOWS_RELEASE=${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name) }}
-            if $FORCE_RELEASE; then
-              ISRELEASE=true
-            elif $FORCE_NOT_RELEASE; then
-              ISRELEASE=false
-            elif ($CHECK_BRANCH_FOR_RELEASE) && ($BRANCH_ALLOWS_RELEASE); then
-              ISRELEASE=true
-            else
-              ISRELEASE=false
-            fi
-            echo "Setting IS_RELEASE to $ISRELEASE"
-            echo "IS_RELEASE=$ISRELEASE" >> $GITHUB_OUTPUT
-            echo "NOT_SNAPSHOT=$BRANCH_ALLOWS_RELEASE" >> $GITHUB_OUTPUT
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.2.2
+        with:
+          release_type: ${{ inputs.release_type }}
 
       - name: Show Context
         run: |
@@ -77,12 +67,7 @@ jobs:
         env: 
             GITHUB_CONTEXT: ${{ toJson(github) }}
             IS_RELEASE: ${{ steps.checkRelease.outputs.IS_RELEASE }}
-
-      - name: Check branch and release type
-        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.1
-        with:
-          release_type: ${{ inputs.release_type }}
-
+  
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
@@ -127,7 +112,11 @@ jobs:
       - name: Package JAR
         id: package
         run: |
-          mvn -B package -P ${{ inputs.cloud_provider }} 
+          if [[ "${{ inputs.skip_tests }}" == "false" ]]; then
+            mvn -B package -P ${{ inputs.cloud_provider }}
+          else
+            mvn -B package -P ${{ inputs.cloud_provider }} -DskipTests
+          fi
           echo "jar_version=$(mvn help:evaluate -Dexpression=project.version | grep -e '^[1-9][^\[]')" >> $GITHUB_OUTPUT
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 
