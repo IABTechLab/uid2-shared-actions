@@ -41,7 +41,7 @@ cp "$OPTOUT_ROOT/run_tool_local_e2e.sh" "$OPTOUT_CONFIG_FILE_DIR"
 cp -r "$OPTOUT_ROOT/src/main/resources/localstack" "$OPTOUT_RESOURCE_FILE_DIR"
 mkdir -p "$OPERATOR_CONFIG_FILE_DIR"
 cp "$OPERATOR_ROOT/conf/default-config.json" "$OPERATOR_CONFIG_FILE_DIR"
-cp "$OPERATOR_ROOT/conf/local-e2e-docker-config.json" "$OPERATOR_CONFIG_FILE_DIR"
+cp "$OPERATOR_ROOT/conf/local-e2e-docker-$OPERATOR_TYPE-config.json" "$OPERATOR_CONFIG_FILE_DIR"
 
 CORE_CONFIG_FILE="$ROOT/docker/uid2-core/conf/local-e2e-docker-config.json"
 OPTOUT_CONFIG_FILE="$ROOT/docker/uid2-optout/conf/local-e2e-docker-config.json"
