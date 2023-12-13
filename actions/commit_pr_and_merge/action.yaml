@@ -41,7 +41,7 @@ runs:
           core.setOutput('pull-request-number', newPr.number);
 
     - name: Merge PR
-      run: gh pr merge $PR_URL $MERGE_PR_STRATEGY
+      run: gh pr merge $PR_URL --delete-branch $MERGE_PR_STRATEGY
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}
