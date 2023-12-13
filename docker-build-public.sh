@@ -49,10 +49,6 @@ OPERATOR_CONFIG_FILE="$ROOT/docker/uid2-operator/conf/local-e2e-docker-config.js
 COMPOSE_FILE="$ROOT/docker-compose.yml"
 OPTOUT_MOUNT="$ROOT/docker/uid2-optout/mount"
 
-
-source "$ROOT/jq_helper.sh"
-source "$ROOT/healthcheck.sh"
-
 if [ -z "$CORE_VERSION" ]; then
   echo "CORE_VERSION can not be empty"
   exit 1
