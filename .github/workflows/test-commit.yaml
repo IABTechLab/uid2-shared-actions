@@ -28,7 +28,7 @@ jobs:
           rm version.tmp
 
       - name: Commit-PR-merge
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2.3.5-pre-autopr
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2.3.7-prepr
         with:
           message: 'Update the version file'
           tag: ${{ inputs.tag }}
