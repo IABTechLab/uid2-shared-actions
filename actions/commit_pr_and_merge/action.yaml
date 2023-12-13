@@ -8,9 +8,8 @@ inputs:
     description: 'If provided, this tag is applied to the commit'
     required: false
   add:
-    description: 'Comma- or newline-separated list of paths to add. If omitted, all new and modified files will be added.'
-    required: false
-    default: ''
+    description: 'Comma- or newline-separated list of paths to add.'
+    required: true
 runs:
   using: "composite"
   steps:
