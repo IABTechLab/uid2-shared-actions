@@ -1,6 +1,6 @@
 name: Increment version and update via PR
 on: 
-  workflow_dispatch:
+  workflow_call:
     inputs:
       tag:
         description: 'Tag'
@@ -28,7 +28,7 @@ jobs:
           rm version.tmp
 
       - name: Commit-PR-merge
-        uses: ./.github/actions/commit-pr-and-merge
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2.3.5-pre-autopr
         with:
           message: 'Update the version file'
           tag: ${{ inputs.tag }}
