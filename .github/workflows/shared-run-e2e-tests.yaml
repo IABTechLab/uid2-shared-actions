@@ -34,6 +34,18 @@ on:
         description: 'The version of E2E image'
         type: string
         default: 'latest'
+      core_branch:
+        description: 'The branch of UID2-core to test on'
+        type: string
+        default: 'main'
+      optout_branch:
+        description: 'The branch of UID2-optout to test on'
+        type: string
+        default: 'main'
+      admin_branch:
+        description: 'The branch of UID2-admin to test on'
+        type: string
+        default: 'main'
       operator_type:
         description: 'The type of operator [either public or private]'
         type: string
@@ -89,18 +101,21 @@ jobs:
       - name: Checkout uid2-core repo
         uses: actions/checkout@v3
         with:
+          ref: ${{ inputs.core_branch }}
           repository: IABTechLab/uid2-core
           path: uid2-core
 
       - name: Checkout uid2-optout repo
         uses: actions/checkout@v3
         with:
+          ref: ${{ inputs.optout_branch }}
           repository: IABTechLab/uid2-optout
           path: uid2-optout
 
       - name: Checkout uid2-admin repo
         uses: actions/checkout@v3
         with:
+          ref: ${{ inputs.admin_branch }}
           repository: IABTechLab/uid2-admin
           path: uid2-admin
 
