@@ -72,14 +72,14 @@ if [ -z "$E2E_VERSION" ]; then
 fi
 
 # replace placeholders
-sed -i.bak "s#<CORE_VERSION>#$CORE_VERSION#g" $DOCKER_COMPOSE_FILE
-sed -i.bak "s#<OPTOUT_VERSION>#$OPTOUT_VERSION#g" $DOCKER_COMPOSE_FILE
-sed -i.bak "s#<OPERATOR_VERSION>#$OPERATOR_VERSION#g" $DOCKER_COMPOSE_FILE
-sed -i.bak "s#<E2E_VERSION>#$E2E_VERSION#g" $DOCKER_COMPOSE_FILE
+sed -i.bak "s#uid2-core:latest#uid2-core:$CORE_VERSION#g" $DOCKER_COMPOSE_FILE
+sed -i.bak "s#uid2-optout:latest#uid2-optout:$OPTOUT_VERSION#g" $DOCKER_COMPOSE_FILE
+sed -i.bak "s#uid2-operator:latest#uid2-operator:$OPERATOR_VERSION#g" $DOCKER_COMPOSE_FILE
 
 cat $CORE_CONFIG_FILE
 cat $OPTOUT_CONFIG_FILE
 cat $OPERATOR_CONFIG_FILE
+cat $DOCKER_COMPOSE_FILE
 
 mkdir -p "$OPTOUT_MOUNT" && chmod 777 "$OPTOUT_MOUNT"
 chmod 777 "$CORE_RESOURCE_FILE_DIR/init-aws.sh"
