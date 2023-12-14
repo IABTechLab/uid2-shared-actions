@@ -81,7 +81,6 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          # we use personal access token here since we need to pull images from private repo (core)
           password: ${{ secrets.GHCR_PAT }}
 
       - name: Checkout full history
@@ -91,21 +90,18 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: IABTechLab/uid2-core
-          token: ${{ secrets.GHCR_PAT }}
           path: uid2-core
 
       - name: Checkout uid2-optout repo
         uses: actions/checkout@v3
         with:
           repository: IABTechLab/uid2-optout
-          token: ${{ secrets.GHCR_PAT }}
           path: uid2-optout
 
       - name: Checkout uid2-admin repo
         uses: actions/checkout@v3
         with:
           repository: IABTechLab/uid2-admin
-          token: ${{ secrets.GHCR_PAT }}
           path: uid2-admin
 
       - name: Checkout uid2-shared-actions repo
@@ -113,7 +109,6 @@ jobs:
         with:
           ref: kcc-UID2-2338-build-test-pipeline-for-operator
           repository: IABTechLab/uid2-shared-actions
-          token: ${{ secrets.GHCR_PAT }}
           path: uid2-shared-actions
 
       - name: Checkout uid2-e2e repo
@@ -121,7 +116,6 @@ jobs:
         with:
           ref: kcc-UID2-2338-build-test-pipeline-for-operator
           repository: IABTechLab/uid2-e2e
-          token: ${{ secrets.GHCR_PAT }}
           path: uid2-e2e
 
       - name: Bring up docker compose
