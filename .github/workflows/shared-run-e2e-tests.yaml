@@ -46,6 +46,10 @@ on:
         description: 'The branch of UID2-admin to test on'
         type: string
         default: 'main'
+      operator_branch:
+        description: 'The branch of UID2-operator to test on'
+        type: string
+        default: 'main'
       operator_type:
         description: 'The type of operator [either public or private]'
         type: string
@@ -118,6 +122,13 @@ jobs:
           ref: ${{ inputs.admin_branch }}
           repository: IABTechLab/uid2-admin
           path: uid2-admin
+
+      - name: Checkout uid2-operator repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.operator_branch }}
+          repository: IABTechLab/uid2-operator
+          path: uid2-operator
 
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v3
