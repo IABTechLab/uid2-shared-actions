@@ -137,7 +137,7 @@ jobs:
           E2E_VERSION: ${{ inputs.e2e_image_version }}
           OPERATOR_TYPE: ${{ inputs.operator_type }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/docker-build-public.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/prepare-resources-for-e2e-docker-compose.sh
 
       - name: Run e2e tests
         id: e2e
