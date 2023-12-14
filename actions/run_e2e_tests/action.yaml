@@ -27,6 +27,11 @@ inputs:
     required: false
     type: string
     default: 'PUBLIC'
+  uid2_e2e_phone_support:
+    description: 'Environment variable to run the E2E test'
+    required: false
+    type: string
+    default: 'true'
 
 runs:
   using: "composite"
@@ -44,7 +49,7 @@ runs:
           export UID2_E2E_API_KEY_OLD="UID2-C-L-1000-qxpBsF.ibeCDBpD2bq4Zm7inDacGioUk1aaLeNJrabow="
           export UID2_E2E_API_SECRET_OLD="VT7+t0G/RVueMuVZAL56I2c3JJFSYQfhbu8yo0V/Tds="
           export UID2_E2E_IDENTITY_SCOPE=${{ inputs.uid2_e2e_identity_scope }}
-          export UID2_E2E_PHONE_SUPPORT="true"
+          export UID2_E2E_PHONE_SUPPORT=${{ inputs.uid2_e2e_phone_support }}
           export UID2_E2E_PIPELINE_OPERATOR_TYPE=${{ inputs.uid2_e2e_pipeline_operator_type }}
           export UID2_E2E_PIPELINE_OPERATOR_URL=${{ inputs.uid2_e2e_pipeline_operator_url }}
           export UID2_E2E_PIPELINE_OPERATOR_CLOUD_PROVIDER=${{ inputs.uid2_e2e_pipeline_operator_cloud_provider }}
