@@ -58,6 +58,11 @@ on:
         required: false
         type: string
         default: 'PUBLIC'
+      uid2_e2e_phone_support:
+        description: 'Environment variable to run the E2E test'
+        required: false
+        type: string
+        default: 'true'
 
 env:
   REGISTRY: ghcr.io
