@@ -25,11 +25,11 @@ on:
       core_image_version:
         description: 'The version of UID2 core image'
         type: string
-        default: '2.15.8-d2e5469826-default'
+        default: 'latest'
       optout_image_version:
         description: 'The version of UID2 optout image'
         type: string
-        default: '2.7.3-4f813a8ad9-default'
+        default: 'latest'
       e2e_image_version:
         description: 'The version of E2E image'
         type: string
