@@ -121,6 +121,8 @@ jobs:
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 
       - name: Commit pom.xml and version.json
+        permissions:
+          pull-requests: write
         if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
@@ -128,6 +130,8 @@ jobs:
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
 
       - name: Commit pom.xml, version.json and set tag
+        permissions:
+          pull-requests: write
         if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
