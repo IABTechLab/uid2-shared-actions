@@ -8,29 +8,44 @@ inputs:
     description: 'If provided, this tag is applied to the commit'
     required: false
   add:
-    description: 'Comma- or newline-separated list of paths to add. If omitted, all new and modified files will be added.'
-    required: false
-    default: ''
+    description: 'Comma- or newline-separated list of paths to add.'
+    required: true
 runs:
   using: "composite"
   steps:
-    - name: Commit and PR
-      uses: peter-evans/create-pull-request@v5
+    - name: Commit to new branch
+      uses: EndBug/add-and-commit@v9
+      id: create-branch-and-commit
+      with:
+        message: '[CI Pipeline] ${{ inputs.message }}'
+        author_name: Release Workflow
+        author_email: unifiedid-admin+release@thetradedesk.com
+        new_branch: ci-${{ github.sha }}
+        add: ${{ inputs.add }}
+        
+    - name: Create PR
+      uses: actions/github-script@v7
       id: create-pr
       with:
-        commit-message: '[CI Pipeline] ${{ inputs.message }}'
-        title: '[CI Pipeline] ${{ inputs.message }}'
-        body: '[CI Pipeline] Automated update'
-        branch-suffix: short-commit-hash
-        add-paths: ${{ inputs.add }}
+        script: |
+          const newPr = (await github.rest.pulls.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '[CI Pipeline] ${{ inputs.message }}',
+            head: 'ci-${{ github.sha }}',
+            base: '${{ github.ref_name }}',
+            body: '[CI Pipeline] Automated update'
+          })).data;
+          core.setOutput('pull-request-url', newPr.html_url);
+          core.setOutput('pull-request-number', newPr.number);
 
     - name: Merge PR
-      run: gh pr merge $PR_URL $MERGE_PR_STRATEGY
+      run: gh pr merge $PR_URL --delete-branch $MERGE_PR_STRATEGY
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}
         PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
-        MERGE_PR_STRATEGY: ${{github.ref_protected == true && '--merge' || '--rebase' }}
+        MERGE_PR_STRATEGY: ${{github.ref_protected == true && '--merge' || '--rebase' }}  
     
     - name: Tag commit
       uses: actions/github-script@v7
