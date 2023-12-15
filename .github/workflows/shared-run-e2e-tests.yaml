@@ -133,6 +133,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v3
         with:
+          ref: v2.7
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -159,6 +160,6 @@ jobs:
 
       - name: Run e2e tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@main
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2.7
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
