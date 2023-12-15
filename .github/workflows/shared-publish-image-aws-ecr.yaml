@@ -78,7 +78,7 @@ jobs:
     - name: Commit pom.xml and version.json
       uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
       with:
-        add: 'pom.xml,version.json'
+        add: 'pom.xml version.json'
         message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
 
     - name: Extract metadata (tags, labels) for Docker
