@@ -133,14 +133,12 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v3
         with:
-          ref: kcc-UID2-2338-build-test-pipeline-for-operator
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
       - name: Checkout uid2-e2e repo
         uses: actions/checkout@v3
         with:
-          ref: kcc-UID2-2338-build-test-pipeline-for-operator
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
@@ -161,6 +159,6 @@ jobs:
 
       - name: Run e2e tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@kcc-UID2-2338-build-test-pipeline-for-operator
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@main
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
