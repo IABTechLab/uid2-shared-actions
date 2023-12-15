@@ -41,17 +41,15 @@ cp "$OPTOUT_ROOT/run_tool_local_e2e.sh" "$OPTOUT_CONFIG_FILE_DIR"
 cp -r "$OPTOUT_ROOT/src/main/resources/localstack" "$OPTOUT_RESOURCE_FILE_DIR"
 mkdir -p "$OPERATOR_CONFIG_FILE_DIR"
 cp "$OPERATOR_ROOT/conf/default-config.json" "$OPERATOR_CONFIG_FILE_DIR"
-cp "$OPERATOR_ROOT/conf/local-e2e-docker-$OPERATOR_TYPE-config.json" "$OPERATOR_CONFIG_FILE_DIR"
+cp "$OPERATOR_ROOT/conf/local-e2e-docker-$OPERATOR_TYPE-config.json" "$OPERATOR_CONFIG_FILE_DIR/local-e2e-docker-config.json"
+
+cp "../uid2-e2e/docker-compose.yml" "$ROOT"
 
 CORE_CONFIG_FILE="$ROOT/docker/uid2-core/conf/local-e2e-docker-config.json"
 OPTOUT_CONFIG_FILE="$ROOT/docker/uid2-optout/conf/local-e2e-docker-config.json"
 OPERATOR_CONFIG_FILE="$ROOT/docker/uid2-operator/conf/local-e2e-docker-config.json"
-COMPOSE_FILE="$ROOT/docker-compose.yml"
+DOCKER_COMPOSE_FILE="$ROOT/docker-compose.yml"
 OPTOUT_MOUNT="$ROOT/docker/uid2-optout/mount"
-
-
-source "$ROOT/jq_helper.sh"
-source "$ROOT/healthcheck.sh"
 
 if [ -z "$CORE_VERSION" ]; then
   echo "CORE_VERSION can not be empty"
@@ -74,19 +72,19 @@ if [ -z "$E2E_VERSION" ]; then
 fi
 
 # replace placeholders
-sed -i.bak "s#<CORE_VERSION>#$CORE_VERSION#g" $COMPOSE_FILE
-sed -i.bak "s#<OPTOUT_VERSION>#$OPTOUT_VERSION#g" $COMPOSE_FILE
-sed -i.bak "s#<OPERATOR_VERSION>#$OPERATOR_VERSION#g" $COMPOSE_FILE
-sed -i.bak "s#<E2E_VERSION>#$E2E_VERSION#g" $COMPOSE_FILE
+sed -i.bak "s#uid2-core:latest#uid2-core:$CORE_VERSION#g" $DOCKER_COMPOSE_FILE
+sed -i.bak "s#uid2-optout:latest#uid2-optout:$OPTOUT_VERSION#g" $DOCKER_COMPOSE_FILE
+sed -i.bak "s#uid2-operator:latest#uid2-operator:$OPERATOR_VERSION#g" $DOCKER_COMPOSE_FILE
 
 cat $CORE_CONFIG_FILE
 cat $OPTOUT_CONFIG_FILE
 cat $OPERATOR_CONFIG_FILE
+cat $DOCKER_COMPOSE_FILE
 
 mkdir -p "$OPTOUT_MOUNT" && chmod 777 "$OPTOUT_MOUNT"
 chmod 777 "$CORE_RESOURCE_FILE_DIR/init-aws.sh"
 chmod 777 "$OPTOUT_RESOURCE_FILE_DIR/init-aws.sh"
 
-docker compose -f "$ROOT/e2e/docker-compose.yml" up -d
+docker compose --profile "$OPERATOR_TYPE" -f "$DOCKER_COMPOSE_FILE" up -d
 docker ps -a
 docker network ls

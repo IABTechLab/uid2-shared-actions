@@ -1,0 +1,58 @@
+name: Shared E2E Test
+description: Pull uid2-e2e Docker image and run E2E test suite
+
+inputs:
+  e2e_image_version:
+    description: 'The version of E2E image'
+    required: false
+    type: string
+    default: 'latest'
+  uid2_e2e_identity_scope:
+    description: 'Environment variable to run the E2E test'
+    required: false
+    type: string
+    default: 'UID2'
+  uid2_e2e_pipeline_operator_type:
+    description: 'Environment variable to run the E2E test'
+    required: false
+    type: string
+    default: 'PUBLIC'
+  uid2_e2e_pipeline_operator_url:
+    description: 'Environment variable to run the E2E test'
+    required: false
+    type: string
+    default: 'http://publicoperator:8080'
+  uid2_e2e_pipeline_operator_cloud_provider:
+    description: 'Environment variable to run the E2E test'
+    required: false
+    type: string
+    default: 'PUBLIC'
+  uid2_e2e_phone_support:
+    description: 'Environment variable to run the E2E test'
+    required: false
+    type: string
+    default: 'true'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Run E2E tests
+      shell: bash
+      run: |
+        docker pull ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
+        docker images
+        echo $UID2_E2E_PIPELINE_OPERATOR_TYPE
+        docker run \
+        --env UID2_E2E_ENV='github-test-pipeline' \
+        --env UID2_E2E_API_KEY='UID2-C-L-999-fCXrMM.fsR3mDqAXELtWWMS+xG1s7RdgRTMqdOH2qaAo=' \
+        --env UID2_E2E_API_KEY_OLD='UID2-C-L-1000-qxpBsF.ibeCDBpD2bq4Zm7inDacGioUk1aaLeNJrabow=' \
+        --env UID2_E2E_API_SECRET='DzBzbjTJcYL0swDtFs2krRNu+g1Eokm2tBU4dEuD0Wk=' \
+        --env UID2_E2E_API_SECRET_OLD='VT7+t0G/RVueMuVZAL56I2c3JJFSYQfhbu8yo0V/Tds=' \
+        --env UID2_E2E_IDENTITY_SCOPE='${{ inputs.uid2_e2e_identity_scope }}' \
+        --env UID2_E2E_PHONE_SUPPORT='${{ inputs.uid2_e2e_phone_support }}' \
+        --env UID2_E2E_PIPELINE_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_e2e_pipeline_operator_cloud_provider }}' \
+        --env UID2_E2E_PIPELINE_OPERATOR_TYPE='${{ inputs.uid2_e2e_pipeline_operator_type }}' \
+        --env UID2_E2E_PIPELINE_OPERATOR_URL='${{ inputs.uid2_e2e_pipeline_operator_url }}' \
+        --env UID2_E2E_SITE_ID='999' \
+        --network e2e_default \
+        ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
