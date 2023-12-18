@@ -223,7 +223,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Changelog
-        id: github_release
+        id: github_release_specific_version
         if: ${{ steps.checkRelease.outputs.IS_RELEASE == 'true' && inputs.version_number_input != '' }}
         uses: mikepenz/release-changelog-builder-action@v3
         with:
