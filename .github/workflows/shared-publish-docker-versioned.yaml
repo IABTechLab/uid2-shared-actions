@@ -210,9 +210,24 @@ jobs:
 
       - name: Build Changelog
         id: github_release
-        if: ${{ steps.checkRelease.outputs.IS_RELEASE == 'true' }}
+        if: ${{ steps.checkRelease.outputs.IS_RELEASE == 'true' && inputs.version_number_input == '' }}
         uses: mikepenz/release-changelog-builder-action@v3
         with:
+          toTag: v${{ steps.version.outputs.new_version }}
+          configurationJson: |
+            {
+              "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ steps.meta.outputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ steps.updatePom.outputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
+              "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Changelog
+        id: github_release
+        if: ${{ steps.checkRelease.outputs.IS_RELEASE == 'true' && inputs.version_number_input != '' }}
+        uses: mikepenz/release-changelog-builder-action@v3
+        with:
+          toTag: v${{inputs.version_number_input}}
           configurationJson: |
             {
               "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ steps.meta.outputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ steps.updatePom.outputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
