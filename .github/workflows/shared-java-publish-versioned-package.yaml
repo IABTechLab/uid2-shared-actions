@@ -86,17 +86,26 @@ jobs:
         run: mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
 
       - name: Commit pom.xml and version.json
+        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
           add: 'pom.xml version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-          tag: v${{ steps.version.outputs.new_version }}
+
+      - name: Commit pom.xml, version.json and set tag
+        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        with:
+          add: 'pom.xml version.json'
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          tag: v${{ steps.version.outputs.new_version }}          
 
       - name: Build Changelog
         id: github_release
         if: ${{ env.IS_RELEASE == 'true' }}
         uses: mikepenz/release-changelog-builder-action@v3
         with:
+          toTag: v${{ steps.version.outputs.new_version }}
           configurationJson: |
             {
               "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/${{ env.REPO }}/${{ steps.version.outputs.new_version }}/${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
