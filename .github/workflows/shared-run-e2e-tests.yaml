@@ -51,7 +51,7 @@ on:
         type: string
         default: 'main'
       operator_type:
-        description: 'The type of operator [either public or private]'
+        description: 'The type of operator [either public or gcp or azure]'
         type: string
         default: 'public'
       uid2_e2e_identity_scope:
@@ -133,7 +133,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v3
         with:
-          ref: v2.7
+          ref: kcc-UID2-2339-create-test-pipeline-for-gcp
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -142,6 +142,26 @@ jobs:
         with:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
+
+      - name: Bring up bore
+        id: bore
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
+        env:
+          BORE_TOKEN: ${{ secrets.BORE_AUTHTOKEN }}
+        run: |
+          cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
+
+      # - name: Start GCP private operator
+      #   id: start_gcp
+      #   if: ${{ inputs.operator_type == 'gcp'}}
+      #   uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2339-create-test-pipeline-for-gcp
+      #   with:
+      #     GCP_PROJECT: ${{ vars.GCP_PROJECT }}
+      #     SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      #     BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
+      #     BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+      #     OPERATOR_KEY: ${{ steps.metadata.outputs.OPERATOR_KEY }}
+      #     IMAGE_HASH: ${{ inputs.operator_image_hash }}
 
       - name: Bring up docker compose
         id: docker-compose
@@ -160,6 +180,6 @@ jobs:
 
       - name: Run e2e tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2.7
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
