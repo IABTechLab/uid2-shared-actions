@@ -18,6 +18,10 @@ inputs:
     description: Yes for a short name that does not include the git hash
     required: false
     default: ''
+  version_path:
+    description: The path to version.json file
+    type: string
+    default: version.json
 outputs:
   new_version:
     description: The complete version number 
@@ -29,21 +33,21 @@ runs:
       if: inputs.type == 'Major' && inputs.version_number == ''
       shell: bash
       run: |
-        old_ver=$(jq '.version' version.json | tr -d '"')
+        old_ver=$(jq '.version' ${{ inputs.version_path }} | tr -d '"')
         new_ver=$(echo $old_ver | cut -d'.' -f 1) #get the major number
         new_ver=$(echo $(expr $new_ver + 1))      #increment
         new_ver=$(echo $new_ver.0)                #set minor version to 0
         new_ver=\"$new_ver\"
-        echo $(jq ".version=$new_ver" version.json) > version.json
+        echo $(jq ".version=$new_ver" ${{ inputs.version_path }}) > ${{ inputs.version_path }}
 
     - name: Update Minor Version
       if: inputs.type == 'Minor' && inputs.version_number == ''
       shell: bash
       run: |
-        old_ver=$(jq '.version' version.json | tr -d '"')
+        old_ver=$(jq '.version' ${{ inputs.version_path }} | tr -d '"')
         new_ver=$(echo $old_ver | awk -F. -v OFS=. '{$NF++; print $0}') # minor
         new_ver=\"$new_ver\"
-        echo $(jq ".version=$new_ver" version.json) > version.json
+        echo $(jq ".version=$new_ver" ${{ inputs.version_path }}) > ${{ inputs.version_path }}
 
     - name: Set Version
       if:  inputs.version_number == ''

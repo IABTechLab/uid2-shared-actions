@@ -21,6 +21,10 @@ on:
         description: The path to pom.xml file
         type: string
         default: pom.xml
+      version_path:
+        description: The path to version.json file
+        type: string
+        default: version.json
 
 env:
   IS_RELEASE: ${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name ) }}
@@ -68,10 +72,11 @@ jobs:
 
       - name: Set version number
         id: version
-        uses: IABTechLab/uid2-shared-actions/actions/version_number@v1.0
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@kcc-UID2-2327-update-maven-repos-to-use-new-pipelines
         with:
           type: ${{ inputs.release_type }}
           branch_name: ${{ github.ref }}
+          version_path: ${{ inputs.version_path }}
 
       - name: Update pom.xml
         run: |
@@ -84,10 +89,10 @@ jobs:
         if: ${{ inputs.publish_to_maven }}
         run: mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
 
-      - name: Commit pom.xml and version.json
+      - name: Commit pom.xml and ${{ inputs.version_path }}
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
-          add: '${{ inputs.pom_path }} version.json'
+          add: '${{ inputs.pom_path }} ${{ inputs.version_path }}'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
 
