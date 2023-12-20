@@ -198,3 +198,12 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
+
+      - name: Stop GCP private operator
+        if: always()
+        env:
+          GCP_PROJECT: ${{ vars.GCP_PROJECT }}
+          SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
+        run: |
+          cd e2e && bash ../uid2-shared-actions/scripts/stop_gcp_enclave.sh
