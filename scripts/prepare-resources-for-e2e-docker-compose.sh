@@ -41,7 +41,9 @@ cp "$OPTOUT_ROOT/run_tool_local_e2e.sh" "$OPTOUT_CONFIG_FILE_DIR"
 cp -r "$OPTOUT_ROOT/src/main/resources/localstack" "$OPTOUT_RESOURCE_FILE_DIR"
 mkdir -p "$OPERATOR_CONFIG_FILE_DIR"
 cp "$OPERATOR_ROOT/conf/default-config.json" "$OPERATOR_CONFIG_FILE_DIR"
-cp "$OPERATOR_ROOT/conf/local-e2e-docker-$OPERATOR_TYPE-config.json" "$OPERATOR_CONFIG_FILE_DIR/local-e2e-docker-config.json"
+if [ $OPERATOR_TYPE == "public" ]; then
+  cp "$OPERATOR_ROOT/conf/local-e2e-docker-$OPERATOR_TYPE-config.json" "$OPERATOR_CONFIG_FILE_DIR/local-e2e-docker-config.json"
+fi
 
 cp "../uid2-e2e/docker-compose.yml" "$ROOT"
 
@@ -78,7 +80,9 @@ sed -i.bak "s#uid2-operator:latest#uid2-operator:$OPERATOR_VERSION#g" $DOCKER_CO
 
 cat $CORE_CONFIG_FILE
 cat $OPTOUT_CONFIG_FILE
-cat $OPERATOR_CONFIG_FILE
+if [ $OPERATOR_TYPE == "public" ]; then
+  cat $OPERATOR_CONFIG_FILE
+fi
 cat $DOCKER_COMPOSE_FILE
 
 mkdir -p "$OPTOUT_MOUNT" && chmod 777 "$OPTOUT_MOUNT"

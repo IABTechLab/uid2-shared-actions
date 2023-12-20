@@ -161,20 +161,6 @@ jobs:
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
 
-      - name: Start GCP private operator
-        id: start_gcp_private_operator
-        if: ${{ inputs.operator_type == 'gcp'}}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2339-create-test-pipeline-for-gcp
-        with:
-          operator_image_version: ${{ inputs.operator_image_version }}
-          admin_root: ${{ inputs.admin_root }}
-          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
-          gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
-          gcp_service_account: ${{ inputs.gcp_service_account }}
-          gcp_project: ${{ inputs.gcp_project }}
-
       - name: Bring up docker compose
         id: docker-compose
         env:
@@ -189,6 +175,20 @@ jobs:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/prepare-resources-for-e2e-docker-compose.sh
+
+      - name: Start GCP private operator
+        id: start_gcp_private_operator
+        if: ${{ inputs.operator_type == 'gcp'}}
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2339-create-test-pipeline-for-gcp
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+          gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
+          gcp_service_account: ${{ inputs.gcp_service_account }}
+          gcp_project: ${{ inputs.gcp_project }}
 
       - name: Run e2e tests
         id: e2e
