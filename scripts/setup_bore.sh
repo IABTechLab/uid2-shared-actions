@@ -12,7 +12,7 @@ if ! which bore > /dev/null; then
   bore_cmd="./bore"
 fi
 
-$bore_cmd local --local-host localhost --to bore.pub 5001  > $ROOT/bore_localhost.out &
+$bore_cmd local --local-host localstack --to bore.pub 5001  > $ROOT/bore_localhost.out &
 $bore_cmd local --local-host core --to bore.pub 8088  > $ROOT/bore_core.out &
 $bore_cmd local --local-host optout --to bore.pub 8081 > $ROOT/bore_optout.out &
 
