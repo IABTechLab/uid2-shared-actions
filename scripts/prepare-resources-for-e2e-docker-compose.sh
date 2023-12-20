@@ -9,6 +9,8 @@ OPERATOR_CONFIG_FILE_DIR="$ROOT/docker/uid2-operator/conf"
 CORE_RESOURCE_FILE_DIR="$ROOT/docker/uid2-core/src"
 OPTOUT_RESOURCE_FILE_DIR="$ROOT/docker/uid2-optout/src"
 
+source "../uid2-shared-actions/scripts/jq_helper.sh"
+source "../uid2-shared-actions/scripts/healthcheck.sh"
 
 if [ -z "$CORE_ROOT" ]; then
   echo "CORE_ROOT can not be empty"
@@ -78,8 +80,23 @@ sed -i.bak "s#uid2-core:latest#uid2-core:$CORE_VERSION#g" $DOCKER_COMPOSE_FILE
 sed -i.bak "s#uid2-optout:latest#uid2-optout:$OPTOUT_VERSION#g" $DOCKER_COMPOSE_FILE
 sed -i.bak "s#uid2-operator:latest#uid2-operator:$OPERATOR_VERSION#g" $DOCKER_COMPOSE_FILE
 
+# set provide_private_site_data to false to workaround the private site path
+jq_inplace_update $CORE_CONFIG_FILE aws_s3_endpoint "$BORE_URL_LOCALSTACK"
+jq_inplace_update $CORE_CONFIG_FILE kms_aws_endpoint "$BORE_URL_LOCALSTACK"
+jq_inplace_update $CORE_CONFIG_FILE core_public_url "$BORE_URL_CORE"
+jq_inplace_update $CORE_CONFIG_FILE optout_url "$BORE_URL_OPTOUT"
+jq_inplace_update_json $CORE_CONFIG_FILE provide_private_site_data false
+
+jq_inplace_update $OPTOUT_CONFIG_FILE aws_s3_endpoint "$BORE_URL_LOCALSTACK"
+jq_inplace_update $OPTOUT_CONFIG_FILE partners_metadata_path "$BORE_URL_CORE/partners/refresh"
+jq_inplace_update $OPTOUT_CONFIG_FILE operators_metadata_path "$BORE_URL_CORE/operators/refresh"
+jq_inplace_update $OPTOUT_CONFIG_FILE core_attest_url "$BORE_URL_CORE/attest"
+jq_inplace_update $OPTOUT_CONFIG_FILE core_public_url "$BORE_URL_CORE"
+jq_inplace_update $OPTOUT_CONFIG_FILE optout_url "$BORE_URL_OPTOUT"
+
 cat $CORE_CONFIG_FILE
 cat $OPTOUT_CONFIG_FILE
+
 if [ $OPERATOR_TYPE == "public" ]; then
   cat $OPERATOR_CONFIG_FILE
 fi
