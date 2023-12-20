@@ -1,0 +1,75 @@
+name: Start GCP Private Operator
+inputs:
+  operator_image_version:
+    description: 'The version of UID2 operator image'
+    type: string
+    default: 'latest'
+  admin_root:
+    description: 'The root path for uid2-admin folder'
+    type: string
+    default: '../uid2-admin'
+  bore_url_core:
+    description: 'The bore url for core service'
+    type: string
+    required: true
+  bore_url_optout:
+    description: 'The bore url for optout service'
+    type: string
+    required: true
+  bore_url_localstack:
+    description: 'The bore url for localstack service'
+    type: string
+    required: true
+  gcp_project:
+    description: 'The name of the GCP project'
+    type: string
+    required: true
+  gcp_service_account:
+    description: 'The GCP service account'
+    type: string
+    required: true
+  gcp_workload_identity_provider_id:
+    description: 'The GCP workload identity provider id'
+    type: string
+    required: true
+outputs:
+  gcp_instance_name:
+    description: 'GCP instance name'
+    value: ${{ steps.start_gcp.outputs.GCP_INSTANCE_NAME }}
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare GCP enclave metadata
+      id: metadata
+      shell: bash
+      env:
+        OPERATOR_IMAGE_VERSION: ${{ inputs.operator_image_version }}
+        ADMIN_ROOT: ${{ inputs.admin_root }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/prepare_gcp_enclave_metadata.sh
+
+    - name: Authenticate with Google Cloud
+      id: gcp_auth
+      uses: google-github-actions/auth@v2
+      with:
+        token_format: access_token
+        workload_identity_provider: ${{ inputs.gcp_workload_identity_provider_id }}
+        service_account: ${{ inputs.gcp_service_account }}
+        access_token_lifetime: 1200s
+
+    - name: Set up Cloud SDK
+      uses: 'google-github-actions/setup-gcloud@v1'
+
+    - name: Start GCP private operator
+      id: start_gcp
+      shell: bash
+      env:
+        GCP_PROJECT: ${{ inputs.gcp_project }}
+        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        BORE_URL_LOCALSTACK: ${{ inputs.bore_url_localstack }}
+        OPERATOR_KEY: ${{ steps.metadata.outputs.OPERATOR_KEY }}
+        IMAGE_HASH: ${{ inputs.operator_image_version }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/start_gcp_enclave.sh

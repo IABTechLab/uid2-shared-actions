@@ -54,6 +54,18 @@ on:
         description: 'The type of operator [either public or gcp or azure]'
         type: string
         default: 'public'
+      gcp_project:
+        description: 'The name of the GCP project'
+        type: string
+        required: true
+      gcp_service_account:
+        description: 'The GCP service account'
+        type: string
+        required: true
+      gcp_workload_identity_provider_id:
+        description: 'The GCP workload identity provider id'
+        type: string
+        required: true
       uid2_e2e_identity_scope:
         description: 'Environment variable to run the E2E test'
         required: false
@@ -146,22 +158,22 @@ jobs:
       - name: Bring up bore
         id: bore
         if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
-        env:
-          BORE_TOKEN: ${{ secrets.BORE_AUTHTOKEN }}
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
 
-      # - name: Start GCP private operator
-      #   id: start_gcp
-      #   if: ${{ inputs.operator_type == 'gcp'}}
-      #   uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2339-create-test-pipeline-for-gcp
-      #   with:
-      #     GCP_PROJECT: ${{ vars.GCP_PROJECT }}
-      #     SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
-      #     BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
-      #     BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-      #     OPERATOR_KEY: ${{ steps.metadata.outputs.OPERATOR_KEY }}
-      #     IMAGE_HASH: ${{ inputs.operator_image_hash }}
+      - name: Start GCP private operator
+        id: start_gcp_private_operator
+        if: ${{ inputs.operator_type == 'gcp'}}
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2339-create-test-pipeline-for-gcp
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+          gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
+          gcp_service_account: ${{ inputs.gcp_service_account }}
+          gcp_project: ${{ inputs.gcp_project }}
 
       - name: Bring up docker compose
         id: docker-compose
