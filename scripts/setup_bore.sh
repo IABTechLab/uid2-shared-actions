@@ -12,9 +12,17 @@ if ! which bore > /dev/null; then
   bore_cmd="./bore"
 fi
 
-$bore_cmd local --to bore.pub 5001  > $ROOT/bore_localhost.out &
-$bore_cmd local --to bore.pub 8088  > $ROOT/bore_core.out &
-$bore_cmd local --to bore.pub 8081 > $ROOT/bore_optout.out &
+$bore_cmd server > $ROOT/bore_server.out &
+until [ -f $ROOT/bore_server.out ]
+do
+  sleep 5
+done
+cat $ROOT/bore_server.out
+BORE_SERVER=$(cat $ROOT/bore_server.out | grep addr | cut -d '=' -f2 | cut -d ':' -f1)
+
+$bore_cmd local --to $BORE_SERVER 5001  > $ROOT/bore_localhost.out &
+$bore_cmd local --to $BORE_SERVER 8088  > $ROOT/bore_core.out &
+$bore_cmd local --to $BORE_SERVER 8081 > $ROOT/bore_optout.out &
 
 until [ -f $ROOT/bore_localhost.out ] && [ -f $ROOT/bore_core.out ] && [ -f $ROOT/bore_optout.out ]
 do
@@ -24,6 +32,14 @@ done
 cat $ROOT/bore_localhost.out
 cat $ROOT/bore_core.out
 cat $ROOT/bore_optout.out
+
+source "$ROOT/healthcheck.sh"
+healthcheck $BORE_SERVER
+
+# parse public url
+tunnel_info=$(curl -s $BORE_SERVER)
+
+echo $tunnel_info
 
 BORE_URL_LOCALSTACK=$(cat $ROOT/bore_localhost.out | grep at | cut -d ' ' -f7)
 BORE_URL_CORE=$(cat $ROOT/bore_core.out | grep at | cut -d ' ' -f7)
