@@ -156,12 +156,6 @@ jobs:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
-      - name: Bring up bore
-        id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
-        run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
-
       - name: Bring up docker compose
         id: docker-compose
         env:
@@ -174,11 +168,17 @@ jobs:
           OPERATOR_VERSION: ${{ inputs.operator_image_version }}
           E2E_VERSION: ${{ inputs.e2e_image_version }}
           OPERATOR_TYPE: ${{ inputs.operator_type }}
-          BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+          # BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          # BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          # BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/prepare-resources-for-e2e-docker-compose.sh
+
+      - name: Bring up bore
+        id: bore
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
+        run: |
+          cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
 
       # - name: Start GCP private operator
       #   id: start_gcp_private_operator
