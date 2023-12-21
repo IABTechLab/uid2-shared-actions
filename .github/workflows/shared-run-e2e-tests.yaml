@@ -152,6 +152,7 @@ jobs:
       - name: Checkout uid2-e2e repo
         uses: actions/checkout@v3
         with:
+          ref: kcc-UID2-2339-create-test-pipeline-for-gcp
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
@@ -179,31 +180,31 @@ jobs:
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/prepare-resources-for-e2e-docker-compose.sh
 
-      - name: Start GCP private operator
-        id: start_gcp_private_operator
-        if: ${{ inputs.operator_type == 'gcp'}}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2339-create-test-pipeline-for-gcp
-        with:
-          operator_image_version: ${{ inputs.operator_image_version }}
-          admin_root: ${{ inputs.admin_root }}
-          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
-          gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
-          gcp_service_account: ${{ inputs.gcp_service_account }}
-          gcp_project: ${{ inputs.gcp_project }}
+      # - name: Start GCP private operator
+      #   id: start_gcp_private_operator
+      #   if: ${{ inputs.operator_type == 'gcp'}}
+      #   uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2339-create-test-pipeline-for-gcp
+      #   with:
+      #     operator_image_version: ${{ inputs.operator_image_version }}
+      #     admin_root: ${{ inputs.admin_root }}
+      #     bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+      #     bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+      #     bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+      #     gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
+      #     gcp_service_account: ${{ inputs.gcp_service_account }}
+      #     gcp_project: ${{ inputs.gcp_project }}
 
-      - name: Run e2e tests
-        id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
-        with:
-          e2e_image_version: ${{ inputs.e2e_image_version }}
+      # - name: Run e2e tests
+      #   id: e2e
+      #   uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
+      #   with:
+      #     e2e_image_version: ${{ inputs.e2e_image_version }}
 
-      - name: Stop GCP private operator
-        if: always()
-        env:
-          GCP_PROJECT: ${{ vars.GCP_PROJECT }}
-          SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
-          GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
-        run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/stop_gcp_enclave.sh
+      # - name: Stop GCP private operator
+      #   if: always()
+      #   env:
+      #     GCP_PROJECT: ${{ vars.GCP_PROJECT }}
+      #     SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+      #     GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
+      #   run: |
+      #     cd e2e && bash ../uid2-shared-actions/scripts/stop_gcp_enclave.sh

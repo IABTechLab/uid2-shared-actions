@@ -109,3 +109,6 @@ chmod 777 "$OPTOUT_RESOURCE_FILE_DIR/init-aws.sh"
 docker compose --profile "$OPERATOR_TYPE" -f "$DOCKER_COMPOSE_FILE" up -d
 docker ps -a
 docker network ls
+curl localhost:5001
+curl http://localstack:5001/core-test-bucket
+
