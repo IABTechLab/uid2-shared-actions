@@ -178,7 +178,7 @@ jobs:
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
           BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/prepare-resources-for-e2e-docker-compose.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
 
       - name: Start GCP private operator
         id: start_gcp_private_operator
