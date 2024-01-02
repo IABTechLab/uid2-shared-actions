@@ -1,13 +1,5 @@
 name: Start GCP Private Operator
 inputs:
-  operator_image_version:
-    description: 'The version of UID2 operator image'
-    type: string
-    default: 'latest'
-  admin_root:
-    description: 'The root path for uid2-admin folder'
-    type: string
-    default: '../uid2-admin'
   bore_url_core:
     description: 'The bore url for core service'
     type: string
@@ -28,14 +20,14 @@ inputs:
     description: 'The GCP service account'
     type: string
     required: true
-  gcp_workload_identity_provider_id:
-    description: 'The GCP workload identity provider id'
+  image_hash:
+    description: 'The operator image hash of the operator image version'
     type: string
     required: true
-  gcp_registry:
-    description: 'The GCP docker registry'
+  operator_key:
+    description: 'Operator key'
     type: string
-    default: us-docker.pkg.dev
+    required: true
 outputs:
   gcp_instance_name:
     description: 'GCP instance name'
@@ -44,48 +36,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Authenticate with Google Cloud
-      id: gcp_auth
-      uses: google-github-actions/auth@v2
-      with:
-        token_format: access_token
-        workload_identity_provider: ${{ inputs.gcp_workload_identity_provider_id }}
-        service_account: ${{ inputs.gcp_service_account }}
-        access_token_lifetime: 1200s
-
-    - name: Set up Cloud SDK
-      uses: 'google-github-actions/setup-gcloud@v1'
-    
-    - name: Log in to the GCP Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ inputs.gcp_registry }}
-        username: oauth2accesstoken
-        password: ${{ steps.gcp_auth.outputs.access_token }}
-
-    - name: Get Image Digest
-      id: get_digest
-      shell: bash
-      run: |
-        IMAGE_NAME="us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator"
-        IMAGE_TAG="${{ inputs.operator_image_version }}"
-
-        # Pull the image to make sure it's available locally
-        docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
-
-        # Get the digest
-        IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2)
-        echo "::set-output name=image_digest::${IMAGE_DIGEST}"
-
-    - name: Prepare GCP enclave metadata
-      id: metadata
-      shell: bash
-      env:
-        IMAGE_HASH: ${{ steps.get_digest.outputs.image_digest }}
-        ADMIN_ROOT: ${{ inputs.admin_root }}
-      run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/prepare_gcp_enclave_metadata.sh
-
     - name: Start GCP private operator
       id: start_gcp
       shell: bash
@@ -95,7 +45,7 @@ runs:
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
         BORE_URL_LOCALSTACK: ${{ inputs.bore_url_localstack }}
-        OPERATOR_KEY: ${{ steps.metadata.outputs.OPERATOR_KEY }}
-        IMAGE_HASH: ${{ steps.get_digest.outputs.image_digest }}
+        OPERATOR_KEY: ${{ inputs.operator_key }}
+        IMAGE_HASH: ${{ inputs.image_hash }}
       run: |
         cd e2e && bash ../uid2-shared-actions/scripts/start_gcp_enclave.sh

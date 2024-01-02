@@ -17,13 +17,13 @@ if [ -z "$SERVICE_ACCOUNT" ]; then
   exit 1
 fi
 
-if [ -z "$IMAGE_HASH" ]; then
-  echo "IMAGE_HASH can not be empty"
+if [ -z "$OPERATOR_KEY" ]; then
+  echo "OPERATOR_KEY can not be empty"
   exit 1
 fi
 
-if [ -z "$OPERATOR_KEY" ]; then
-  echo "OPERATOR_KEY can not be empty"
+if [ -z "$IMAGE_HASH" ]; then
+  echo "IMAGE_HASH can not be empty"
   exit 1
 fi
 
