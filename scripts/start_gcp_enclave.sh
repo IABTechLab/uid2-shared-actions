@@ -56,7 +56,7 @@ gcloud compute instances create $GCP_INSTANCE_NAME \
     --image-project confidential-space-images \
     --image-family confidential-space-debug \
     --service-account $SERVICE_ACCOUNT \
-    --metadata ^~^tee-image-reference=us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator@$IMAGE_HASH~tee-restart-policy=Never~tee-container-log-redirect=true~tee-env-DEPLOYMENT_ENVIRONMENT=integ~tee-env-API_TOKEN_SECRET_NAME=$OPERATOR_KEY_SECRET_VERSION~tee-env-CORE_BASE_URL=http://$BORE_URL_CORE~tee-env-OPTOUT_BASE_URL=http://$BORE_URL_OPTOUT
+    --metadata ^~^tee-image-reference=us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator@$IMAGE_HASH~tee-restart-policy=Never~tee-container-log-redirect=true~tee-env-DEPLOYMENT_ENVIRONMENT=integ~tee-env-API_TOKEN_SECRET_NAME=$OPERATOR_KEY_SECRET_VERSION~tee-env-CORE_BASE_URL=http://$BORE_URL_CORE~tee-env-OPTOUT_BASE_URL=http://$BORE_URL_OPTOUT~tee-env-ENFORCE_HTTPS=false
 
 # export to Github output
 echo "GCP_INSTANCE_NAME=$GCP_INSTANCE_NAME"
@@ -76,7 +76,7 @@ echo "instance ip: $ip"
 healthcheck_url="http://$ip:8080/ops/healthcheck"
 
 # health check - for 5 mins
-healthcheck "$healthcheck_url" 60
+healthcheck "$healthcheck_url" 60000
 
 OPERATOR_KEY_SECRET_NAME=$GCP_INSTANCE_NAME
 
