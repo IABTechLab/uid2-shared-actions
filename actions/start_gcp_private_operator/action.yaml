@@ -32,10 +32,15 @@ inputs:
     description: 'The GCP workload identity provider id'
     type: string
     required: true
+  gcp_registry:
+    description: 'The GCP docker registry'
+    type: string
+    default: us-docker.pkg.dev
 outputs:
   gcp_instance_name:
     description: 'GCP instance name'
     value: ${{ steps.start_gcp.outputs.GCP_INSTANCE_NAME }}
+
 runs:
   using: "composite"
   steps:
@@ -59,12 +64,19 @@ runs:
 
     - name: Set up Cloud SDK
       uses: 'google-github-actions/setup-gcloud@v1'
+    
+    - name: Log in to the GCP Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.gcp_registry }}
+        username: oauth2accesstoken
+        password: ${{ steps.gcp_auth.outputs.access_token }}
 
     - name: Get Image Digest
       id: get_digest
       shell: bash
       run: |
-        IMAGE_NAME="ghcr.io/iabtechlab/uid2-operator"
+        IMAGE_NAME="us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator"
         IMAGE_TAG="${{ inputs.operator_image_version }}"
 
         # Pull the image to make sure it's available locally
