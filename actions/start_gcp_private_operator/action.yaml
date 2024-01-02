@@ -44,15 +44,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Prepare GCP enclave metadata
-      id: metadata
-      shell: bash
-      env:
-        OPERATOR_IMAGE_VERSION: ${{ inputs.operator_image_version }}
-        ADMIN_ROOT: ${{ inputs.admin_root }}
-      run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/prepare_gcp_enclave_metadata.sh
-
     - name: Authenticate with Google Cloud
       id: gcp_auth
       uses: google-github-actions/auth@v2
@@ -85,6 +76,15 @@ runs:
         # Get the digest
         IMAGE_DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2)
         echo "::set-output name=image_digest::${IMAGE_DIGEST}"
+
+    - name: Prepare GCP enclave metadata
+      id: metadata
+      shell: bash
+      env:
+        IMAGE_HASH: ${{ steps.get_digest.outputs.image_digest }}
+        ADMIN_ROOT: ${{ inputs.admin_root }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/prepare_gcp_enclave_metadata.sh
 
     - name: Start GCP private operator
       id: start_gcp

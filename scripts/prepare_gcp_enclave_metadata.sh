@@ -6,13 +6,13 @@ METADATA_ROOT="$ADMIN_ROOT/src/main/resources/localstack/s3/core"
 OPERATOR_FILE="$METADATA_ROOT/operators/operators.json"
 ENCLAVE_FILE="$METADATA_ROOT/enclaves/enclaves.json"
 
-if [ -z "$OPERATOR_IMAGE_VERSION" ]; then
-  echo "OPERATOR_IMAGE_VERSION can not be empty"
+if [ -z "$IMAGE_HASH" ]; then
+  echo "IMAGE_HASH can not be empty"
   exit 1
 fi
 
 # generate enclave id
-enclave_str="V1,true,$OPERATOR_IMAGE_VERSION"
+enclave_str="V1,true,$IMAGE_HASH"
 echo "enclave_str=$enclave_str"
 enclave_id=$(echo -n $enclave_str | openssl dgst -sha256 -binary | openssl base64)
 
