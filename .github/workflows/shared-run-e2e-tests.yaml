@@ -228,7 +228,7 @@ jobs:
           uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
 
       - name: Stop GCP private operator
-        if: always()
+        if: ${{ inputs.operator_type == 'gcp'}}
         env:
           GCP_PROJECT: ${{ vars.GCP_PROJECT }}
           SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
