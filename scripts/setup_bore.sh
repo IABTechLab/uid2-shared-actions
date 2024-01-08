@@ -3,8 +3,6 @@ set -ex
 
 ROOT="."
 
-docker network create e2e_default
-
 docker run --init --rm --network e2e_default ekzhang/bore local --local-host localstack --to bore.pub 5001  > $ROOT/bore_localstack.out &
 docker run --init --rm --network e2e_default ekzhang/bore local --local-host core --to bore.pub 8088  > $ROOT/bore_core.out &
 docker run --init --rm --network e2e_default ekzhang/bore local --local-host optout --to bore.pub 8081  > $ROOT/bore_optout.out &

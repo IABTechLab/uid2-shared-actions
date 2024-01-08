@@ -141,6 +141,10 @@ jobs:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
+      - name: Create docker network
+        run: |
+          docker network create e2e_default
+
       - name: Bring up bore
         id: bore
         if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
