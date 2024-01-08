@@ -203,11 +203,35 @@ jobs:
           image_hash: ${{ steps.prepare_gcp_metadata.outputs.image_hash }}
           operator_key: ${{ steps.prepare_gcp_metadata.outputs.operator_key }}
 
-      # - name: Run e2e tests
-      #   id: e2e
-      #   uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
-      #   with:
-      #     e2e_image_version: ${{ inputs.e2e_image_version }}
+      - name: Decide E2E test environment variables
+        id: decide_env_var
+        if: ${{ inputs.operator_type != 'public'}}
+        shell: bash
+        env:
+          OPERATOR_TYPE: ${{ inputs.operator_type }}
+        run: |
+          if [ -z "$GITHUB_OUTPUT" ]; then
+            echo "not in github action"
+          elif [ -z "$OPERATOR_TYPE" ]; then
+            echo "$OPERATOR_TYPE not set"
+          else
+            echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
+            if [ "$OPERATOR_TYPE" == "gcp" ]; then
+              echo "uid2_e2e_pipeline_operator_cloud_provider=GCP-OIDC" >> $GITHUB_OUTPUT
+            elif [ "$OPERATOR_TYPE" == "azure" ]; then
+              echo "uid2_e2e_pipeline_operator_cloud_provider=Azure-CC" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+
+      - name: Run e2e tests
+        id: e2e
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
+        with:
+          e2e_image_version: ${{ inputs.e2e_image_version }}
+          uid2_e2e_pipeline_operator_url: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
+          uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
 
       - name: Stop GCP private operator
         if: always()

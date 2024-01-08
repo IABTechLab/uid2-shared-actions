@@ -32,6 +32,9 @@ outputs:
   gcp_instance_name:
     description: 'GCP instance name'
     value: ${{ steps.start_gcp.outputs.GCP_INSTANCE_NAME }}
+  uid2_e2e_pipeline_operator_url:
+    description: 'The GCP operator url'
+    value: ${{ steps.start_gcp.outputs.uid2_e2e_pipeline_operator_url }}
 
 runs:
   using: "composite"

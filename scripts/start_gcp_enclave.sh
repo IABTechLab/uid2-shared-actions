@@ -72,6 +72,7 @@ ip=$(gcloud compute instances describe $GCP_INSTANCE_NAME \
     --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
 
 echo "instance ip: $ip"
+echo "uid2_e2e_pipeline_operator_url=http://$ip:8080" >> $GITHUB_OUTPUT
 
 healthcheck_url="http://$ip:8080/ops/healthcheck"
 
