@@ -71,21 +71,6 @@ on:
         required: false
         type: string
         default: 'UID2'
-      uid2_e2e_pipeline_operator_type:
-        description: 'Environment variable to run the E2E test'
-        required: false
-        type: string
-        default: 'PUBLIC'
-      uid2_e2e_pipeline_operator_url:
-        description: 'Environment variable to run the E2E test'
-        required: false
-        type: string
-        default: 'http://publicoperator:8080'
-      uid2_e2e_pipeline_operator_cloud_provider:
-        description: 'Environment variable to run the E2E test'
-        required: false
-        type: string
-        default: 'PUBLIC'
       uid2_e2e_phone_support:
         description: 'Environment variable to run the E2E test'
         required: false
@@ -209,13 +194,19 @@ jobs:
         shell: bash
         env:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
+          OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
         run: |
           if [ -z "$GITHUB_OUTPUT" ]; then
             echo "not in github action"
           elif [ -z "$OPERATOR_TYPE" ]; then
             echo "$OPERATOR_TYPE not set"
+          elif [ "$OPERATOR_TYPE" == "public" ]; then
+            echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
           else
             echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_operator_url=$OPERATOR_URL" >> $GITHUB_OUTPUT
             if [ "$OPERATOR_TYPE" == "gcp" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=GCP-OIDC" >> $GITHUB_OUTPUT
             elif [ "$OPERATOR_TYPE" == "azure" ]; then
@@ -223,13 +214,12 @@ jobs:
             fi
           fi
 
-
       - name: Run e2e tests
         id: e2e
         uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
-          uid2_e2e_pipeline_operator_url: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
           uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
           uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
 
