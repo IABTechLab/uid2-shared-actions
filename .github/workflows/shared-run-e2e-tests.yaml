@@ -212,9 +212,9 @@ jobs:
             echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_url=$OPERATOR_URL" >> $GITHUB_OUTPUT
             if [ "$OPERATOR_TYPE" == "gcp" ]; then
-              echo "uid2_e2e_pipeline_operator_cloud_provider=GCP-OIDC" >> $GITHUB_OUTPUT
+              echo "uid2_e2e_pipeline_operator_cloud_provider=GCP" >> $GITHUB_OUTPUT
             elif [ "$OPERATOR_TYPE" == "azure" ]; then
-              echo "uid2_e2e_pipeline_operator_cloud_provider=Azure-CC" >> $GITHUB_OUTPUT
+              echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> $GITHUB_OUTPUT
             fi
           fi
 
