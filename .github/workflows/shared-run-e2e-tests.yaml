@@ -213,7 +213,7 @@ jobs:
             fi
           fi
 
-      - name: Run e2e tests
+      - name: Run E2E tests
         id: e2e
         uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
         with:
