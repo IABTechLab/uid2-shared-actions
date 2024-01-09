@@ -3,7 +3,7 @@
 # for string
 # https://jqlang.github.io/jq/manual/
 # --arg foo 123 will bind $foo to "123".
-function jq_inplace_update() {
+function jq_string_update() {
     local file=$1
     local field=$2
     local value=$3
@@ -13,7 +13,7 @@ function jq_inplace_update() {
 # for number/boolean
 # https://jqlang.github.io/jq/manual/
 # --argjson foo 123 will bind $foo to 123.
-function jq_inplace_update_json() {
+function jq_string_update_json() {
     local file=$1
     local field=$2
     local value=$3

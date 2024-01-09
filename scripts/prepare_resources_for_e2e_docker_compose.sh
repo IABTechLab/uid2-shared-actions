@@ -82,18 +82,18 @@ sed -i.bak "s#uid2-operator:latest#uid2-operator:$OPERATOR_VERSION#g" $DOCKER_CO
 
 # set provide_private_site_data to false to workaround the private site path
 if [ $OPERATOR_TYPE != "public" ]; then
-  jq_inplace_update $CORE_CONFIG_FILE aws_s3_endpoint "http://$BORE_URL_LOCALSTACK"
-  jq_inplace_update $CORE_CONFIG_FILE kms_aws_endpoint "http://$BORE_URL_LOCALSTACK"
-  jq_inplace_update $CORE_CONFIG_FILE core_public_url "http://$BORE_URL_CORE"
-  jq_inplace_update $CORE_CONFIG_FILE optout_url "http://$BORE_URL_OPTOUT"
-  jq_inplace_update_json $CORE_CONFIG_FILE provide_private_site_data false
+  jq_string_update $CORE_CONFIG_FILE aws_s3_endpoint "http://$BORE_URL_LOCALSTACK"
+  jq_string_update $CORE_CONFIG_FILE kms_aws_endpoint "http://$BORE_URL_LOCALSTACK"
+  jq_string_update $CORE_CONFIG_FILE core_public_url "http://$BORE_URL_CORE"
+  jq_string_update $CORE_CONFIG_FILE optout_url "http://$BORE_URL_OPTOUT"
+  jq_number_boolean_update $CORE_CONFIG_FILE provide_private_site_data false
 
-  jq_inplace_update $OPTOUT_CONFIG_FILE aws_s3_endpoint "http://$BORE_URL_LOCALSTACK"
-  jq_inplace_update $OPTOUT_CONFIG_FILE partners_metadata_path "http://$BORE_URL_CORE/partners/refresh"
-  jq_inplace_update $OPTOUT_CONFIG_FILE operators_metadata_path "http://$BORE_URL_CORE/operators/refresh"
-  jq_inplace_update $OPTOUT_CONFIG_FILE core_attest_url "http://$BORE_URL_CORE/attest"
-  jq_inplace_update $OPTOUT_CONFIG_FILE core_public_url "http://$BORE_URL_CORE"
-  jq_inplace_update $OPTOUT_CONFIG_FILE optout_url "http://$BORE_URL_OPTOUT"
+  jq_string_update $OPTOUT_CONFIG_FILE aws_s3_endpoint "http://$BORE_URL_LOCALSTACK"
+  jq_string_update $OPTOUT_CONFIG_FILE partners_metadata_path "http://$BORE_URL_CORE/partners/refresh"
+  jq_string_update $OPTOUT_CONFIG_FILE operators_metadata_path "http://$BORE_URL_CORE/operators/refresh"
+  jq_string_update $OPTOUT_CONFIG_FILE core_attest_url "http://$BORE_URL_CORE/attest"
+  jq_string_update $OPTOUT_CONFIG_FILE core_public_url "http://$BORE_URL_CORE"
+  jq_string_update $OPTOUT_CONFIG_FILE optout_url "http://$BORE_URL_OPTOUT"
 fi
 
 cat $CORE_CONFIG_FILE
