@@ -194,7 +194,6 @@ jobs:
 
       - name: Decide E2E test environment variables
         id: decide_env_var
-        if: ${{ inputs.operator_type != 'public'}}
         shell: bash
         env:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
