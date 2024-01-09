@@ -57,15 +57,12 @@ on:
       gcp_project:
         description: 'The name of the GCP project'
         type: string
-        required: true
       gcp_service_account:
         description: 'The GCP service account'
         type: string
-        required: true
       gcp_workload_identity_provider_id:
         description: 'The GCP workload identity provider id'
         type: string
-        required: true
       uid2_e2e_identity_scope:
         description: 'Environment variable to run the E2E test'
         required: false
