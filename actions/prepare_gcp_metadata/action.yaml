@@ -1,0 +1,75 @@
+name: Prepare GCP Metadata
+inputs:
+  operator_image_version:
+    description: 'The version of UID2 operator image'
+    type: string
+    default: 'latest'
+  admin_root:
+    description: 'The root path for uid2-admin folder'
+    type: string
+    default: '../uid2-admin'
+  gcp_service_account:
+    description: 'The GCP service account'
+    type: string
+    required: true
+  gcp_workload_identity_provider_id:
+    description: 'The GCP workload identity provider id'
+    type: string
+    required: true
+  gcp_registry:
+    description: 'The GCP docker registry'
+    type: string
+    default: us-docker.pkg.dev
+outputs:
+  operator_key:
+    description: 'Operator key'
+    value: ${{ steps.metadata.outputs.OPERATOR_KEY }}
+  image_hash:
+    description: 'The operator image hash of the operator image version'
+    value: ${{ steps.get_digest.outputs.IMAGE_HASH }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Authenticate with Google Cloud
+      id: gcp_auth
+      uses: google-github-actions/auth@v2
+      with:
+        token_format: access_token
+        workload_identity_provider: ${{ inputs.gcp_workload_identity_provider_id }}
+        service_account: ${{ inputs.gcp_service_account }}
+        access_token_lifetime: 1200s
+
+    - name: Set up Cloud SDK
+      uses: 'google-github-actions/setup-gcloud@v1'
+    
+    - name: Log in to the GCP Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.gcp_registry }}
+        username: oauth2accesstoken
+        password: ${{ steps.gcp_auth.outputs.access_token }}
+
+    - name: Get Image Digest
+      id: get_digest
+      shell: bash
+      run: |
+        IMAGE_NAME="us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator"
+        IMAGE_TAG="${{ inputs.operator_image_version }}"
+
+        # Pull the image to make sure it's available locally
+        docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
+
+        # Get the digest
+        IMAGE_HASH=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2)
+        echo "::set-output name=image_hash::${IMAGE_HASH}"
+
+    - name: Prepare GCP enclave metadata
+      id: metadata
+      shell: bash
+      env:
+        IMAGE_HASH: ${{ steps.get_digest.outputs.image_hash }}
+        ADMIN_ROOT: ${{ inputs.admin_root }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_metadata.sh
+

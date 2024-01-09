@@ -1,0 +1,54 @@
+name: Start GCP Private Operator
+inputs:
+  bore_url_core:
+    description: 'The bore url for core service'
+    type: string
+    required: true
+  bore_url_optout:
+    description: 'The bore url for optout service'
+    type: string
+    required: true
+  bore_url_localstack:
+    description: 'The bore url for localstack service'
+    type: string
+    required: true
+  gcp_project:
+    description: 'The name of the GCP project'
+    type: string
+    required: true
+  gcp_service_account:
+    description: 'The GCP service account'
+    type: string
+    required: true
+  image_hash:
+    description: 'The operator image hash of the operator image version'
+    type: string
+    required: true
+  operator_key:
+    description: 'Operator key'
+    type: string
+    required: true
+outputs:
+  gcp_instance_name:
+    description: 'GCP instance name'
+    value: ${{ steps.start_gcp.outputs.GCP_INSTANCE_NAME }}
+  uid2_e2e_pipeline_operator_url:
+    description: 'The GCP operator url'
+    value: ${{ steps.start_gcp.outputs.uid2_e2e_pipeline_operator_url }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Start GCP private operator
+      id: start_gcp
+      shell: bash
+      env:
+        GCP_PROJECT: ${{ inputs.gcp_project }}
+        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        BORE_URL_LOCALSTACK: ${{ inputs.bore_url_localstack }}
+        OPERATOR_KEY: ${{ inputs.operator_key }}
+        IMAGE_HASH: ${{ inputs.image_hash }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/gcp/start_gcp_enclave.sh

@@ -51,29 +51,23 @@ on:
         type: string
         default: 'main'
       operator_type:
-        description: 'The type of operator [either public or private]'
+        description: 'The type of operator [either public or gcp or azure]'
         type: string
         default: 'public'
+      gcp_project:
+        description: 'The name of the GCP project'
+        type: string
+      gcp_service_account:
+        description: 'The GCP service account'
+        type: string
+      gcp_workload_identity_provider_id:
+        description: 'The GCP workload identity provider id'
+        type: string
       uid2_e2e_identity_scope:
         description: 'Environment variable to run the E2E test'
         required: false
         type: string
         default: 'UID2'
-      uid2_e2e_pipeline_operator_type:
-        description: 'Environment variable to run the E2E test'
-        required: false
-        type: string
-        default: 'PUBLIC'
-      uid2_e2e_pipeline_operator_url:
-        description: 'Environment variable to run the E2E test'
-        required: false
-        type: string
-        default: 'http://publicoperator:8080'
-      uid2_e2e_pipeline_operator_cloud_provider:
-        description: 'Environment variable to run the E2E test'
-        required: false
-        type: string
-        default: 'PUBLIC'
       uid2_e2e_phone_support:
         description: 'Environment variable to run the E2E test'
         required: false
@@ -133,7 +127,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v3
         with:
-          ref: v2.7
+          ref: v2
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -142,6 +136,26 @@ jobs:
         with:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
+
+      - name: Create docker network
+        run: |
+          docker network create e2e_default
+
+      - name: Bring up bore
+        id: bore
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
+        run: |
+          cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
+
+      - name: Prepare GCP metadata
+        id: prepare_gcp_metadata
+        if: ${{ inputs.operator_type == 'gcp'}}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+          gcp_service_account: ${{ inputs.gcp_service_account }}
+          gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
 
       - name: Bring up docker compose
         id: docker-compose
@@ -155,11 +169,64 @@ jobs:
           OPERATOR_VERSION: ${{ inputs.operator_image_version }}
           E2E_VERSION: ${{ inputs.e2e_image_version }}
           OPERATOR_TYPE: ${{ inputs.operator_type }}
+          BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/prepare-resources-for-e2e-docker-compose.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
+
+      - name: Start GCP private operator
+        id: start_gcp_private_operator
+        if: ${{ inputs.operator_type == 'gcp'}}
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
+        with:
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+          gcp_project: ${{ inputs.gcp_project }}
+          gcp_service_account: ${{ inputs.gcp_service_account }}
+          image_hash: ${{ steps.prepare_gcp_metadata.outputs.image_hash }}
+          operator_key: ${{ steps.prepare_gcp_metadata.outputs.operator_key }}
+
+      - name: Decide E2E test environment variables
+        id: decide_env_var
+        shell: bash
+        env:
+          OPERATOR_TYPE: ${{ inputs.operator_type }}
+          OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+        run: |
+          if [ -z "$GITHUB_OUTPUT" ]; then
+            echo "not in github action"
+          elif [ -z "$OPERATOR_TYPE" ]; then
+            echo "$OPERATOR_TYPE not set"
+          elif [ "$OPERATOR_TYPE" == "public" ]; then
+            echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
+          else
+            echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_operator_url=$OPERATOR_URL" >> $GITHUB_OUTPUT
+            if [ "$OPERATOR_TYPE" == "gcp" ]; then
+              echo "uid2_e2e_pipeline_operator_cloud_provider=GCP" >> $GITHUB_OUTPUT
+            elif [ "$OPERATOR_TYPE" == "azure" ]; then
+              echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> $GITHUB_OUTPUT
+            fi
+          fi
 
       - name: Run e2e tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2.7
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
+          uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
+          uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
+          uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
+
+      - name: Stop GCP private operator
+        if: ${{ inputs.operator_type == 'gcp'}}
+        env:
+          GCP_PROJECT: ${{ vars.GCP_PROJECT }}
+          SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
+        run: |
+          cd e2e && bash ../uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
