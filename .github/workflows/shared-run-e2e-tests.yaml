@@ -230,4 +230,4 @@ jobs:
           SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/stop_gcp_enclave.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh

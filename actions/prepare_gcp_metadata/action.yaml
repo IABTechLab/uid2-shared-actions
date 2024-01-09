@@ -71,5 +71,5 @@ runs:
         IMAGE_HASH: ${{ steps.get_digest.outputs.image_hash }}
         ADMIN_ROOT: ${{ inputs.admin_root }}
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/prepare_gcp_enclave_metadata.sh
+        cd e2e && bash ../uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_metadata.sh
 
