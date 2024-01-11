@@ -18,6 +18,7 @@ on:
         description: 'The root path for uid2-operator folder'
         type: string
         default: '../uid2-operator'
+
       operator_image_version:
         description: 'The version of UID2 operator image'
         type: string
@@ -34,26 +35,29 @@ on:
         description: 'The version of E2E image'
         type: string
         default: 'latest'
+
       core_branch:
-        description: 'The branch of UID2-core to test on'
+        description: 'The branch of uid2-core to test on'
         type: string
         default: 'main'
       optout_branch:
-        description: 'The branch of UID2-optout to test on'
+        description: 'The branch of uid2-optout to test on'
         type: string
         default: 'main'
       admin_branch:
-        description: 'The branch of UID2-admin to test on'
+        description: 'The branch of uid2-admin to test on'
         type: string
         default: 'main'
       operator_branch:
-        description: 'The branch of UID2-operator to test on'
+        description: 'The branch of uid2-operator to test on'
         type: string
         default: 'main'
+
       operator_type:
         description: 'The type of operator [either public or gcp or azure]'
         type: string
         default: 'public'
+
       gcp_project:
         description: 'The name of the GCP project'
         type: string
@@ -63,6 +67,7 @@ on:
       gcp_workload_identity_provider_id:
         description: 'The GCP workload identity provider id'
         type: string
+
       uid2_e2e_identity_scope:
         description: 'Environment variable to run the E2E test'
         required: false
@@ -137,7 +142,7 @@ jobs:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
-      - name: Create docker network
+      - name: Create Docker network
         run: |
           docker network create e2e_default
 
@@ -157,7 +162,7 @@ jobs:
           gcp_service_account: ${{ inputs.gcp_service_account }}
           gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
 
-      - name: Bring up docker compose
+      - name: Bring up Docker Compose
         id: docker-compose
         env:
           CORE_ROOT: ${{ inputs.core_root }}
