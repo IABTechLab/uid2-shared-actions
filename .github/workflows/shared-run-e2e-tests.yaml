@@ -63,9 +63,6 @@ on:
       gcp_workload_identity_provider_id:
         description: 'The GCP workload identity provider id'
         type: string
-      azure_credentials:
-        description: 'The Azure credentials'
-        type: string
       uid2_e2e_identity_scope:
         description: 'Environment variable to run the E2E test'
         required: false
@@ -210,7 +207,7 @@ jobs:
           output_template_file: ${{ steps.prepare_azure_metadata.outputs.output_template_file }}
           output_parameters_file: ${{ steps.prepare_azure_metadata.outputs.output_parameters_file }}
           operator_key: ${{ steps.prepare_azure_metadata.outputs.operator_key }}
-          azure_credentials: ${{ inputs.azure_credentials }}
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var

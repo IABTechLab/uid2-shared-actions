@@ -39,10 +39,16 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Test
+      shell: bash
+      run: |
+        echo ${{ inputs.azure_credentials }}
+
     - name: Azure Login
       uses: azure/login@v1
       with:
         creds: ${{ inputs.azure_credentials }}
+        enable-AzPSSession: true
 
     - name: Start Azure private operator
       id: start_azure
