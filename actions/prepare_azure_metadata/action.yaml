@@ -1,0 +1,41 @@
+name: Prepare GCP Metadata
+inputs:
+  operator_image_version:
+    description: 'The version of UID2 operator image'
+    type: string
+    default: 'latest'
+  admin_root:
+    description: 'The root path for uid2-admin folder'
+    type: string
+    default: '../uid2-admin'
+outputs:
+  output_template_file:
+    description: 'Output template file'
+    value: ${{ steps.azure_artifacts.outputs.OUTPUT_TEMPLATE_FILE }}
+  output_parameters_file:
+    description: 'Output parameters file'
+    value: ${{ steps.azure_artifacts.outputs.OUTPUT_PARAMETERS_FILE }}
+  operator_key:
+    description: 'Operator key'
+    value: ${{ steps.azure_metadata.outputs.OPERATOR_KEY }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Generate Azure enclave deployment artifacts
+      id: azure_artifacts
+      shell: bash
+      env:
+        IMAGE_VERSION: ${{ inputs.operator_image_version }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/azure/prepare_azure_cc_artifacts.sh
+
+    - name: Prepare Azure enclave metadata
+      id: azure_metadata
+      shell: bash
+      env:
+        OUTPUT_POLICY_DIGEST_FILE: ${{ steps.azure_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
+        ADMIN_ROOT: ${{ inputs.admin_root }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/azure/prepare_azure_cc_enclave_metadata.sh
+

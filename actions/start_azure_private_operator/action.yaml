@@ -1,0 +1,56 @@
+name: Start Azure Private Operator
+inputs:
+  bore_url_core:
+    description: 'The bore url for core service'
+    type: string
+    required: true
+  bore_url_optout:
+    description: 'The bore url for optout service'
+    type: string
+    required: true
+  bore_url_localstack:
+    description: 'The bore url for localstack service'
+    type: string
+    required: true
+  output_template_file:
+    description: 'The output template file'
+    type: string
+    required: true
+  output_parameters_file:
+    description: 'The output parameters file'
+    type: string
+    required: true
+  operator_key:
+    description: 'Operator key'
+    type: string
+    required: true
+  azure_credentials:
+    description: 'The Azure credentials'
+    type: string
+    required: true
+outputs:
+  container_group_name:
+    description: 'Azure instance name'
+    value: ${{ steps.start_azure.outputs.CONTAINER_GROUP_NAME }}
+  uid2_e2e_pipeline_operator_url:
+    description: 'The Azure operator url'
+    value: ${{ steps.start_azure.outputs.uid2_e2e_pipeline_operator_url }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ inputs.azure_credentials }}
+
+    - name: Start Azure private operator
+      id: start_azure
+      shell: bash
+      env:
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        OUTPUT_TEMPLATE_FILE: ${{ inputs.output_template_file }}
+        OUTPUT_PARAMETERS_FILE: ${{ inputs.output_parameters_file }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/azure/start_azure_cc_enclave.sh
