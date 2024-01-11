@@ -1,5 +1,6 @@
-name: Checks the branch and release type
-description: 'Enforces that pre-release builds are done on a release branch and release builds are done on the default branch'
+name: Check Branch and Release Type
+description: Enforces that pre-release builds are done on a release branch and release builds are done on the default branch
+
 inputs:
   release_type:
     description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
@@ -7,6 +8,7 @@ inputs:
   force_release:
     description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
     default: 'branch'
+
 outputs:
   is_release: 
     description: True if a release should be created
@@ -14,6 +16,7 @@ outputs:
   not_snapshot:
     description: True if the release type is not a snapshot or pre-release build
     value: ${{ steps.checkRelease.outputs.NOT_SNAPSHOT }}
+
 runs:
   using: "composite" 
 

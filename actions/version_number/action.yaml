@@ -2,6 +2,7 @@ name: Get Version number
 description: Returns the version number to use as an output
 # This action uses Nerdbank.Gitversioning to determine the version number
 # Outputs a value: new_version that is the complete version number
+
 inputs:
   type:
     description: The type of version number to return. Must be one of Snapshot, Patch, Minor or Major
@@ -20,14 +21,16 @@ inputs:
     default: ''
   working_dir:
     description: The path to the directory for which the version should be determined.
-    type: string
     default: '.'
+
 outputs:
   new_version:
     description: The complete version number 
     value: ${{ steps.version.outputs.new_version }}
+
 runs:
   using: "composite"
+
   steps:
     - name: Update Major Version
       if: inputs.type == 'Major' && inputs.version_number == ''

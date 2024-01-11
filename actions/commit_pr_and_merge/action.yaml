@@ -1,4 +1,6 @@
-name: Commit, create PR, and merge it
+name: Commit, Create PR, and Merge
+description: Commits, creates a PR, and merges the PR
+
 inputs:
   message:
     description: 'Message for commit and PR title'
@@ -10,8 +12,10 @@ inputs:
   add:
     description: 'Comma- or newline-separated list of paths to add.'
     required: true
+
 runs:
   using: "composite"
+
   steps:
     - name: Commit to new branch
       uses: EndBug/add-and-commit@v9

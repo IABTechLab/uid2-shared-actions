@@ -1,34 +1,40 @@
 name: Check Version
-description: 'Checks that the JAR file version has not already been released, and optionally must be a snapshot'
+description: Checks that the JAR file version has not already been released, and optionally must be a snapshot
 # This workflow checks that the version in the commit is valid. 
 # Valid meaning:
 # - Not Already Released
 # - Has -SNAPSHOT for now released workflows
+
 inputs:
   needs_snapshot:
-    description: 'If set to true, this version needs a -SNAPSHOT'
+    description: If set to true, this version needs a -SNAPSHOT
     required: true
+
 outputs:
   version:
-    description: 'The Version of the package'
+    description: The version of the package
     value: ${{ steps.version.outputs.jar_version }}
+
 runs:
   using: "composite" 
 
   steps:
-    - name: Get Jar Version
+    - name: Get JAR version
       id: version
       shell: bash
       run: echo "jar_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_OUTPUT
-    - name: Check if Version has Snapshot
+
+    - name: Check if version has Snapshot
       if: ${{ inputs.needs_snapshot == 'true' }}
       shell: bash
       run: grep -q "\-SNAPSHOT" <<< "${{ steps.version.outputs.jar_version }}"
-    - name: Check if Version has no Snapshot
+
+    - name: Check if version has no Snapshot
       if: ${{ inputs.needs_snapshot == 'false' }}
       shell: bash
       run: grep -vq "\-SNAPSHOT" <<< "${{ steps.version.outputs.jar_version }}"
-    - name: Check if Version is released
+
+    - name: Check if version is released
       shell: bash
       run: |
         export VERSION=${{ steps.version.outputs.jar_version }}

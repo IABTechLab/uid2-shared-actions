@@ -1,35 +1,34 @@
 name: Prepare GCP Metadata
+description: Prepares the GCP enclave metadata
+
 inputs:
   operator_image_version:
-    description: 'The version of UID2 operator image'
-    type: string
+    description: The version of UID2 operator image
     default: 'latest'
   admin_root:
-    description: 'The root path for uid2-admin folder'
-    type: string
-    default: '../uid2-admin'
+    description: The root path for uid2-admin folder
+    default: ../uid2-admin
   gcp_service_account:
-    description: 'The GCP service account'
-    type: string
+    description: The GCP service account
     required: true
   gcp_workload_identity_provider_id:
-    description: 'The GCP workload identity provider id'
-    type: string
+    description: The GCP workload identity provider id
     required: true
   gcp_registry:
-    description: 'The GCP docker registry'
-    type: string
+    description: The GCP docker registry
     default: us-docker.pkg.dev
+
 outputs:
   operator_key:
-    description: 'Operator key'
+    description: The operator key
     value: ${{ steps.metadata.outputs.OPERATOR_KEY }}
   image_hash:
-    description: 'The operator image hash of the operator image version'
+    description: The operator image hash of the operator image version
     value: ${{ steps.get_digest.outputs.IMAGE_HASH }}
 
 runs:
   using: "composite"
+
   steps:
     - name: Authenticate with Google Cloud
       id: gcp_auth
@@ -72,4 +71,3 @@ runs:
         ADMIN_ROOT: ${{ inputs.admin_root }}
       run: |
         cd e2e && bash ../uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_metadata.sh
-
