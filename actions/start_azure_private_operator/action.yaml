@@ -39,11 +39,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Test
-      shell: bash
-      run: |
-        echo ${{ inputs.azure_credentials }}
-
     - name: Azure Login
       uses: azure/login@v1
       with:
