@@ -1,0 +1,16 @@
+name: 'Update major version tags'
+
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  update-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update major version
+        uses: IABTechLab/uid2-shared-actions/actions/update-major-version-tag@latest
+        continue-on-error: true
+        with:
+          version: ${{ github.event.release.tag_name }}
