@@ -1,0 +1,81 @@
+name: Update major version tag
+inputs:
+  version:
+    description: 'The full version number of the release'
+    required: true
+  sha:
+    description: 'The SHA of the commit to point the major version tag to. If not provided, it will be looked up from the tag matching the version.'
+    required: false
+    default: ''
+outputs:
+  updated_tag:
+    description: 'The tag updated (or created) by the script'
+    value: ${{ steps.updateTag.outputs.updated_tag }}
+runs:
+  using: "composite"
+  steps:
+    - name: Update major version tag
+      id: updateTag
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const inputVersion = `${{ inputs.version }}`;
+          const inputSha = `${{ inputs.sha }}`;
+          const match = /^(v\d+)\.\d[\d\.]*$/.exec(inputVersion);
+          if (match == null) {
+              console.log('Unable to match a valid SEMVER string in input version.');
+          }
+          else {
+              const majorVersion = match[1];
+              let targetSha = inputSha;
+              if (!targetSha) {
+                  console.log(`SHA not provided, looking up tag ${inputVersion}...`);
+                  try {
+                      const releaseRef = (await github.rest.git.getRef({
+                          owner: `UnifiedID2`,
+                          repo: `github-testing`,
+                          ref: `tags/${inputVersion}`,
+                      })).data;
+                      targetSha = releaseRef.object.sha;
+                  }
+                  catch (error) {
+                      console.log(`Could not find a tag for ${inputVersion}, cannot continue.`);
+                      throw Error();
+                  }
+              }
+              try {
+                  console.log(`Checking for existing tag ${majorVersion}...`);
+                  const existingRef = (await github.rest.git.getRef({
+                      owner: `UnifiedID2`,
+                      repo: `github-testing`,
+                      ref: `tags/${majorVersion}`,
+                  })).data;
+                  if (existingRef.object.sha == targetSha) {
+                      console.log(`Found existing tag ${majorVersion} already matching SHA ${targetSha}, nothing to update.`);
+                  }
+                  else {
+                      console.log(`Found existing tag ${majorVersion} at ${existingRef.object.sha}, updating it to ${targetSha}.`);
+                      await github.rest.git.updateRef({
+                          owner: `UnifiedID2`,
+                          repo: `github-testing`,
+                          ref: `tags/${majorVersion}`,
+                          sha: targetSha
+                      });
+                      console.log('Complete.')
+                      core.setOutput('updated_tag', majorVersion);
+                  }
+              } catch (error) {
+                  console.log(`No existing tag ${majorVersion}, creating it at ${targetSha}.`)
+                  if (error.status == 404) {
+                      await github.rest.git.createRef({
+                          owner: `UnifiedID2`,
+                          repo: `github-testing`,
+                          ref: `refs/tags/${majorVersion}`,
+                          sha: targetSha
+                      });
+                      console.log('Complete.')
+                      core.setOutput('updated_tag', majorVersion);
+                  }
+                  else throw error;
+              }
+          }
