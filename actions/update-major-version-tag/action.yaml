@@ -32,8 +32,8 @@ runs:
                   console.log(`SHA not provided, looking up tag ${inputVersion}...`);
                   try {
                       const releaseRef = (await github.rest.git.getRef({
-                          owner: `UnifiedID2`,
-                          repo: `github-testing`,
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
                           ref: `tags/${inputVersion}`,
                       })).data;
                       targetSha = releaseRef.object.sha;
@@ -46,8 +46,8 @@ runs:
               try {
                   console.log(`Checking for existing tag ${majorVersion}...`);
                   const existingRef = (await github.rest.git.getRef({
-                      owner: `UnifiedID2`,
-                      repo: `github-testing`,
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
                       ref: `tags/${majorVersion}`,
                   })).data;
                   if (existingRef.object.sha == targetSha) {
@@ -56,8 +56,8 @@ runs:
                   else {
                       console.log(`Found existing tag ${majorVersion} at ${existingRef.object.sha}, updating it to ${targetSha}.`);
                       await github.rest.git.updateRef({
-                          owner: `UnifiedID2`,
-                          repo: `github-testing`,
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
                           ref: `tags/${majorVersion}`,
                           sha: targetSha
                       });
@@ -68,8 +68,8 @@ runs:
                   console.log(`No existing tag ${majorVersion}, creating it at ${targetSha}.`)
                   if (error.status == 404) {
                       await github.rest.git.createRef({
-                          owner: `UnifiedID2`,
-                          repo: `github-testing`,
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
                           ref: `refs/tags/${majorVersion}`,
                           sha: targetSha
                       });
