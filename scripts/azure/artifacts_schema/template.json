@@ -49,6 +49,12 @@
       "metadata": {
         "description": "UID2 optout base url override"
       }
+    },
+    "enforceHttps": {
+      "type": "bool",
+      "metadata": {
+        "description": "Whether to use HTTPS to communicate with core and optout service"
+      }
     }
   },
   "resources": [
@@ -130,6 +136,10 @@
                 {
                   "name": "OPTOUT_BASE_URL",
                   "value": "[parameters('optoutBaseUrl')]"
+                },
+                {
+                  "name": "ENFORCE_HTTPS",
+                  "value": "[parameters('enforceHttps')]"
                 }
               ]
             }

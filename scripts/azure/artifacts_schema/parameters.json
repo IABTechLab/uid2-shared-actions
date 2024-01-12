@@ -25,6 +25,9 @@
     },
     "optoutBaseUrl": {
       "value": ""
+    },
+    "enforceHttps": {
+      "value": true
     }
   }
 }
