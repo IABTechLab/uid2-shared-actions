@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update major version
-        uses: IABTechLab/uid2-shared-actions/actions/update-major-version-tag@latest
+        uses: IABTechLab/uid2-shared-actions/actions/update-major-version-tag@v2
         continue-on-error: true
         with:
           version: ${{ github.event.release.tag_name }}
