@@ -254,7 +254,7 @@ jobs:
           cd e2e && bash ../uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
       - name: Stop Azure private operator
-        if: ${{ inputs.operator_type == 'azure'}}
+        if: always()
         env:
           CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.container_group_name }}
         run: |
