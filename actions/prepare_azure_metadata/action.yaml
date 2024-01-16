@@ -1,22 +1,22 @@
-name: Prepare GCP Metadata
+name: Prepare Azure Metadata
+description: Prepare for Azure artifacts and enclave metadata
 inputs:
   operator_image_version:
-    description: 'The version of UID2 operator image'
-    type: string
-    default: 'latest'
+    description: The version of UID2 operator image
+    default: latest
   admin_root:
-    description: 'The root path for uid2-admin folder'
+    description: The root path for uid2-admin folder
     type: string
-    default: '../uid2-admin'
+    default: ../uid2-admin
 outputs:
   output_template_file:
-    description: 'Output template file'
+    description: Output template file
     value: ${{ steps.azure_artifacts.outputs.OUTPUT_TEMPLATE_FILE }}
   output_parameters_file:
-    description: 'Output parameters file'
+    description: Output parameters file
     value: ${{ steps.azure_artifacts.outputs.OUTPUT_PARAMETERS_FILE }}
   operator_key:
-    description: 'Operator key'
+    description: Operator key
     value: ${{ steps.azure_metadata.outputs.OPERATOR_KEY }}
 
 runs:

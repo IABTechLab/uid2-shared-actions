@@ -1,39 +1,33 @@
 name: Start Azure Private Operator
+description: Start the Azure private operator with the core and optout instances
 inputs:
   bore_url_core:
-    description: 'The bore url for core service'
-    type: string
+    description: The bore url for core service
     required: true
   bore_url_optout:
-    description: 'The bore url for optout service'
-    type: string
+    description: The bore url for optout service
     required: true
   bore_url_localstack:
-    description: 'The bore url for localstack service'
-    type: string
+    description: The bore url for localstack service
     required: true
   output_template_file:
-    description: 'The output template file'
-    type: string
+    description: The output template file
     required: true
   output_parameters_file:
-    description: 'The output parameters file'
-    type: string
+    description: The output parameters file
     required: true
   operator_key:
-    description: 'Operator key'
-    type: string
+    description: Operator key
     required: true
   azure_credentials:
-    description: 'The Azure credentials'
-    type: string
+    description: The Azure credentials
     required: true
 outputs:
   container_group_name:
-    description: 'Azure instance name'
+    description: Azure instance name
     value: ${{ steps.start_azure.outputs.CONTAINER_GROUP_NAME }}
   uid2_e2e_pipeline_operator_url:
-    description: 'The Azure operator url'
+    description: The Azure operator url
     value: ${{ steps.start_azure.outputs.uid2_e2e_pipeline_operator_url }}
 
 runs:
