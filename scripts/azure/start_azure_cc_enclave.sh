@@ -90,4 +90,4 @@ echo "uid2_e2e_pipeline_operator_url=http://$ip:8080" >> $GITHUB_OUTPUT
 healthcheck_url="http://$ip:8080/ops/healthcheck"
 
 # health check - for 5 mins
-healthcheck "$healthcheck_url" 600
+healthcheck "$healthcheck_url" 60
