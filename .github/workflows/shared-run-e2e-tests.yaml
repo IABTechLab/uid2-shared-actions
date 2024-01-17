@@ -157,6 +157,14 @@ jobs:
           gcp_service_account: ${{ inputs.gcp_service_account }}
           gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
 
+      - name: Prepare Azure metadata
+        id: prepare_azure_metadata
+        if: ${{ inputs.operator_type == 'azure' }}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v2
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+
       - name: Bring up docker compose
         id: docker-compose
         env:
@@ -188,6 +196,17 @@ jobs:
           image_hash: ${{ steps.prepare_gcp_metadata.outputs.image_hash }}
           operator_key: ${{ steps.prepare_gcp_metadata.outputs.operator_key }}
 
+      - name: Start Azure private operator
+        id: start_azure_private_operator
+        if: ${{ inputs.operator_type == 'azure' }}
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v2
+        with:
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          output_template_file: ${{ steps.prepare_azure_metadata.outputs.output_template_file }}
+          output_parameters_file: ${{ steps.prepare_azure_metadata.outputs.output_parameters_file }}
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Decide E2E test environment variables
         id: decide_env_var
         shell: bash
@@ -205,11 +224,12 @@ jobs:
             echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
           else
             echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
-            echo "uid2_e2e_pipeline_operator_url=$OPERATOR_URL" >> $GITHUB_OUTPUT
             if [ "$OPERATOR_TYPE" == "gcp" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=GCP" >> $GITHUB_OUTPUT
+              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
             elif [ "$OPERATOR_TYPE" == "azure" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> $GITHUB_OUTPUT
+              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
             fi
           fi
 
@@ -230,3 +250,10 @@ jobs:
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+
+      - name: Stop Azure private operator
+        if: ${{ inputs.operator_type == 'azure' }}
+        env:
+          CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.container_group_name }}
+        run: |
+          cd e2e && bash ../uid2-shared-actions/scripts/azure/stop_azure_cc_enclave.sh

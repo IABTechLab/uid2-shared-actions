@@ -1,0 +1,45 @@
+name: Start Azure Private Operator
+description: Start the Azure private operator with the core and optout instances
+inputs:
+  bore_url_core:
+    description: The bore url for core service
+    required: true
+  bore_url_optout:
+    description: The bore url for optout service
+    required: true
+  output_template_file:
+    description: The output template file
+    required: true
+  output_parameters_file:
+    description: The output parameters file
+    required: true
+  azure_credentials:
+    description: The Azure credentials
+    required: true
+outputs:
+  container_group_name:
+    description: Azure instance name
+    value: ${{ steps.start_azure.outputs.CONTAINER_GROUP_NAME }}
+  uid2_e2e_pipeline_operator_url:
+    description: The Azure operator url
+    value: ${{ steps.start_azure.outputs.uid2_e2e_pipeline_operator_url }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ inputs.azure_credentials }}
+        enable-AzPSSession: true
+
+    - name: Start Azure private operator
+      id: start_azure
+      shell: bash
+      env:
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        OUTPUT_TEMPLATE_FILE: ${{ inputs.output_template_file }}
+        OUTPUT_PARAMETERS_FILE: ${{ inputs.output_parameters_file }}
+      run: |
+        cd e2e && bash ../uid2-shared-actions/scripts/azure/start_azure_cc_enclave.sh
