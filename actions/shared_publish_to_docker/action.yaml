@@ -11,6 +11,9 @@ inputs:
   not_snapshot:
     description: True if the release type is not a snapshot or pre-release build
     default: 'false'
+  github_token:
+    description: The github token to login to Docker container
+    required: true
 
 outputs:
   is_release:
@@ -26,7 +29,7 @@ runs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.github_token }}
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
@@ -39,6 +42,7 @@ runs:
 
     - name: Extract First Image Tag
       id: extractImageTag
+      shell: bash
       run: |
         FIRST_TAG=${DOCKER_METADATA_OUTPUT_TAGS%%$'\n'*}
         echo "firstTag=$FIRST_TAG" >> $GITHUB_OUTPUT
