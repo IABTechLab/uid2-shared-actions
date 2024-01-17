@@ -1,0 +1,56 @@
+name: Start AWS UID2 Private Operator
+description: Spins up an AWS UID2 private operator
+
+inputs:
+  bore_url_core:
+    description: The bore URL for core service
+    required: true
+  bore_url_optout:
+    description: The bore URL for optout service
+    required: true
+  aws_region:
+    description: The AWS region [us-east-1, us-west-1, ca-central-1]
+    required: true
+  aws_ami:
+    description: The AWS AMI ID
+    required: true
+  image_hash:
+    description: The operator image hash
+    required: true
+  operator_key:
+    description: The operator key
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Setup Python 3
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install Python dependencies
+      uses: py-actions/py-dependency-install@v4
+      with:
+        path: ./uid2-shared-actions/scripts/aws/requirements.txt
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: 'us-east-2'
+        role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-test
+    - run: aws sts get-caller-identity
+      shell: bash
+
+    - name: Create CloudFormation stack
+      shell: bash
+      env:
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        REGION: ${{ inputs.aws_region }}
+        AMI: ${{ inputs.aws_ami }}
+        OPERATOR_KEY: ${{ inputs.operator_key }}
+        IMAGE_HASH: ${{ inputs.image_hash }}
+      run: |
+        ./uid2-shared-actions/scripts/aws/start_aws_enclave.sh

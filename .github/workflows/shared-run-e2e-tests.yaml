@@ -1,78 +1,89 @@
-name: Run operator E2E tests
+name: Run Operator E2E Tests
 on:
   workflow_call:
     inputs:
       core_root:
-        description: 'The root path for uid2-core folder'
+        description: The root path for uid2-core folder
         type: string
-        default: '../uid2-core'
+        default: ../uid2-core
       optout_root:
-        description: 'The root path for uid2-optout folder'
+        description: The root path for uid2-optout folder
         type: string
-        default: '../uid2-optout'
+        default: ../uid2-optout
       admin_root:
-        description: 'The root path for uid2-admin folder'
+        description: The root path for uid2-admin folder
         type: string
-        default: '../uid2-admin'
+        default: ../uid2-admin
       operator_root:
-        description: 'The root path for uid2-operator folder'
+        description: The root path for uid2-operator folder
         type: string
-        default: '../uid2-operator'
+        default: ../uid2-operator
+
       operator_image_version:
-        description: 'The version of UID2 operator image'
+        description: The uid2-operator image version
         type: string
-        default: 'latest'
+        default: latest
       core_image_version:
-        description: 'The version of UID2 core image'
+        description: The uid2-core image version
         type: string
-        default: 'latest'
+        default: latest
       optout_image_version:
-        description: 'The version of UID2 optout image'
+        description: The uid2-optout image version
         type: string
-        default: 'latest'
+        default: latest
       e2e_image_version:
-        description: 'The version of E2E image'
+        description: The uid2-e2e image version
         type: string
-        default: 'latest'
+        default: latest
+
       core_branch:
-        description: 'The branch of UID2-core to test on'
+        description: The branch of uid2-core to test on
         type: string
-        default: 'main'
+        default: main
       optout_branch:
-        description: 'The branch of UID2-optout to test on'
+        description: The branch of uid2-optout to test on
         type: string
-        default: 'main'
+        default: main
       admin_branch:
-        description: 'The branch of UID2-admin to test on'
+        description: The branch of uid2-admin to test on
         type: string
-        default: 'main'
+        default: main
       operator_branch:
-        description: 'The branch of UID2-operator to test on'
+        description: The branch of uid2-operator to test on
         type: string
-        default: 'main'
+        default: main
+
       operator_type:
-        description: 'The type of operator [either public or gcp or azure]'
+        description: The operator type [public, gcp, azure, aws]
         type: string
-        default: 'public'
-      gcp_project:
-        description: 'The name of the GCP project'
-        type: string
-      gcp_service_account:
-        description: 'The GCP service account'
-        type: string
-      gcp_workload_identity_provider_id:
-        description: 'The GCP workload identity provider id'
-        type: string
+        default: public
       uid2_e2e_identity_scope:
-        description: 'Environment variable to run the E2E test'
+        description: Environment variable to run the E2E test for identity scope [UID2, EUID]
         required: false
         type: string
-        default: 'UID2'
+        default: UID2
       uid2_e2e_phone_support:
-        description: 'Environment variable to run the E2E test'
+        description: Environment variable to run the E2E test for phone support [true, false]
         required: false
         type: string
         default: 'true'
+
+      gcp_project:
+        description: The name of the GCP project
+        type: string
+      gcp_service_account:
+        description: The GCP service account
+        type: string
+      gcp_workload_identity_provider_id:
+        description: The GCP workload identity provider ID
+        type: string
+
+      aws_region:
+        description: The AWS region [us-east-1, us-west-1, ca-central-1]
+        type: string
+      aws_ami:
+        description: The AWS AMI ID
+        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -143,13 +154,13 @@ jobs:
 
       - name: Bring up bore
         id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' }}
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
 
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
-        if: ${{ inputs.operator_type == 'gcp'}}
+        if: ${{ inputs.operator_type == 'gcp' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
@@ -161,6 +172,14 @@ jobs:
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v2
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+
+      - name: Prepare AWS metadata
+        id: prepare_aws_metadata
+        if: ${{ inputs.operator_type == 'aws' }}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-2341-aws-test-pipeline
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -185,7 +204,7 @@ jobs:
 
       - name: Start GCP private operator
         id: start_gcp_private_operator
-        if: ${{ inputs.operator_type == 'gcp'}}
+        if: ${{ inputs.operator_type == 'gcp' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
@@ -206,6 +225,18 @@ jobs:
           output_template_file: ${{ steps.prepare_azure_metadata.outputs.output_template_file }}
           output_parameters_file: ${{ steps.prepare_azure_metadata.outputs.output_parameters_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Start AWS UID2 private operator
+        id: start_aws_uid2_private_operator
+        if: ${{ inputs.operator_type == 'aws' }}
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-2341-aws-test-pipeline
+        with:
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          aws_region: ${{ inputs.aws_region }}
+          aws_ami: ${{ inputs.aws_ami }}
+          image_hash: ${{ steps.prepare_aws_metadata.outputs.image_hash }}
+          operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
