@@ -16,7 +16,6 @@ enclave_str="V1,true,$IMAGE_HASH"
 echo "enclave_str=$enclave_str"
 enclave_id=$(echo -n $enclave_str | openssl dgst -sha256 -binary | openssl base64)
 
-
 # fetch operator key
 OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="gcp-oidc") | .key' $OPERATOR_FILE)
 
