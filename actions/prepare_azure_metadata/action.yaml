@@ -15,9 +15,6 @@ outputs:
   output_parameters_file:
     description: Output parameters file
     value: ${{ steps.azure_artifacts.outputs.OUTPUT_PARAMETERS_FILE }}
-  operator_key:
-    description: Operator key
-    value: ${{ steps.azure_metadata.outputs.OPERATOR_KEY }}
 
 runs:
   using: "composite"

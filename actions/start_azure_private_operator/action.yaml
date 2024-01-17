@@ -7,17 +7,11 @@ inputs:
   bore_url_optout:
     description: The bore url for optout service
     required: true
-  bore_url_localstack:
-    description: The bore url for localstack service
-    required: true
   output_template_file:
     description: The output template file
     required: true
   output_parameters_file:
     description: The output parameters file
-    required: true
-  operator_key:
-    description: Operator key
     required: true
   azure_credentials:
     description: The Azure credentials

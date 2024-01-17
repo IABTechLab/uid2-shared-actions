@@ -23,11 +23,4 @@ OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="azure-cc") | .key' $OPERATOR_FILE
 # update azure-cc enclave id
 cat <<< $(jq '(.[] | select(.protocol=="azure-cc") | .identifier) |='\"$enclave_id\"'' $ENCLAVE_FILE) > $ENCLAVE_FILE
 
-# export to Github output
 echo "OPERATOR_KEY=$OPERATOR_KEY"
-
-if [ -z "$GITHUB_OUTPUT" ]; then
-  echo "not in github action"
-else
-  echo "OPERATOR_KEY=$OPERATOR_KEY" >> $GITHUB_OUTPUT
-fi

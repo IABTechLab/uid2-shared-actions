@@ -203,10 +203,8 @@ jobs:
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
           output_template_file: ${{ steps.prepare_azure_metadata.outputs.output_template_file }}
           output_parameters_file: ${{ steps.prepare_azure_metadata.outputs.output_parameters_file }}
-          operator_key: ${{ steps.prepare_azure_metadata.outputs.operator_key }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Decide E2E test environment variables
