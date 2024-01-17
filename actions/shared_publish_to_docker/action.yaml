@@ -1,0 +1,55 @@
+name: Shared publish to Docker
+description: Shared action for publish image to Docker
+
+inputs:
+  version_number_input:
+    description: The version number to publish for the docker repo
+    default: ''
+  image_tag:
+    description: The image tag used to extract metadata for Docker
+    default: ''
+  not_snapshot:
+    description: True if the release type is not a snapshot or pre-release build
+    default: 'false'
+
+outputs:
+  is_release:
+    description: Whether this workflow is a release type
+    value: ${{ steps.checkRelease.outputs.IS_RELEASE }}
+
+runs:
+  using: "composite" 
+
+  steps:
+    - name: Log in to the Docker container registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=raw,value=${{ inputs.image_tag }}
+          type=raw,value=${{ inputs.not_snapshot == 'true' && 'latest' || '' }}
+
+    - name: Extract First Image Tag
+      id: extractImageTag
+      run: |
+        FIRST_TAG=${DOCKER_METADATA_OUTPUT_TAGS%%$'\n'*}
+        echo "firstTag=$FIRST_TAG" >> $GITHUB_OUTPUT
+
+    - name: Build and export to Docker
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        load: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          JAR_VERSION=${{ inputs.version_number_input }}
+          IMAGE_VERSION=${{ inputs.version_number_input }}
