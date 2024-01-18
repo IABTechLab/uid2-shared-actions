@@ -9,7 +9,7 @@ on:
       publish_vulnerabilities:
         description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
         type: string
-        default: 'true'
+        default: true
       version_number_input:
         description: The version number to publish for the docker repo
         type: string
@@ -59,45 +59,6 @@ jobs:
           not_snapshot: ${{ steps.setup.outputs.not_snapshot }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           docker_file: ${{ inputs.docker_file }}
-
-      # - name: Generate Trivy vulnerability scan report
-      #   uses: aquasecurity/trivy-action@0.14.0
-      #   if: inputs.publish_vulnerabilities == 'true'
-      #   with:
-      #     image-ref: ${{ steps.extractImageTag.outputs.firstTag }}
-      #     format: 'sarif'
-      #     exit-code: '0'
-      #     ignore-unfixed: true
-      #     severity: 'CRITICAL,HIGH'
-      #     output: 'trivy-results.sarif'
-      #     hide-progress: true
-
-      # - name: Upload Trivy scan report to GitHub Security tab
-      #   uses: github/codeql-action/upload-sarif@v2
-      #   if: inputs.publish_vulnerabilities == 'true'
-      #   with:
-      #     sarif_file: 'trivy-results.sarif'
-
-      # - name: Test with Trivy vulnerability scanner
-      #   uses: aquasecurity/trivy-action@0.14.0
-      #   with:
-      #     image-ref: ${{ steps.extractImageTag.outputs.firstTag }}
-      #     format: 'table'
-      #     exit-code: '1'
-      #     ignore-unfixed: true
-      #     severity: 'CRITICAL'
-      #     hide-progress: true
-
-      # - name: Push to Docker
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: .
-      #     push: true
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
-      #     build-args: |
-      #       JAR_VERSION=${{ inputs.version_number_input }}
-      #       IMAGE_VERSION=${{ inputs.version_number_input }}
 
       # - name: Build Changelog
       #   id: github_release
