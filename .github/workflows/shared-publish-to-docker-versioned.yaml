@@ -30,13 +30,6 @@ on:
         description: The docker registry
         required: true
         type: string
-    # outputs:
-    #   version_number_output:
-    #     description: The complete version number 
-    #     value: ${{ jobs.buildImage.outputs.jar_version }}
-    #   image_tag:
-    #     description: The tag used to describe the image in docker
-    #     value: ${{ jobs.buildImage.outputs.image_tag }}
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
