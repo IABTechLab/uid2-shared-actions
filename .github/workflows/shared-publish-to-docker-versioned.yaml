@@ -50,12 +50,53 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
         with:
           release_type: ${{ inputs.release_type }}
+      
+      - name: Checkout uid2-shared-actions repo
+        uses: actions/checkout@v3
+        with:
+          ref: kcc-UID2-2674-implement-shared-publish-to-docker-versioned
+          repository: IABTechLab/uid2-shared-actions
+          path: uid2-shared-actions
+
+      - name: Set version number
+        id: version
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@main
+        with:
+          type: ${{ inputs.release_type }}
+          version_number: ${{ inputs.version_number_input }}
+          branch_name: ${{ github.ref }}
+
+      - name: Update package.json
+        id: updatePackageJson
+        run: |
+          ls -al
+          source "uid2-shared-actions/scripts/jq_helper.sh"
+          current_version=$(jq -r '.version')
+          new_version=${{ steps.version.outputs.new_version }}
+          jq_string_update package.json version $new_version
+          echo "Version number updated from $current_version to $new_version"
+          echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
+
+      - name: Commit package.json
+        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        with:
+          add: 'package.json'
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+
+      - name: Commit package.json and set tag
+        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        with:
+          add: 'package.json'
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          tag: v${{ steps.version.outputs.new_version }}
 
       - name: Publish to Docker
         id: publishToDocker
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
         with:
-          image_tag: ${{ inputs.version_number_input }}
+          image_tag: ${{ steps.updatePackageJson.image_tag }}
           not_snapshot: ${{ steps.setup.outputs.not_snapshot }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           docker_file: ${{ inputs.docker_file }}
@@ -67,5 +108,5 @@ jobs:
           is_release: ${{ steps.setup.outputs.is_release }}
           version_number_input: ${{ inputs.version_number_input }}
           tags: ${{ steps.publishToDocker.outputs.tags }}
-          image_tag: ${{ inputs.version_number_input }}
+          image_tag: ${{ steps.updatePackageJson.image_tag }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
