@@ -96,6 +96,7 @@ jobs:
         id: publishToDocker
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
         with:
+          new_version: ${{ steps.version.outputs.new_version }}
           image_tag: ${{ steps.updatePackageJson.image_tag }}
           not_snapshot: ${{ steps.setup.outputs.not_snapshot }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
