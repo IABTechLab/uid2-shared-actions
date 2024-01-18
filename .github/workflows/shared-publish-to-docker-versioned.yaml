@@ -97,7 +97,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
         with:
           new_version: ${{ steps.version.outputs.new_version }}
-          image_tag: ${{ steps.updatePackageJson.image_tag }}
+          image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
           not_snapshot: ${{ steps.setup.outputs.not_snapshot }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           docker_file: ${{ inputs.docker_file }}
@@ -109,5 +109,5 @@ jobs:
           is_release: ${{ steps.setup.outputs.is_release }}
           version_number_input: ${{ inputs.version_number_input }}
           tags: ${{ steps.publishToDocker.outputs.tags }}
-          image_tag: ${{ steps.updatePackageJson.image_tag }}
+          image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
