@@ -18,6 +18,10 @@ on:
         description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
         type: string
         default: 'branch'
+      docker_file:
+        description: The Dockerfile used to build and publish Docker image
+        type: string
+        default: ''
     # outputs:
     #   version_number_output:
     #     description: The complete version number 
@@ -54,6 +58,7 @@ jobs:
           image_tag: ${{ inputs.version_number_input }}
           not_snapshot: ${{ steps.setup.outputs.not_snapshot }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          docker_file: ${{ inputs.docker_file }}
 
       # - name: Generate Trivy vulnerability scan report
       #   uses: aquasecurity/trivy-action@0.14.0
