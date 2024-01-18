@@ -60,24 +60,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           docker_file: ${{ inputs.docker_file }}
 
-      # - name: Build Changelog
-      #   id: github_release
-      #   if: ${{ steps.setup.outputs.is_release == 'true' }}
-      #   uses: mikepenz/release-changelog-builder-action@v3
-      #   with:
-      #     toTag: v${{ inputs.version_number_input }}
-      #     configurationJson: |
-      #       {
-      #         "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ steps.meta.outputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ steps.updatePom.outputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
-      #         "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
-      #       }
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Create Release
-      #   if: ${{ steps.setup.outputs.is_release == 'true' }}
-      #   uses: softprops/action-gh-release@v1
-      #   with:
-      #     name: ${{ inputs.version_number_input }}
-      #     body: ${{ steps.github_release.outputs.changelog }}
-      #     draft: true
+      - name: Create Release
+        id: github_release
+        uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
+        with:
+          is_release: ${{ steps.setup.outputs.is_release }}
+          version_number_input: ${{ inputs.version_number_input }}
+          tags: ${{ steps.publishToDocker.outputs.tags }}
+          image_tag: ${{ inputs.version_number_input }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

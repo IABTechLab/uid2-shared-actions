@@ -23,9 +23,9 @@ inputs:
     default: true
 
 outputs:
-  is_release:
-    description: Whether this workflow is a release type
-    value: ${{ steps.checkRelease.outputs.IS_RELEASE }}
+  tags:
+    description: The docker image tags
+    value: ${{ steps.meta.outputs.tags }}
 
 runs:
   using: "composite" 
