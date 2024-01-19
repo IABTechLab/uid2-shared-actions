@@ -27,7 +27,7 @@ runs:
       env:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
       run: |
-        bash ./uid2-shared-actions/scripts/azure/prepare_azure_cc_artifacts.sh
+        bash ./uid2-shared-actions/scripts/azure/prepare_azure_artifacts.sh
 
     - name: Prepare Azure enclave ID
       id: enclave_id
@@ -35,7 +35,7 @@ runs:
       env:
         OUTPUT_POLICY_DIGEST_FILE: ${{ steps.azure_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
       run: |
-        bash ./uid2-shared-actions/scripts/azure/prepare_azure_cc_enclave_metadata.sh
+        bash ./uid2-shared-actions/scripts/azure/prepare_azure_enclave_metadata.sh
 
     - name: Prepare Azure enclave metadata
       id: enclave_metadata
