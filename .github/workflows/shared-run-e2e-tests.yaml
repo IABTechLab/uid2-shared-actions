@@ -127,7 +127,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v3
         with:
-          ref: v2
+          ref: tjm-UID2-2592-rename-azure-image
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
