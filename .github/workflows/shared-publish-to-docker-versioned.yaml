@@ -48,13 +48,6 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
         with:
           release_type: ${{ inputs.release_type }}
-      
-      - name: Checkout uid2-shared-actions repo
-        uses: actions/checkout@v3
-        with:
-          ref: kcc-UID2-2674-implement-shared-publish-to-docker-versioned
-          repository: IABTechLab/uid2-shared-actions
-          path: uid2-shared-actions
 
       - name: Set version number
         id: version
@@ -67,11 +60,9 @@ jobs:
       - name: Update package.json
         id: updatePackageJson
         run: |
-          ls -al
-          source "uid2-shared-actions/scripts/jq_helper.sh"
           current_version=$(jq -r '.version')
           new_version=${{ steps.version.outputs.new_version }}
-          jq_string_update package.json version $new_version
+          jq --argjson v $new_version ".version = \$v" package.json > tmp.json && mv tmp.json package.json
           echo "Version number updated from $current_version to $new_version"
           echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
 
