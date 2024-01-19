@@ -1,26 +1,20 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="."
-METADATA_ROOT="$ADMIN_ROOT/src/main/resources/localstack/s3/core"
-OPERATOR_FILE="$METADATA_ROOT/operators/operators.json"
-ENCLAVE_FILE="$METADATA_ROOT/enclaves/enclaves.json"
-
-if [[ ! -f $OUTPUT_POLICY_DIGEST_FILE ]]; then
+if [[ ! -f ${OUTPUT_POLICY_DIGEST_FILE} ]]; then
   echo "OUTPUT_POLICY_DIGEST_FILE does not exist"
   exit 1
 fi
 
-AZURE_CC_POLICY_DIGEST="$(cat $OUTPUT_POLICY_DIGEST_FILE)"
+AZURE_POLICY_DIGEST="$(cat ${OUTPUT_POLICY_DIGEST_FILE})"
+echo "AZURE_POLICY_DIGEST=${AZURE_POLICY_DIGEST}"
 
-echo "AZURE_CC_POLICY_DIGEST=$AZURE_CC_POLICY_DIGEST"
+ENCLAVE_ID=${AZURE_POLICY_DIGEST}
+echo "ENCLAVE_ID=${ENCLAVE_ID}"
 
-enclave_id=$AZURE_CC_POLICY_DIGEST
-
-# fetch operator key
-OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="azure-cc") | .key' $OPERATOR_FILE)
-
-# update azure-cc enclave id
-cat <<< $(jq '(.[] | select(.protocol=="azure-cc") | .identifier) |='\"$enclave_id\"'' $ENCLAVE_FILE) > $ENCLAVE_FILE
-
-echo "OPERATOR_KEY=$OPERATOR_KEY"
+# export to Github output
+if [ -z "${GITHUB_OUTPUT}" ]; then
+  echo "not in GitHub action"
+else
+  echo "ENCLAVE_ID=${ENCLAVE_ID}" >> ${GITHUB_OUTPUT}
+fi

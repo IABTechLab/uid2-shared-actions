@@ -148,7 +148,7 @@ jobs:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
-      - name: Create docker network
+      - name: Create Docker network
         run: |
           docker network create e2e_default
 
@@ -184,7 +184,7 @@ jobs:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
 
-      - name: Bring up docker compose
+      - name: Bring up Docker Compose
         id: docker-compose
         env:
           CORE_ROOT: ${{ inputs.core_root }}

@@ -1,35 +1,34 @@
 name: Prepare GCP Metadata
+description: Prepares the GCP OIDC enclave metadata
+
 inputs:
   operator_image_version:
-    description: 'The version of UID2 operator image'
-    type: string
-    default: 'latest'
+    description: The uid2-operator image version
+    default: latest
   admin_root:
-    description: 'The root path for uid2-admin folder'
-    type: string
-    default: '../uid2-admin'
+    description: The root path for uid2-admin folder
+    default: ../uid2-admin
   gcp_service_account:
-    description: 'The GCP service account'
-    type: string
+    description: The GCP service account
     required: true
   gcp_workload_identity_provider_id:
-    description: 'The GCP workload identity provider id'
-    type: string
+    description: The GCP workload identity provider id
     required: true
   gcp_registry:
-    description: 'The GCP docker registry'
-    type: string
+    description: The GCP docker registry
     default: us-docker.pkg.dev
+
 outputs:
-  operator_key:
-    description: 'Operator key'
-    value: ${{ steps.metadata.outputs.OPERATOR_KEY }}
   image_hash:
-    description: 'The operator image hash of the operator image version'
-    value: ${{ steps.get_digest.outputs.IMAGE_HASH }}
+    description: The operator image hash
+    value: ${{ steps.image_digest.outputs.IMAGE_HASH }}
+  operator_key:
+    description: The operator key
+    value: ${{ steps.enclave_metadata.outputs.OPERATOR_KEY }}
 
 runs:
   using: "composite"
+
   steps:
     - name: Authenticate with Google Cloud
       id: gcp_auth
@@ -41,8 +40,8 @@ runs:
         access_token_lifetime: 1200s
 
     - name: Set up Cloud SDK
-      uses: 'google-github-actions/setup-gcloud@v1'
-    
+      uses: google-github-actions/setup-gcloud@v1
+
     - name: Log in to the GCP Registry
       uses: docker/login-action@v3
       with:
@@ -50,8 +49,8 @@ runs:
         username: oauth2accesstoken
         password: ${{ steps.gcp_auth.outputs.access_token }}
 
-    - name: Get Image Digest
-      id: get_digest
+    - name: Get image digest
+      id: image_digest
       shell: bash
       run: |
         IMAGE_NAME="us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator"
@@ -64,12 +63,20 @@ runs:
         IMAGE_HASH=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2)
         echo "::set-output name=image_hash::${IMAGE_HASH}"
 
-    - name: Prepare GCP enclave metadata
-      id: metadata
+    - name: Prepare GCP enclave ID
+      id: enclave_id
       shell: bash
       env:
-        IMAGE_HASH: ${{ steps.get_digest.outputs.image_hash }}
-        ADMIN_ROOT: ${{ inputs.admin_root }}
+        IMAGE_HASH: ${{ steps.image_digest.outputs.image_hash }}
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_metadata.sh
+        bash ./uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_metadata.sh
 
+    - name: Prepare GCP enclave metadata
+      id: enclave_metadata
+      shell: bash
+      env:
+        ADMIN_ROOT: ${{ inputs.admin_root }}
+        ENCLAVE_ID: ${{ steps.enclave_id.outputs.ENCLAVE_ID }}
+        ENCLAVE_PROTOCOL: gcp-oidc
+      run: |
+        bash ./uid2-shared-actions/scripts/prepare_enclave_metadata.sh
