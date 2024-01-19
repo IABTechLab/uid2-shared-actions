@@ -1,43 +1,40 @@
 name: Start GCP Private Operator
+description: Spins up a GCP private operator
+
 inputs:
   bore_url_core:
-    description: 'The bore url for core service'
-    type: string
+    description: The bore url for core service
     required: true
   bore_url_optout:
-    description: 'The bore url for optout service'
-    type: string
+    description: The bore url for optout service
     required: true
   bore_url_localstack:
-    description: 'The bore url for localstack service'
-    type: string
+    description: The bore url for localstack service
     required: true
   gcp_project:
-    description: 'The name of the GCP project'
-    type: string
+    description: The name of the GCP project
     required: true
   gcp_service_account:
-    description: 'The GCP service account'
-    type: string
+    description: The GCP service account
     required: true
   image_hash:
-    description: 'The operator image hash of the operator image version'
-    type: string
+    description: The operator image hash of the operator image version
     required: true
   operator_key:
-    description: 'Operator key'
-    type: string
+    description: Operator key
     required: true
+
 outputs:
   gcp_instance_name:
-    description: 'GCP instance name'
+    description: GCP instance name
     value: ${{ steps.start_gcp.outputs.GCP_INSTANCE_NAME }}
   uid2_e2e_pipeline_operator_url:
-    description: 'The GCP operator url'
+    description: The GCP operator url
     value: ${{ steps.start_gcp.outputs.uid2_e2e_pipeline_operator_url }}
 
 runs:
   using: "composite"
+
   steps:
     - name: Start GCP private operator
       id: start_gcp

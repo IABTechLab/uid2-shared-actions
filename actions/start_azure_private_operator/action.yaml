@@ -1,11 +1,12 @@
 name: Start Azure Private Operator
-description: Start the Azure private operator with the core and optout instances
+description: Spins up an Azure private operator
+
 inputs:
   bore_url_core:
-    description: The bore url for core service
+    description: The bore URL for core service
     required: true
   bore_url_optout:
-    description: The bore url for optout service
+    description: The bore URL for optout service
     required: true
   output_template_file:
     description: The output template file
@@ -16,6 +17,7 @@ inputs:
   azure_credentials:
     description: The Azure credentials
     required: true
+
 outputs:
   container_group_name:
     description: Azure instance name
@@ -26,8 +28,9 @@ outputs:
 
 runs:
   using: "composite"
+
   steps:
-    - name: Azure Login
+    - name: Log in to Azure
       uses: azure/login@v1
       with:
         creds: ${{ inputs.azure_credentials }}
