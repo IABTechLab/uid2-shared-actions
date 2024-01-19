@@ -30,9 +30,6 @@ on:
         description: The docker registry
         required: true
         type: string
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 jobs:
   buildImage:
     name: Build Image
