@@ -8,6 +8,9 @@ inputs:
   admin_root:
     description: The root path for uid2-admin folder
     default: ../uid2-admin
+  aws_pcr0:
+    description: The AWS PCR0
+    required: true
 
 outputs:
   image_hash:
@@ -41,18 +44,12 @@ runs:
         IMAGE_HASH=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2)
         echo "::set-output name=image_hash::${IMAGE_HASH}"
 
-    - name: Prepare AWS enclave ID
-      id: enclave_id
-      shell: bash
-      run: |
-        bash ./uid2-shared-actions/scripts/aws/prepare_aws_enclave_metadata.sh
-
     - name: Prepare AWS enclave metadata
       id: enclave_metadata
       shell: bash
       env:
         ADMIN_ROOT: ${{ inputs.admin_root }}
-        ENCLAVE_ID: ${{ steps.enclave_id.outputs.ENCLAVE_ID }}
+        ENCLAVE_ID: ${{ inputs.aws_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |
         bash ./uid2-shared-actions/scripts/prepare_enclave_metadata.sh

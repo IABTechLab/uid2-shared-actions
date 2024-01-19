@@ -84,6 +84,9 @@ on:
       aws_ami:
         description: The AWS AMI ID
         type: string
+      aws_pcr0:
+        description: The AWS PCR0
+        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -183,6 +186,7 @@ jobs:
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
+          aws_pcr0: ${{ inputs.aws_pcr0 }}
 
       - name: Bring up Docker Compose
         id: docker-compose
