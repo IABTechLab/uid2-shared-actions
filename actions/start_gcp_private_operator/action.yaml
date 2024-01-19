@@ -51,4 +51,4 @@ runs:
         OPERATOR_KEY: ${{ inputs.operator_key }}
         IMAGE_HASH: ${{ inputs.image_hash }}
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/gcp/start_gcp_enclave.sh
+        bash ./uid2-shared-actions/scripts/gcp/start_gcp_enclave.sh
