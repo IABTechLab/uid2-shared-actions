@@ -101,6 +101,7 @@ jobs:
           docker_file: ${{ inputs.docker_file }}
           docker_image_name: ${{ inputs.docker_image_name }}
           docker_registry: ${{ inputs.docker_registry }}
+          scan_type: image
 
       - name: Create Release
         id: github_release
