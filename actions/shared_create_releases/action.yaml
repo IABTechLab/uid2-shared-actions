@@ -17,20 +17,43 @@ inputs:
   github_token:
     description: The github token to login to Docker container
     required: true
+  publish_platform:
+    description: The platform we are publishing to. Must be one of [Docker or Maven]
+    required: true
+  repo:
+    description: The repo that publishing to.
+    default: ''
+  new_version:
+    description: The new version that are publish to Maven
+    default: ''
 
 runs:
   using: "composite" 
 
   steps:
-    - name: Build Changelog
+    - name: Build Docker Changelog
       id: github_release
-      if: ${{ inputs.is_release == 'true' }}
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker'}}
       uses: mikepenz/release-changelog-builder-action@v3
       with:
         toTag: v${{ inputs.version_number_input }}
         configurationJson: |
           {
             "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ inputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ inputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
+            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+          }
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    - name: Build Maven Changelog
+      id: github_release
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
+      uses: mikepenz/release-changelog-builder-action@v3
+      with:
+        toTag: v${{ inputs.version_number_input }}
+        configurationJson: |
+          {
+            "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ inputs.repo }}</artifactId>\n    <version>${{ inputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [${{ inputs.repo }}-${{ inputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/${{ inputs.repo }}/${{ inputs.new_version }}/${{ inputs.repo }}-${{ inputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
             "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
           }
       env:

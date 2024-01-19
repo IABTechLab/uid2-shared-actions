@@ -112,3 +112,4 @@ jobs:
           tags: ${{ steps.publishToDocker.outputs.tags }}
           image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_platform: Docker
