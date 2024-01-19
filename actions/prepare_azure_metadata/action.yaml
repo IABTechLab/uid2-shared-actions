@@ -35,7 +35,7 @@ runs:
       env:
         OUTPUT_POLICY_DIGEST_FILE: ${{ steps.azure_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
       run: |
-        bash ./uid2-shared-actions/scripts/azure/prepare_azure_enclave_metadata.sh
+        bash ./uid2-shared-actions/scripts/azure/prepare_azure_enclave_id.sh
 
     - name: Prepare Azure enclave metadata
       id: enclave_metadata

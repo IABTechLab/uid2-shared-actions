@@ -69,7 +69,7 @@ runs:
       env:
         IMAGE_HASH: ${{ steps.image_digest.outputs.image_hash }}
       run: |
-        bash ./uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_metadata.sh
+        bash ./uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_id.sh
 
     - name: Prepare GCP enclave metadata
       id: enclave_metadata
