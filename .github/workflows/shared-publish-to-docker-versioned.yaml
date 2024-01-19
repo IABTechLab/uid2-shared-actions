@@ -62,7 +62,7 @@ jobs:
         run: |
           current_version=$(jq -r '.version')
           new_version=${{ steps.version.outputs.new_version }}
-          jq --argjson v $new_version ".version = \$v" package.json > tmp.json && mv tmp.json package.json
+          jq --arg v "$new_version" ".version = \$v" "package.json" > tmp.json && mv tmp.json "package.json"
           echo "Version number updated from $current_version to $new_version"
           echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
 
