@@ -45,7 +45,7 @@ aws cloudformation describe-stacks \
   --stack-name="${AWS_STACK_NAME}" \
   --region="${REGION}"
 
-# export to Github output
+# Export to GitHub output
 echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
