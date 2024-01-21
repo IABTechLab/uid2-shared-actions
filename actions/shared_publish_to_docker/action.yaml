@@ -77,14 +77,14 @@ runs:
           JAR_VERSION=${{ inputs.new_version }}
           IMAGE_VERSION=${{ inputs.new_version }}
 
-    # - name: Vulnerability scan
-    #   uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
-    #   with:
-    #     publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
-    #     failure_severity: CRITICAL
-    #     scan_severity: CRITICAL,HIGH
-    #     image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
-    #     scan_type: ${{ inputs.scan_type }}
+    - name: Vulnerability scan
+      uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v2
+      with:
+        publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
+        failure_severity: CRITICAL
+        scan_severity: CRITICAL,HIGH
+        image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
+        scan_type: ${{ inputs.scan_type }}
 
     - name: Push to Docker
       uses: docker/build-push-action@v5

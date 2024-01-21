@@ -45,7 +45,7 @@ jobs:
     steps:
       - name: Setup
         id: setup
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@v2
         with:
           release_type: ${{ inputs.release_type }}
 
@@ -83,7 +83,7 @@ jobs:
 
       - name: Publish to Docker
         id: publishToDocker
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@v2
         with:
           new_version: ${{ steps.version.outputs.new_version }}
           image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
@@ -96,7 +96,7 @@ jobs:
 
       - name: Create Release
         id: github_release
-        uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
+        uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v2
         with:
           is_release: ${{ steps.setup.outputs.is_release }}
           version_number_input: ${{ inputs.version_number_input }}
