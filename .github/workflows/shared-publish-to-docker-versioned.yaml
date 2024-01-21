@@ -1,0 +1,106 @@
+name: Shared Pipeline to build and publish images to Docker
+on:
+  workflow_call:
+    inputs:
+      release_type:
+        description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
+        required: true
+        type: string
+      publish_vulnerabilities:
+        description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
+        type: string
+        default: true
+      version_number_input:
+        description: The version number to publish for the docker repo
+        type: string
+        default: ''
+      force_release:
+        description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
+        type: string
+        default: 'branch'
+      docker_file:
+        description: The Dockerfile used to build and publish Docker image
+        type: string
+        default: ''
+      docker_image_name:
+        description: The docker image name
+        required: true
+        type: string
+      docker_registry:
+        description: The docker registry
+        required: true
+        type: string
+jobs:
+  buildImage:
+    name: Build Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      security-events: write
+      packages: write
+      pull-requests: write
+    outputs:
+      jar_version: ${{ inputs.version_number_input }}
+      image_tag: ${{ steps.updatePom.outputs.image_tag }}
+    steps:
+      - name: Setup
+        id: setup
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@v2
+        with:
+          release_type: ${{ inputs.release_type }}
+
+      - name: Set version number
+        id: version
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@main
+        with:
+          type: ${{ inputs.release_type }}
+          version_number: ${{ inputs.version_number_input }}
+          branch_name: ${{ github.ref }}
+
+      - name: Update package.json
+        id: updatePackageJson
+        run: |
+          current_version=$(jq -r '.version')
+          new_version=${{ steps.version.outputs.new_version }}
+          jq --arg v "$new_version" ".version = \$v" "package.json" > tmp.json && mv tmp.json "package.json"
+          echo "Version number updated from $current_version to $new_version"
+          echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
+
+      - name: Commit package.json
+        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        with:
+          add: 'package.json'
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+
+      - name: Commit package.json and set tag
+        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        with:
+          add: 'package.json'
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          tag: v${{ steps.version.outputs.new_version }}
+
+      - name: Publish to Docker
+        id: publishToDocker
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@v2
+        with:
+          new_version: ${{ steps.version.outputs.new_version }}
+          image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
+          not_snapshot: ${{ steps.setup.outputs.not_snapshot }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          docker_file: ${{ inputs.docker_file }}
+          docker_image_name: ${{ inputs.docker_image_name }}
+          docker_registry: ${{ inputs.docker_registry }}
+          scan_type: image
+
+      - name: Create Release
+        id: github_release
+        uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v2
+        with:
+          is_release: ${{ steps.setup.outputs.is_release }}
+          version_number_input: ${{ inputs.version_number_input }}
+          tags: ${{ steps.publishToDocker.outputs.tags }}
+          image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_platform: Docker
