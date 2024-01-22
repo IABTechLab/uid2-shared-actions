@@ -20,10 +20,10 @@ inputs:
 
 outputs:
   container_group_name:
-    description: Azure instance name
+    description: The Azure instance name
     value: ${{ steps.start_azure.outputs.CONTAINER_GROUP_NAME }}
   uid2_e2e_pipeline_operator_url:
-    description: The Azure operator url
+    description: The Azure operator URL
     value: ${{ steps.start_azure.outputs.uid2_e2e_pipeline_operator_url }}
 
 runs:

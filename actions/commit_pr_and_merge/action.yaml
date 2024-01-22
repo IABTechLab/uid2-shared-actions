@@ -1,17 +1,21 @@
 name: Commit, create PR, and merge it
+description: Commits changes, creates PR with that commit, and merges the PR
+
 inputs:
   message:
-    description: 'Message for commit and PR title'
+    description: Message for commit and PR title
     required: false
-    default: 'Automated update'
+    default: Automated update
   tag:
-    description: 'If provided, this tag is applied to the commit'
+    description: If provided, this tag is applied to the commit
     required: false
   add:
-    description: 'Comma- or newline-separated list of paths to add.'
+    description: Comma- or newline-separated list of paths to add
     required: true
+
 runs:
   using: "composite"
+
   steps:
     - name: Commit to new branch
       uses: EndBug/add-and-commit@v9

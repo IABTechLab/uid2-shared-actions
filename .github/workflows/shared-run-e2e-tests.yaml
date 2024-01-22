@@ -250,21 +250,25 @@ jobs:
           OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
         run: |
           if [ -z "$GITHUB_OUTPUT" ]; then
-            echo "not in github action"
-          elif [ -z "$OPERATOR_TYPE" ]; then
-            echo "$OPERATOR_TYPE not set"
-          elif [ "$OPERATOR_TYPE" == "public" ]; then
+            echo "not in GitHub action"
+          elif [ -z "${OPERATOR_TYPE}" ]; then
+            echo "OPERATOR_TYPE not set"
+          elif [ "${OPERATOR_TYPE}" == "public" ]; then
             echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
           else
             echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
-            if [ "$OPERATOR_TYPE" == "gcp" ]; then
+            if [ "${OPERATOR_TYPE}" == "gcp" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=GCP" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
-            elif [ "$OPERATOR_TYPE" == "azure" ]; then
+            elif [ "${OPERATOR_TYPE}" == "azure" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
+            fi
+            elif [ "${OPERATOR_TYPE}" == "aws" ]; then
+              echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> $GITHUB_OUTPUT
+              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_aws_uid2_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
             fi
           fi
 

@@ -53,3 +53,16 @@ if [ -z "${GITHUB_OUTPUT}" ]; then
 else
   echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> ${GITHUB_OUTPUT}
 fi
+
+# Get public URL
+python ./uid2-shared-actions/scripts/aws/get_instance_url.py \
+  --region="${REGION}" \
+  --stack="${AWS_STACK_NAME}"
+
+echo "Instance URL: ${AWS_INSTANCE_URL}"
+echo "uid2_e2e_pipeline_operator_url=${AWS_INSTANCE_URL}:8080" >> ${GITHUB_OUTPUT}
+
+HEALTHCHECK_URL="${AWS_INSTANCE_URL}:8080/ops/healthcheck"
+
+# Health check - for 5 mins
+healthcheck "${HEALTHCHECK_URL}" 60

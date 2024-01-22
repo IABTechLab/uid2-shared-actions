@@ -21,6 +21,14 @@ inputs:
     description: The operator key
     required: true
 
+outputs:
+  aws_stack_name:
+    description: The AWS instance name
+    value: ${{ steps.start_aws.outputs.AWS_STACK_NAME }}
+  uid2_e2e_pipeline_operator_url:
+    description: The AWS operator URL
+    value: ${{ steps.start_aws.outputs.uid2_e2e_pipeline_operator_url }}
+
 runs:
   using: "composite"
 
@@ -43,7 +51,8 @@ runs:
     - run: aws sts get-caller-identity
       shell: bash
 
-    - name: Create CloudFormation stack
+    - name: Start AWS private operator
+      id: start_aws
       shell: bash
       env:
         BORE_URL_CORE: ${{ inputs.bore_url_core }}

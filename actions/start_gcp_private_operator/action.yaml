@@ -3,13 +3,13 @@ description: Spins up a GCP private operator
 
 inputs:
   bore_url_core:
-    description: The bore url for core service
+    description: The bore URL for core service
     required: true
   bore_url_optout:
-    description: The bore url for optout service
+    description: The bore URL for optout service
     required: true
   bore_url_localstack:
-    description: The bore url for localstack service
+    description: The bore URL for localstack service
     required: true
   gcp_project:
     description: The name of the GCP project
@@ -21,15 +21,15 @@ inputs:
     description: The operator image hash of the operator image version
     required: true
   operator_key:
-    description: Operator key
+    description: The operator key
     required: true
 
 outputs:
   gcp_instance_name:
-    description: GCP instance name
+    description: The GCP instance name
     value: ${{ steps.start_gcp.outputs.GCP_INSTANCE_NAME }}
   uid2_e2e_pipeline_operator_url:
-    description: The GCP operator url
+    description: The GCP operator URL
     value: ${{ steps.start_gcp.outputs.uid2_e2e_pipeline_operator_url }}
 
 runs:
