@@ -1,4 +1,4 @@
-name: Shared Bump Version Number
+name: Shared Increase Version Number
 on:
   workflow_call:
     inputs:
@@ -13,13 +13,13 @@ on:
     outputs:
       new_version:
         description: The new version number to publish for the docker repo
-        value: ${{ jobs.bumpVersion.outputs.new_version }}
+        value: ${{ jobs.incrementVersionNumber.outputs.new_version }}
       image_tag:
         description: The image tag used to extract metadata for Docker
-        value: ${{ jobs.bumpVersion.outputs.image_tag }}
+        value: ${{ jobs.incrementVersionNumber.outputs.image_tag }}
 
 jobs:
-  bumpVersion:
+  incrementVersionNumber:
     runs-on: ubuntu-latest
     outputs:
       new_version: ${{ steps.version.outputs.new_version }}
