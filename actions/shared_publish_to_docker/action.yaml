@@ -29,6 +29,10 @@ inputs:
     description: The docker registry
     required: true
     type: string
+  docker_context:
+    description: The docker context
+    default: .
+    type: string
   scan_type:
     description: The scan-type for aquasecurity/trivy-action action. Default to a fs scan.
     default: fs
@@ -68,7 +72,7 @@ runs:
     - name: Build and export to Docker
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ${{ inputs.docker_context }}
         file: ${{ inputs.docker_file }}
         load: true
         tags: ${{ steps.meta.outputs.tags }}
@@ -89,7 +93,7 @@ runs:
     - name: Push to Docker
       uses: docker/build-push-action@v5
       with:
-        context: .
+        context: ${{ inputs.docker_context }}
         file: ${{ inputs.docker_file }}
         push: true
         tags: ${{ steps.meta.outputs.tags }}
