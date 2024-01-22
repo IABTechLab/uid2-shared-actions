@@ -10,6 +10,10 @@ on:
         description: If set, the version number will not be incremented and the given number will be used.
         default: ''
         type: string
+      working_dir:
+        description: The path to the directory for which the version should be determined.
+        type: string
+        default: '.'
     outputs:
       new_version:
         description: The new version number to publish for the docker repo
@@ -38,27 +42,28 @@ jobs:
           type: ${{ inputs.release_type }}
           version_number: ${{ inputs.version_number_input }}
           branch_name: ${{ github.ref }}
+          working_dir: ${{ inputs.working_dir }}
 
-      - name: Update package.json
+      - name: Update ${{ inputs.working_dir }}/package.json
         id: updatePackageJson
         run: |
           current_version=$(jq -r '.version')
           new_version=${{ steps.version.outputs.new_version }}
-          jq --arg v "$new_version" ".version = \$v" "package.json" > tmp.json && mv tmp.json "package.json"
+          jq --arg v "$new_version" ".version = \$v" "${{ inputs.working_dir }}/package.json" > tmp.json && mv tmp.json "${{ inputs.working_dir }}/package.json"
           echo "Version number updated from $current_version to $new_version"
           echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
 
-      - name: Commit package.json and version.json
+      - name: Commit ${{ inputs.working_dir }}/package.json and ${{ inputs.working_dir }}/version.json
         if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
-          add: 'package.json version.json'
+          add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
 
-      - name: Commit package.json, version.json and set tag
+      - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/version.json and set tag
         if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
-          add: 'package.json version.json'
+          add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}

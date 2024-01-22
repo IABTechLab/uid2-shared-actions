@@ -38,6 +38,10 @@ on:
         description: The docker registry
         required: true
         type: string
+      docker_context:
+        description: The docker context
+        default: .
+        type: string
 jobs:
   buildImage:
     name: Build Image
@@ -65,6 +69,7 @@ jobs:
           docker_file: ${{ inputs.docker_file }}
           docker_image_name: ${{ inputs.docker_image_name }}
           docker_registry: ${{ inputs.docker_registry }}
+          docker_context: ${{ inputs.docker_context }}
           scan_type: image
 
       - name: Create Release
