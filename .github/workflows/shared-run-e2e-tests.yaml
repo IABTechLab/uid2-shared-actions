@@ -230,8 +230,8 @@ jobs:
           output_parameters_file: ${{ steps.prepare_azure_metadata.outputs.output_parameters_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Start AWS UID2 private operator
-        id: start_aws_uid2_private_operator
+      - name: Start AWS private operator
+        id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-2341-aws-test-pipeline
         with:
@@ -296,3 +296,11 @@ jobs:
           CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.container_group_name }}
         run: |
           bash ./uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+
+      - name: Stop AWS private operator
+        if: ${{ inputs.operator_type == 'aws' }}
+        env:
+          AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
+          AWS_REGION: ${{ inputs.aws_region }}
+        run: |
+          bash ./uid2-shared-actions/scripts/aws/stop_aws_enclave.sh

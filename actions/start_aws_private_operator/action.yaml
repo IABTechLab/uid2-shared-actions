@@ -1,5 +1,5 @@
-name: Start AWS UID2 Private Operator
-description: Spins up an AWS UID2 private operator
+name: Start AWS Private Operator
+description: Spins up an AWS private operator
 
 inputs:
   bore_url_core:
@@ -57,9 +57,9 @@ runs:
       env:
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
-        REGION: ${{ inputs.aws_region }}
-        AMI: ${{ inputs.aws_ami }}
-        OPERATOR_KEY: ${{ inputs.operator_key }}
+        AWS_REGION: ${{ inputs.aws_region }}
+        AWS_AMI: ${{ inputs.aws_ami }}
         IMAGE_HASH: ${{ inputs.image_hash }}
+        OPERATOR_KEY: ${{ inputs.operator_key }}
       run: |
         ./uid2-shared-actions/scripts/aws/start_aws_enclave.sh

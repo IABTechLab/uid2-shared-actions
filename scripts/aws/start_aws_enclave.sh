@@ -11,13 +11,13 @@ if [ -z "${BORE_URL_OPTOUT}" ]; then
   exit 1
 fi
 
-if [ -z "${REGION}" ]; then
-  echo "REGION can not be empty"
+if [ -z "${AWS_REGION}" ]; then
+  echo "AWS_REGION can not be empty"
   exit 1
 fi
 
-if [ -z "${AMI}" ]; then
-  echo "AMI can not be empty"
+if [ -z "${AWS_AMI}" ]; then
+  echo "AWS_AMI can not be empty"
   exit 1
 fi
 
@@ -36,14 +36,14 @@ AWS_STACK_NAME="uid2-operator-e2e-${IMAGE_HASH}"
 python ./uid2-shared-actions/scripts/aws/create_cloudformation_stack.py \
   --core="${BORE_URL_CORE}" \
   --optout="${BORE_URL_OPTOUT}" \
-  --region="${REGION}" \
-  --ami="${AMI}" \
+  --region="${AWS_REGION}" \
+  --ami="${AWS_AMI}" \
   --stack="${AWS_STACK_NAME}" \
   --key="${OPERATOR_KEY}"
 
 aws cloudformation describe-stacks \
   --stack-name="${AWS_STACK_NAME}" \
-  --region="${REGION}"
+  --region="${AWS_REGION}"
 
 # Export to GitHub output
 echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
@@ -56,7 +56,7 @@ fi
 
 # Get public URL
 python ./uid2-shared-actions/scripts/aws/get_instance_url.py \
-  --region="${REGION}" \
+  --region="${AWS_REGION}" \
   --stack="${AWS_STACK_NAME}"
 
 echo "Instance URL: ${AWS_INSTANCE_URL}"
