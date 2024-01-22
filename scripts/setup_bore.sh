@@ -26,7 +26,7 @@ echo "BORE_URL_CORE=${BORE_URL_CORE}"
 echo "BORE_URL_OPTOUT=${BORE_URL_OPTOUT}"
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "not in github action"
+  echo "Not in GitHub action"
 else
   echo "BORE_URL_LOCALSTACK=${BORE_URL_LOCALSTACK}" >> ${GITHUB_OUTPUT}
   echo "BORE_URL_CORE=${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}

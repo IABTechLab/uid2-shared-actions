@@ -10,8 +10,8 @@ OPERATOR_KEY_NAME=operator-key-ci
 
 LOCATION="East US"
 DEPLOYMENT_ENV="integ"
-CONTAINER_GROUP_NAME="ci-test-${RANDOM}"
-DEPLOYMENT_NAME=${CONTAINER_GROUP_NAME}
+AZURE_CONTAINER_GROUP_NAME="ci-test-${RANDOM}"
+DEPLOYMENT_NAME=${AZURE_CONTAINER_GROUP_NAME}
 
 source "${ROOT}/jq_helper.sh"
 source "${ROOT}/healthcheck.sh"
@@ -51,7 +51,7 @@ if [[ ! -f ${OUTPUT_PARAMETERS_FILE} ]]; then
   exit 1
 fi
 
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.containerGroupName.value "${CONTAINER_GROUP_NAME}"
+jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.containerGroupName.value "${AZURE_CONTAINER_GROUP_NAME}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.location.value "${LOCATION}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.identity.value "${IDENTITY}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.vaultName.value "${VAULT_NAME}"
@@ -70,12 +70,12 @@ az deployment group create \
     --parameters "${OUTPUT_PARAMETERS_FILE}"
 
 # Export to GitHub output
-echo "CONTAINER_GROUP_NAME=${CONTAINER_GROUP_NAME}"
+echo "AZURE_CONTAINER_GROUP_NAME=${AZURE_CONTAINER_GROUP_NAME}"
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "not in github action"
+  echo "Not in GitHub action"
 else
-  echo "CONTAINER_GROUP_NAME=${CONTAINER_GROUP_NAME}" >> ${GITHUB_OUTPUT}
+  echo "AZURE_CONTAINER_GROUP_NAME=${AZURE_CONTAINER_GROUP_NAME}" >> ${GITHUB_OUTPUT}
 fi
 
 # Get public IP, need to trim quotes

@@ -164,7 +164,7 @@ jobs:
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@gdm-UID2-2341-aws-test-pipeline
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -174,7 +174,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v2
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@gdm-UID2-2341-aws-test-pipeline
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -209,7 +209,7 @@ jobs:
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@gdm-UID2-2341-aws-test-pipeline
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -222,7 +222,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v2
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@gdm-UID2-2341-aws-test-pipeline
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -250,7 +250,7 @@ jobs:
           OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
         run: |
           if [ -z "$GITHUB_OUTPUT" ]; then
-            echo "not in GitHub action"
+            echo "Not in GitHub action"
           elif [ -z "${OPERATOR_TYPE}" ]; then
             echo "OPERATOR_TYPE not set"
           elif [ "${OPERATOR_TYPE}" == "public" ]; then
@@ -293,7 +293,7 @@ jobs:
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
         env:
-          CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.container_group_name }}
+          AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
           bash ./uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 

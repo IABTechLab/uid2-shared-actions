@@ -12,5 +12,5 @@ if [ -z "${AWS_REGION}" ]; then
 fi
 
 aws cloudformation delete-stack \
-    --stack-name="${AWS_STACK_NAME}" \
-    --region="${AWS_REGION}" || echo "failed to delete or nothing to delete"
+    --stack-name "${AWS_STACK_NAME}" \
+    --region "${AWS_REGION}" || echo "failed to delete or nothing to delete"

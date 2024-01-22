@@ -15,7 +15,7 @@ echo "ENCLAVE_ID=${ENCLAVE_ID}"
 
 # Export to Github output
 if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "not in GitHub action"
+  echo "Not in GitHub action"
 else
   echo "ENCLAVE_ID=${ENCLAVE_ID}" >> ${GITHUB_OUTPUT}
 fi

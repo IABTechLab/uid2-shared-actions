@@ -19,9 +19,9 @@ inputs:
     required: true
 
 outputs:
-  container_group_name:
+  azure_container_group_name:
     description: The Azure instance name
-    value: ${{ steps.start_azure.outputs.CONTAINER_GROUP_NAME }}
+    value: ${{ steps.start_azure.outputs.AZURE_CONTAINER_GROUP_NAME }}
   uid2_e2e_pipeline_operator_url:
     description: The Azure operator URL
     value: ${{ steps.start_azure.outputs.uid2_e2e_pipeline_operator_url }}

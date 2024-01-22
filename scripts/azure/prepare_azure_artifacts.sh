@@ -59,7 +59,7 @@ else
 fi
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "not in github action"
+  echo "Not in GitHub action"
 else
   echo "OUTPUT_TEMPLATE_FILE=${OUTPUT_TEMPLATE_FILE}" >> ${GITHUB_OUTPUT}
   echo "OUTPUT_PARAMETERS_FILE=${OUTPUT_PARAMETERS_FILE}" >> ${GITHUB_OUTPUT}

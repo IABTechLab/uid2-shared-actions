@@ -31,7 +31,7 @@ cat <<< $(jq '(.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .identifier) |
 echo "OPERATOR_KEY=${OPERATOR_KEY}"
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "not in GitHub action"
+  echo "Not in GitHub action"
 else
   echo "OPERATOR_KEY=${OPERATOR_KEY}" >> ${GITHUB_OUTPUT}
 fi

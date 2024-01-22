@@ -62,7 +62,7 @@ gcloud compute instances create ${GCP_INSTANCE_NAME} \
 echo "GCP_INSTANCE_NAME=${GCP_INSTANCE_NAME}"
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "not in github action"
+  echo "Not in GitHub action"
 else
   echo "GCP_INSTANCE_NAME=${GCP_INSTANCE_NAME}" >> ${GITHUB_OUTPUT}
 fi
