@@ -6,6 +6,14 @@ on:
         description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
         required: true
         type: string
+      new_version:
+        description: The new version number to publish for the docker repo
+        required: true
+        type: string
+      image_tag:
+        description: The image tag used to extract metadata for Docker
+        required: true
+        type: string
       publish_vulnerabilities:
         description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
         type: string
@@ -39,47 +47,12 @@ jobs:
       security-events: write
       packages: write
       pull-requests: write
-    outputs:
-      jar_version: ${{ inputs.version_number_input }}
-      image_tag: ${{ steps.updatePom.outputs.image_tag }}
     steps:
       - name: Setup
         id: setup
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@v2
         with:
           release_type: ${{ inputs.release_type }}
-
-      - name: Set version number
-        id: version
-        uses: IABTechLab/uid2-shared-actions/actions/version_number@main
-        with:
-          type: ${{ inputs.release_type }}
-          version_number: ${{ inputs.version_number_input }}
-          branch_name: ${{ github.ref }}
-
-      - name: Update package.json
-        id: updatePackageJson
-        run: |
-          current_version=$(jq -r '.version')
-          new_version=${{ steps.version.outputs.new_version }}
-          jq --arg v "$new_version" ".version = \$v" "package.json" > tmp.json && mv tmp.json "package.json"
-          echo "Version number updated from $current_version to $new_version"
-          echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
-
-      - name: Commit package.json
-        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
-        with:
-          add: 'package.json'
-          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-
-      - name: Commit package.json and set tag
-        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
-        with:
-          add: 'package.json'
-          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-          tag: v${{ steps.version.outputs.new_version }}
 
       - name: Publish to Docker
         id: publishToDocker
