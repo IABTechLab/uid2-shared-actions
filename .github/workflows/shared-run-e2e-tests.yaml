@@ -274,7 +274,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@gdm-UID2-2341-aws-test-pipeline
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
           uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
@@ -282,7 +282,7 @@ jobs:
           uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
 
       - name: Stop GCP private operator
-        if: ${{ inputs.operator_type == 'gcp'}}
+        if: ${{ inputs.operator_type == 'gcp' }}
         env:
           GCP_PROJECT: ${{ vars.GCP_PROJECT }}
           SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}

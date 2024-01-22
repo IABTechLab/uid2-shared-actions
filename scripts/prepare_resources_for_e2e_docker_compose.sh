@@ -71,7 +71,7 @@ if [ -z "${OPERATOR_VERSION}" ]; then
   exit 1
 fi
 
-if [ -z "${E}2E_VERSION" ]; then
+if [ -z "${E2E_VERSION}" ]; then
   echo "E2E_VERSION can not be empty"
   exit 1
 fi
