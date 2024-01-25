@@ -34,7 +34,7 @@ runs:
         docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
 
         # Get the digest
-        IMAGE_HASH=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2)
+        IMAGE_HASH=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2 | cut -d':' -f2)
         echo "::set-output name=image_hash::${IMAGE_HASH}"
 
     - name: Prepare AWS enclave metadata
