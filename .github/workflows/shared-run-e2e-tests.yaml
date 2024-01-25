@@ -54,7 +54,7 @@ on:
         default: main
 
       operator_type:
-        description: The operator type [Public, GCP, Azure, AWS]
+        description: The operator type [public, gcp, azure, aws]
         type: string
         default: public
       uid2_e2e_identity_scope:
@@ -157,13 +157,13 @@ jobs:
 
       - name: Bring up bore
         id: bore
-        if: ${{ inputs.operator_type == 'GCP' || inputs.operator_type == 'Azure' || inputs.operator_type == 'AWS' }}
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' }}
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
 
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
-        if: ${{ inputs.operator_type == 'GCP' }}
+        if: ${{ inputs.operator_type == 'gcp' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@gdm-UID2-2341-aws-test-pipeline
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
@@ -173,7 +173,7 @@ jobs:
 
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
-        if: ${{ inputs.operator_type == 'Azure' }}
+        if: ${{ inputs.operator_type == 'azure' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@gdm-UID2-2341-aws-test-pipeline
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
@@ -181,7 +181,7 @@ jobs:
 
       - name: Prepare AWS metadata
         id: prepare_aws_metadata
-        if: ${{ inputs.operator_type == 'AWS' }}
+        if: ${{ inputs.operator_type == 'aws' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-2341-aws-test-pipeline
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
@@ -208,7 +208,7 @@ jobs:
 
       - name: Start GCP private operator
         id: start_gcp_private_operator
-        if: ${{ inputs.operator_type == 'GCP' }}
+        if: ${{ inputs.operator_type == 'gcp' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@gdm-UID2-2341-aws-test-pipeline
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
@@ -221,7 +221,7 @@ jobs:
 
       - name: Start Azure private operator
         id: start_azure_private_operator
-        if: ${{ inputs.operator_type == 'Azure' }}
+        if: ${{ inputs.operator_type == 'azure' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@gdm-UID2-2341-aws-test-pipeline
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
@@ -232,7 +232,7 @@ jobs:
 
       - name: Start AWS private operator
         id: start_aws_private_operator
-        if: ${{ inputs.operator_type == 'AWS' }}
+        if: ${{ inputs.operator_type == 'aws' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-2341-aws-test-pipeline
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
@@ -253,19 +253,19 @@ jobs:
             echo "Not in GitHub action"
           elif [ -z "${OPERATOR_TYPE}" ]; then
             echo "OPERATOR_TYPE not set"
-          elif [ "${OPERATOR_TYPE}" == "Public" ]; then
+          elif [ "${OPERATOR_TYPE}" == "public" ]; then
             echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
           else
             echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
-            if [ "${OPERATOR_TYPE}" == "GCP" ]; then
+            if [ "${OPERATOR_TYPE}" == "gcp" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=GCP" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
-            elif [ "${OPERATOR_TYPE}" == "Azure" ]; then
+            elif [ "${OPERATOR_TYPE}" == "azure" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
-            elif [ "${OPERATOR_TYPE}" == "AWS" ]; then
+            elif [ "${OPERATOR_TYPE}" == "aws" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_aws_uid2_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
             fi
@@ -281,7 +281,7 @@ jobs:
           uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
 
       - name: Stop GCP private operator
-        if: ${{ inputs.operator_type == 'GCP' }}
+        if: ${{ inputs.operator_type == 'gcp' }}
         env:
           GCP_PROJECT: ${{ vars.GCP_PROJECT }}
           SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
@@ -290,14 +290,14 @@ jobs:
           cd e2e && bash ../uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
       - name: Stop Azure private operator
-        if: ${{ inputs.operator_type == 'Azure' }}
+        if: ${{ inputs.operator_type == 'azure' }}
         env:
           AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
           cd e2e && bash ../uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 
       - name: Stop AWS private operator
-        if: ${{ inputs.operator_type == 'AWS' }}
+        if: ${{ inputs.operator_type == 'aws' }}
         env:
           AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
