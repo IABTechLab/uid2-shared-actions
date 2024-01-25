@@ -47,7 +47,7 @@ runs:
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: us-east-2
-        role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-test
+        role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
     - run: aws sts get-caller-identity
       shell: bash
 
