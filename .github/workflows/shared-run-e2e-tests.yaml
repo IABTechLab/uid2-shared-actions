@@ -141,7 +141,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v3
         with:
-          ref: v2
+          ref: gdm-UID2-2341-aws-test-pipeline
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
