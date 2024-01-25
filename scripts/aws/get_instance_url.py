@@ -7,12 +7,8 @@ def set_output(name, value):
         print(f'{name}={value}', file=fh)
 
 parser = argparse.ArgumentParser()
-# parser.add_argument('--core', dest='core_url', action='store', required='true', help='The core URL')
-# parser.add_argument('--optout', dest='optout_url', action='store', required='true', help='The optout URL')
 parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1'], dest='region', action='store', required='true', help='The target region')
-# parser.add_argument('--ami', dest='ami_id', action='store', required='true', help='The AMI ID')
 parser.add_argument('--stack', dest='stack', action='store', required='true', help='The AWS stack name')
-# parser.add_argument('--key', dest='operator_key', action='store', required='true', help='The operator key')
 args = parser.parse_args()
 
 asg_name = next(filter(
