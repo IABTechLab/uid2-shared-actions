@@ -39,7 +39,7 @@ AWS_STACK_NAME="uid2-operator-e2e-${IMAGE_HASH}"
 
 python ${ROOT}/aws/create_cloudformation_stack.py \
   --stackfp "${ROOT}/aws/stacks" \
-  --operatorfp "../uid2-operator" \
+  --cftemplatefp "../uid2-operator/scripts/aws" \
   --core "${BORE_URL_CORE}" \
   --optout "${BORE_URL_OPTOUT}" \
   --region "${AWS_REGION}" \

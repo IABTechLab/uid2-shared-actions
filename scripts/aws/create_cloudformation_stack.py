@@ -25,19 +25,19 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_c
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--stackfp', dest='stack_fp', action='store', required='true', help='The filepath to the AWS stacks')
-parser.add_argument('--operatorfp', dest='operator_fp', action='store', required='true', help='The filepath to the uid2-operator repo')
+parser.add_argument('--cftemplatefp', dest='cftemplate_fp', action='store', required='true', help='The filepath to the CloudFormation template')
 parser.add_argument('--core', dest='core_url', action='store', required='true', help='The core URL')
 parser.add_argument('--optout', dest='optout_url', action='store', required='true', help='The optout URL')
 parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1'], dest='region', action='store', required='true', help='The target region')
-parser.add_argument('--ami', dest='ami_id', action='store', required='true', help='The AMI ID')
+parser.add_argument('--ami', dest='ami', action='store', required='true', help='The AMI ID')
 parser.add_argument('--stack', dest='stack', action='store', required='true', help='The AWS stack name')
 parser.add_argument('--key', dest='operator_key', action='store', required='true', help='The operator key')
 args = parser.parse_args()
 
-with open('{}/stacks/stack.{}.json'.format(args.stack_fp, args.region), 'r') as f:
+with open('{}/stack.{}.json'.format(args.stack_fp, args.region), 'r') as f:
     dc_cfg = json.load(f)
 
-with open('{}/scripts/aws/UID_CloudFormation.template.yml'.format(args.operator_fp), 'r') as f:
+with open('{}/UID_CloudFormation.template.yml'.format(args.cftemplate_fp), 'r') as f:
     cft = load_yaml(f)
 
 cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
@@ -55,6 +55,6 @@ create_cloudformation_stack(
     boto3.client('cloudformation', region_name=args.region),
     stack_name=args.stack,
     cft_content=dump_yaml(cft),
-    api_token=args.key,
+    api_token=args.operator_key,
     dc_cfg=dc_cfg, 
     ip_address=ip)
