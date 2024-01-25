@@ -159,7 +159,7 @@ jobs:
         id: bore
         if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' }}
         run: |
-          bash ./uid2-shared-actions/scripts/setup_bore.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
 
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
@@ -204,7 +204,7 @@ jobs:
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
           BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
         run: |
-          bash ./uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
 
       - name: Start GCP private operator
         id: start_gcp_private_operator
@@ -288,14 +288,14 @@ jobs:
           SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
-          bash ./uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
         env:
           AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
-          bash ./uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 
       - name: Stop AWS private operator
         if: ${{ inputs.operator_type == 'aws' }}
@@ -303,4 +303,4 @@ jobs:
           AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
-          bash ./uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+          cd e2e && bash ../uid2-shared-actions/scripts/aws/stop_aws_enclave.sh

@@ -3,7 +3,7 @@ set -ex
 
 ROOT="../uid2-shared-actions/scripts/azure"
 INPUT_DIR="${ROOT}/artifacts_schema"
-OUT_PUT_DIR="${ROOT}/azure-artifacts"
+OUTPUT_DIR="${ROOT}/azure-artifacts"
 
 if [ -z "${IMAGE_VERSION}" ]; then
   echo "IMAGE_VERSION can not be empty"
@@ -12,20 +12,20 @@ fi
 
 IMAGE="ghcr.io/iabtechlab/uid2-operator:${IMAGE_VERSION}"
 
-if [ -d "${OUT_PUT_DIR}" ]; then
-  echo "${OUT_PUT_DIR}  exist."
+if [ -d "${OUTPUT_DIR}" ]; then
+  echo "${OUTPUT_DIR} exist."
 fi
 
 INPUT_TEMPLATE_FILE="${INPUT_DIR}/template.json"
 INPUT_PARAMETERS_FILE="${INPUT_DIR}/parameters.json"
-OUTPUT_TEMPLATE_FILE="${OUT_PUT_DIR}/template.json"
-OUTPUT_PARAMETERS_FILE="${OUT_PUT_DIR}/parameters.json"
-OUTPUT_POLICY_DIGEST_FILE="${OUT_PUT_DIR}/digest.txt"
+OUTPUT_TEMPLATE_FILE="${OUTPUT_DIR}/template.json"
+OUTPUT_PARAMETERS_FILE="${OUTPUT_DIR}/parameters.json"
+OUTPUT_POLICY_DIGEST_FILE="${OUTPUT_DIR}/digest.txt"
 
-if [[ -d ${OUT_PUT_DIR} ]]; then
-  echo "${OUT_PUT_DIR}  exist. Skip. This only happens during local test."
+if [[ -d ${OUTPUT_DIR} ]]; then
+  echo "${OUTPUT_DIR}  exist. Skip. This only happens during local test."
 else
-  mkdir -p ${OUT_PUT_DIR}
+  mkdir -p ${OUTPUT_DIR}
 
   # Install confcom extension, az is originally available in GitHub workflow environment
   az extension add --name confcom
@@ -37,7 +37,7 @@ else
   # Required by az confcom
   sudo usermod -aG docker ${USER}
   if [[ $? -ne 0 ]]; then
-    echo "Failed to add current user to docker group"
+    echo "Failed to add current user to Docker group"
     exit 1
   fi
 

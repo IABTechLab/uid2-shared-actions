@@ -62,4 +62,4 @@ runs:
         IMAGE_HASH: ${{ inputs.image_hash }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
       run: |
-        ./uid2-shared-actions/scripts/aws/start_aws_enclave.sh
+        cd e2e && bash ../uid2-shared-actions/scripts/aws/start_aws_enclave.sh

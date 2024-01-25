@@ -52,4 +52,4 @@ runs:
         ENCLAVE_ID: ${{ inputs.aws_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |
-        bash ./uid2-shared-actions/scripts/prepare_enclave_metadata.sh
+        cd e2e && bash ../uid2-shared-actions/scripts/prepare_enclave_metadata.sh

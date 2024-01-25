@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -ex
 
+ROOT="../uid2-shared-actions/scripts"
+
+source "${ROOT}/healthcheck.sh"
+
 if [ -z "${BORE_URL_CORE}" ]; then
   echo "BORE_URL_CORE can not be empty"
   exit 1
@@ -33,7 +37,7 @@ fi
 
 AWS_STACK_NAME="uid2-operator-e2e-${IMAGE_HASH}"
 
-python ./uid2-shared-actions/scripts/aws/create_cloudformation_stack.py \
+python ${ROOT}/aws/create_cloudformation_stack.py \
   --core "${BORE_URL_CORE}" \
   --optout "${BORE_URL_OPTOUT}" \
   --region "${AWS_REGION}" \
@@ -55,7 +59,7 @@ else
 fi
 
 # Get public URL
-python ./uid2-shared-actions/scripts/aws/get_instance_url.py \
+python ${ROOT}/aws/get_instance_url.py \
   --region "${AWS_REGION}" \
   --stack "${AWS_STACK_NAME}"
 
