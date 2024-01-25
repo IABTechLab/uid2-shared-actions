@@ -35,7 +35,8 @@ if [ -z "${OPERATOR_KEY}" ]; then
   exit 1
 fi
 
-AWS_STACK_NAME="uid2-operator-e2e-${IMAGE_HASH}"
+DATE=$(date '+%Y%m%d%H%M%S')
+AWS_STACK_NAME="uid2-operator-e2e-${IMAGE_HASH}-${DATE}"
 
 python ${ROOT}/aws/create_cloudformation_stack.py \
   --stackfp "${ROOT}/aws/stacks" \
