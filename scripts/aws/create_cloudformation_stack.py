@@ -24,6 +24,8 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_c
     return result
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--stackfp', dest='stack_fp', action='store', required='true', help='The filepath to the AWS stacks')
+parser.add_argument('--operatorfp', dest='operator_fp', action='store', required='true', help='The filepath to the uid2-operator repo')
 parser.add_argument('--core', dest='core_url', action='store', required='true', help='The core URL')
 parser.add_argument('--optout', dest='optout_url', action='store', required='true', help='The optout URL')
 parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1'], dest='region', action='store', required='true', help='The target region')
@@ -32,10 +34,10 @@ parser.add_argument('--stack', dest='stack', action='store', required='true', he
 parser.add_argument('--key', dest='operator_key', action='store', required='true', help='The operator key')
 args = parser.parse_args()
 
-with open("{}stacks/stack.{}.json".format(args.stack_filepath, args.region), 'r') as f:
+with open('{}/stacks/stack.{}.json'.format(args.stack_fp, args.region), 'r') as f:
     dc_cfg = json.load(f)
 
-with open("{}scripts/aws/UID_CloudFormation.template.yml".format(args.operator_repo_filepath), 'r') as f:
+with open('{}/scripts/aws/UID_CloudFormation.template.yml'.format(args.operator_fp), 'r') as f:
     cft = load_yaml(f)
 
 cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
