@@ -265,7 +265,6 @@ jobs:
             elif [ "${OPERATOR_TYPE}" == "azure" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
-            fi
             elif [ "${OPERATOR_TYPE}" == "aws" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_aws_uid2_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
