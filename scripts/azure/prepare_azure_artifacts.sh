@@ -13,7 +13,7 @@ fi
 IMAGE="ghcr.io/iabtechlab/uid2-operator:${IMAGE_VERSION}"
 
 if [ -d "${OUTPUT_DIR}" ]; then
-  echo "${OUTPUT_DIR} exist."
+  echo "${OUTPUT_DIR} exists"
 fi
 
 INPUT_TEMPLATE_FILE="${INPUT_DIR}/template.json"
@@ -23,7 +23,7 @@ OUTPUT_PARAMETERS_FILE="${OUTPUT_DIR}/parameters.json"
 OUTPUT_POLICY_DIGEST_FILE="${OUTPUT_DIR}/digest.txt"
 
 if [[ -d ${OUTPUT_DIR} ]]; then
-  echo "${OUTPUT_DIR}  exist. Skip. This only happens during local test."
+  echo "${OUTPUT_DIR} exists, skipping - this only happens during local testing"
 else
   mkdir -p ${OUTPUT_DIR}
 

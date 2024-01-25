@@ -33,7 +33,7 @@ runs:
       id: enclave_id
       shell: bash
       env:
-        OUTPUT_POLICY_DIGEST_FILE: ${{ steps.azure_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
+        OUTPUT_POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
       run: |
         cd e2e && bash ../uid2-shared-actions/scripts/azure/prepare_azure_enclave_id.sh
 
