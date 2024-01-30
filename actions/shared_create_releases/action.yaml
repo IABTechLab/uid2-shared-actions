@@ -40,7 +40,10 @@ runs:
         configurationJson: |
           {
             "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ inputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ inputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
-            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )",
+            "tag_resolver": {
+                "method": "sort"
+            }
           }
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
