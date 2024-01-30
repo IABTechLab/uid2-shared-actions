@@ -60,10 +60,10 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
 
     - name: Create Docker Release
-      if: ${{ inputs.is_release == 'true' }}
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker' }}
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker'}}
+        name: ${{ inputs.version_number_input }}
         body: ${{ steps.github_release_docker.outputs.changelog }}
         draft: true
 
