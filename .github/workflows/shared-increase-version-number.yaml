@@ -54,14 +54,14 @@ jobs:
           echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
 
       - name: Commit ${{ inputs.working_dir }}/package.json and ${{ inputs.working_dir }}/version.json
-        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
+        if: ${{ inputs.version_number_input == '' && steps.setup.outputs.is_release != 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
           add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/version.json and set tag
-        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
+        if: ${{ inputs.version_number_input == '' && steps.setup.outputs.is_release == 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
           add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/version.json'
