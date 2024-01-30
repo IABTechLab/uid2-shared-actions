@@ -77,7 +77,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v2
         with:
           is_release: ${{ steps.setup.outputs.is_release }}
-          version_number_input: ${{ inputs.version_number_input }}
+          version_number_input: ${{ inputs.new_version }}
           tags: ${{ steps.publishToDocker.outputs.tags }}
           image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
