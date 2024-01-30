@@ -34,16 +34,13 @@ runs:
     - name: Build Docker Changelog
       id: github_release_docker
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker'}}
-      uses: mikepenz/release-changelog-builder-action@v3
+      uses: mikepenz/release-changelog-builder-action@v4
       with:
         toTag: v${{ inputs.version_number_input }}
         configurationJson: |
           {
             "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ inputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ inputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
-            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )",
-            "tag_resolver": {
-                "method": "sort"
-            }
+            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
           }
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
