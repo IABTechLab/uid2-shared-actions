@@ -63,7 +63,7 @@ runs:
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker' }}
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ inputs.version_number_input }}
+        name: v${{ inputs.version_number_input }}
         body: ${{ steps.github_release_docker.outputs.changelog }}
         draft: true
 
@@ -71,6 +71,6 @@ runs:
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ inputs.version_number_input }}
+        name: v${{ inputs.version_number_input }}
         body: ${{ steps.github_release_maven.outputs.changelog }}
         draft: true
