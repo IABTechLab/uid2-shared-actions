@@ -74,7 +74,7 @@ jobs:
 
       - name: Create Release
         id: github_release
-        uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@kcc-UID2-2674-implement-shared-publish-to-docker-versioned
+        uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v2
         with:
           is_release: ${{ steps.setup.outputs.is_release }}
           version_number_input: ${{ inputs.new_version }}
