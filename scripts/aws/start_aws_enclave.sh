@@ -62,14 +62,14 @@ else
 fi
 
 # Get public URL
-python ${ROOT}/aws/get_instance_url.py \
+AWS_INSTANCE_URL=$(python ${ROOT}/aws/get_instance_url.py \
   --region "${AWS_REGION}" \
-  --stack "${AWS_STACK_NAME}"
+  --stack "${AWS_STACK_NAME}")
 
 echo "Instance URL: ${AWS_INSTANCE_URL}"
 echo "uid2_e2e_pipeline_operator_url=${AWS_INSTANCE_URL}:8080" >> ${GITHUB_OUTPUT}
 
-HEALTHCHECK_URL="${AWS_INSTANCE_URL}:8080/ops/healthcheck"
+HEALTHCHECK_URL="${AWS_INSTANCE_URL}/ops/healthcheck"
 
 # Health check - for 5 mins
 healthcheck "${HEALTHCHECK_URL}" 60

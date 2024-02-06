@@ -43,11 +43,13 @@ with open('{}/UID_CloudFormation.template.yml'.format(args.cftemplate_fp), 'r') 
 cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
 
 user_data = cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub']
-cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub'] = user_data + '''
-export CORE_BASE_URL={}
-export OPTOUT_BASE_URL={}
-export ENFORCE_HTTPS=false
-'''.format(args.core_url, args.optout_url)
+first_line = user_data.find('\n')
+user_data = user_data[:first_line] + '''
+export CORE_BASE_URL="http://{}"
+export OPTOUT_BASE_URL="http://{}"
+export ENFORCE_HTTPS="false"'''.format(args.core_url, args.optout_url) + user_data[first_line:]
+cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub'] = user_data
+print(dump_yaml(cft))
 
 ip = requests.get('https://ipinfo.io/ip').text.strip()
 

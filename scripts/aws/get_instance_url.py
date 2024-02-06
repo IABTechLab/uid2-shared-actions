@@ -27,5 +27,5 @@ public_endpoints = [r['PublicDnsName'] for r in boto3.client('ec2', region_name=
 
 instance_url = public_endpoints[0]
 
-print('AWS Instance URL: ' + instance_url)
+print(instance_url)
 set_output('AWS_INSTANCE_URL', 'http://' + instance_url)
