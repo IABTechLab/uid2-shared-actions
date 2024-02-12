@@ -23,9 +23,6 @@ inputs:
   repo:
     description: The repo that publishing to.
     default: ''
-  new_version:
-    description: The new version that are publish to Maven
-    default: ''
 
 runs:
   using: "composite" 
