@@ -18,10 +18,6 @@ on:
         description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
         type: string
         default: true
-      version_number_input:
-        description: The version number to publish for the docker repo
-        type: string
-        default: ''
       force_release:
         description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
         type: string
@@ -77,7 +73,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v2
         with:
           is_release: ${{ steps.setup.outputs.is_release }}
-          version_number_input: ${{ inputs.version_number_input }}
+          new_version: ${{ inputs.new_version }}
           tags: ${{ steps.publishToDocker.outputs.tags }}
           image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

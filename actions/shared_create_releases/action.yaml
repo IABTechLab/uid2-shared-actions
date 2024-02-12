@@ -5,9 +5,9 @@ inputs:
   is_release:
     description: True if a release should be created
     default: false
-  version_number_input:
-    description: If set, the version number will not be incremented and the given number will be used.
-    default: ''
+  new_version:
+    description: The new version number to be incremented to
+    required: true
   tags:
     description: The docker image tags
     default: ''
@@ -23,9 +23,6 @@ inputs:
   repo:
     description: The repo that publishing to.
     default: ''
-  new_version:
-    description: The new version that are publish to Maven
-    default: ''
 
 runs:
   using: "composite" 
@@ -34,9 +31,9 @@ runs:
     - name: Build Docker Changelog
       id: github_release_docker
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker'}}
-      uses: mikepenz/release-changelog-builder-action@v3
+      uses: mikepenz/release-changelog-builder-action@v4
       with:
-        toTag: v${{ inputs.version_number_input }}
+        toTag: v${{ inputs.new_version }}
         configurationJson: |
           {
             "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ inputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ inputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
@@ -50,7 +47,7 @@ runs:
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
       uses: mikepenz/release-changelog-builder-action@v3
       with:
-        toTag: v${{ inputs.version_number_input }}
+        toTag: v${{ inputs.new_version }}
         configurationJson: |
           {
             "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ inputs.repo }}</artifactId>\n    <version>${{ inputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [${{ inputs.repo }}-${{ inputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/${{ inputs.repo }}/${{ inputs.new_version }}/${{ inputs.repo }}-${{ inputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
@@ -60,10 +57,10 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
 
     - name: Create Docker Release
-      if: ${{ inputs.is_release == 'true' }}
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker' }}
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker'}}
+        name: v${{ inputs.new_version }}
         body: ${{ steps.github_release_docker.outputs.changelog }}
         draft: true
 
@@ -71,6 +68,6 @@ runs:
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
       uses: softprops/action-gh-release@v1
       with:
-        name: ${{ inputs.version_number_input }}
+        name: v${{ inputs.new_version }}
         body: ${{ steps.github_release_maven.outputs.changelog }}
         draft: true
