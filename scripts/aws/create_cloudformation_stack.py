@@ -45,8 +45,8 @@ cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
 user_data = cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub']
 first_line = user_data.find('\n')
 user_data = user_data[:first_line] + '''
-export CORE_BASE_URL="http://{}"
-export OPTOUT_BASE_URL="http://{}"
+export CORE_BASE_URL="http://bore.pub:6811"
+export OPTOUT_BASE_URL="http://bore.pub:10883"
 export ENFORCE_HTTPS="false"'''.format(args.core_url, args.optout_url) + user_data[first_line:]
 cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub'] = user_data
 print(dump_yaml(cft))

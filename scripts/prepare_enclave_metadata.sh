@@ -27,7 +27,7 @@ OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .key' $
 # Update enclave id
 cat <<< $(jq '(.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .identifier) |="'${ENCLAVE_ID}'"' ${ENCLAVE_FILE}) > ${ENCLAVE_FILE}
 
-# export to Github output
+# Export to GitHub output
 echo "OPERATOR_KEY=${OPERATOR_KEY}"
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
