@@ -34,6 +34,10 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@v2
         with:
           release_type: ${{ inputs.release_type }}
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Set version number
         id: version
