@@ -56,7 +56,7 @@ jobs:
       - name: Update ${{ inputs.working_dir }}/package-lock.json
         id: updatePackageLockJson
         run: |
-          npm install
+          npm install --package-lock-only
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/package-lock.json and ${{ inputs.working_dir }}/version.json
         if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE != 'true' }} 
