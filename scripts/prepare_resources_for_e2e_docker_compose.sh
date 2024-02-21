@@ -84,7 +84,7 @@ sed -i.bak "s#uid2-operator:latest#uid2-operator:$OPERATOR_VERSION#g" $DOCKER_CO
 if [ $OPERATOR_TYPE != "public" ]; then
   jq_string_update $CORE_CONFIG_FILE aws_s3_endpoint "http://$BORE_URL_LOCALSTACK"
   jq_string_update $CORE_CONFIG_FILE kms_aws_endpoint "http://$BORE_URL_LOCALSTACK"
-  jq_string_update $CORE_CONFIG_FILE core_public_url "http://$BORE_URL_CORE"
+  jq_string_update $CORE_CONFIG_FILE core_public_url "http://kat-test"
   jq_string_update $CORE_CONFIG_FILE optout_url "http://$BORE_URL_OPTOUT"
   jq_number_boolean_update $CORE_CONFIG_FILE provide_private_site_data false
 
