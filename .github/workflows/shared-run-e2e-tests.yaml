@@ -5,19 +5,19 @@ on:
       core_root:
         description: 'The root path for uid2-core folder'
         type: string
-        default: '../uid2-core'
+        default: 'uid2-core'
       optout_root:
         description: 'The root path for uid2-optout folder'
         type: string
-        default: '../uid2-optout'
+        default: 'uid2-optout'
       admin_root:
         description: 'The root path for uid2-admin folder'
         type: string
-        default: '../uid2-admin'
+        default: 'uid2-admin'
       operator_root:
         description: 'The root path for uid2-operator folder'
         type: string
-        default: '../uid2-operator'
+        default: 'uid2-operator'
       operator_image_version:
         description: 'The version of UID2 operator image'
         type: string
@@ -145,12 +145,12 @@ jobs:
         id: bore
         if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
+          bash uid2-shared-actions/scripts/setup_bore.sh
 
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp'}}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@kcc-UID2-2772-enable-e2e-tests
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -160,7 +160,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v2
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@kcc-UID2-2772-enable-e2e-tests
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -181,12 +181,12 @@ jobs:
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
           BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
+          bash uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
 
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp'}}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2772-enable-e2e-tests
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -199,7 +199,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v2
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@kcc-UID2-2772-enable-e2e-tests
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -249,11 +249,11 @@ jobs:
           SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+          bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
         env:
           CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.container_group_name }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/azure/stop_azure_cc_enclave.sh
+          bash uid2-shared-actions/scripts/azure/stop_azure_cc_enclave.sh
