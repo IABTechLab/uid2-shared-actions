@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="../uid2-shared-actions/scripts/azure"
+ROOT="uid2-shared-actions/scripts/azure"
 INPUT_DIR="$ROOT/artifacts_schema"
 OUT_PUT_DIR="$ROOT/azure-artifacts"
 
