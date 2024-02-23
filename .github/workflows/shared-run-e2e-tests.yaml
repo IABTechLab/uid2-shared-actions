@@ -127,7 +127,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v3
         with:
-          ref: kcc-UID2-2772-enable-e2e-tests
+          ref: v2
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -150,7 +150,7 @@ jobs:
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp'}}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@kcc-UID2-2772-enable-e2e-tests
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -160,7 +160,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@kcc-UID2-2772-enable-e2e-tests
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v2
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -186,7 +186,7 @@ jobs:
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp'}}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@kcc-UID2-2772-enable-e2e-tests
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -199,7 +199,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@kcc-UID2-2772-enable-e2e-tests
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v2
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
