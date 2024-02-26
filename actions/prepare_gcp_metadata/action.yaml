@@ -41,7 +41,7 @@ runs:
         access_token_lifetime: 1200s
 
     - name: Set up Cloud SDK
-      uses: 'google-github-actions/setup-gcloud@v1'
+      uses: google-github-actions/setup-gcloud@v2
     
     - name: Log in to the GCP Registry
       uses: docker/login-action@v3
