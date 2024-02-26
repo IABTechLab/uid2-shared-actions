@@ -7,7 +7,7 @@ inputs:
   admin_root:
     description: 'The root path for uid2-admin folder'
     type: string
-    default: '../uid2-admin'
+    default: 'uid2-admin'
   gcp_service_account:
     description: 'The GCP service account'
     type: string
@@ -71,5 +71,5 @@ runs:
         IMAGE_HASH: ${{ steps.get_digest.outputs.image_hash }}
         ADMIN_ROOT: ${{ inputs.admin_root }}
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_metadata.sh
+        bash uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_metadata.sh
 

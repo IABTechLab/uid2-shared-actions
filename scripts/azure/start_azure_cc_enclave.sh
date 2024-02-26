@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="../uid2-shared-actions/scripts"
+ROOT="uid2-shared-actions/scripts"
 # below resources should be prepared ahead
 RESOURCE_GROUP=uid-enclave-ci-cd
 IDENTITY=uid-operator

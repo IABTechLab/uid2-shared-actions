@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="../uid2-shared-actions/scripts"
+ROOT="uid2-shared-actions/scripts"
 GCP_INSTANCE_NAME="ci-test-$RANDOM"
 OPERATOR_KEY_SECRET_NAME=$GCP_INSTANCE_NAME
 
