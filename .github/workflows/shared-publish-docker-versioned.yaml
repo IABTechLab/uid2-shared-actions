@@ -182,7 +182,7 @@ jobs:
           hide-progress: true
 
       - name: Upload Trivy scan report to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         if: inputs.publish_vulnerabilities == 'true'
         with:
           sarif_file: 'trivy-results.sarif'
