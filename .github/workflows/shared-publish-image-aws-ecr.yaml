@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
         fetch-depth: 0
