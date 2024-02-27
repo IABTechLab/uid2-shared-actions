@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -36,7 +36,7 @@ jobs:
           path: target/site/jacoco/*
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2.4.0
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: CRITICAL
