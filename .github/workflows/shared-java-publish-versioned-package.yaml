@@ -45,7 +45,8 @@ jobs:
             GITHUB_CONTEXT: ${{ toJson(github) }}
 
       - name: Check branch and release type
-        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2.2
+        id: checkRelease
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2
         with:
           release_type: ${{ inputs.release_type }}
     
@@ -93,15 +94,15 @@ jobs:
           mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
 
       - name: Commit pom.xml and version.json
-        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE != 'true' }} 
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
         with:
           add: '${{ inputs.working_dir }}/pom.xml ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
 
       - name: Commit pom.xml, version.json and set tag
-        if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.IS_RELEASE == 'true' }} 
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }} 
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
         with:
           add: 'pom.xml version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
