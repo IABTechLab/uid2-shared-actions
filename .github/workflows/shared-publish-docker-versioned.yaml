@@ -91,7 +91,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore timestamps
-        uses: thetradedesk/git-restore-mtime-action@v1.2
+        uses: thetradedesk/git-restore-mtime-action@v1.3
 
       - name: Set version number
         id: version
