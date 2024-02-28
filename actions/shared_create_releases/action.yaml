@@ -45,7 +45,7 @@ runs:
     - name: Build Maven Changelog
       id: github_release_maven
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
-      uses: mikepenz/release-changelog-builder-action@v3
+      uses: mikepenz/release-changelog-builder-action@v4
       with:
         toTag: v${{ inputs.new_version }}
         configurationJson: |

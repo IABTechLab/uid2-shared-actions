@@ -111,7 +111,7 @@ jobs:
       - name: Build Changelog
         id: github_release
         if: ${{ env.IS_RELEASE == 'true' }}
-        uses: mikepenz/release-changelog-builder-action@v3
+        uses: mikepenz/release-changelog-builder-action@v4
         with:
           toTag: v${{ steps.version.outputs.new_version }}
           configurationJson: |
