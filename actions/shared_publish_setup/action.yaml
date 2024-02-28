@@ -39,7 +39,7 @@ runs:
           IS_RELEASE: ${{ steps.checkRelease.outputs.IS_RELEASE }}
 
     - name: Set up JDK
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       if: ${{ inputs.java_version != '' }}
       with:
         distribution: 'temurin'
@@ -61,4 +61,4 @@ runs:
         fetch-depth: 0
 
     - name: Restore timestamps
-      uses: thetradedesk/git-restore-mtime-action@v1.2
+      uses: thetradedesk/git-restore-mtime-action@v1.3
