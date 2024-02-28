@@ -104,7 +104,7 @@ jobs:
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
         with:
-          add: 'pom.xml version.json'
+          add: '${{ inputs.working_dir }}/pom.xml ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}          
 
