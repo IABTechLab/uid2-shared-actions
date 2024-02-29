@@ -81,6 +81,12 @@ sed -i.bak "s#uid2-optout:latest#uid2-optout:$OPTOUT_VERSION#g" $DOCKER_COMPOSE_
 sed -i.bak "s#uid2-operator:latest#uid2-operator:$OPERATOR_VERSION#g" $DOCKER_COMPOSE_FILE
 
 # set provide_private_site_data to false to workaround the private site path
+if [ $OPERATOR_TYPE == "public" ]; then
+  jq_string_update $CORE_CONFIG_FILE core_public_url "http://localhost:8088"
+  jq_string_update $CORE_CONFIG_FILE optout_url "http://localhost:8090"
+fi
+
+# set provide_private_site_data to false to workaround the private site path
 if [ $OPERATOR_TYPE != "public" ]; then
   jq_string_update $CORE_CONFIG_FILE aws_s3_endpoint "http://$BORE_URL_LOCALSTACK"
   jq_string_update $CORE_CONFIG_FILE kms_aws_endpoint "http://$BORE_URL_LOCALSTACK"
