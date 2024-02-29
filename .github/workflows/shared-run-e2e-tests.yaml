@@ -127,7 +127,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v2
+          ref: kcc-fix-e2e-issue
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
