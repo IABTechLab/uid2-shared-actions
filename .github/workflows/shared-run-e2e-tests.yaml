@@ -222,6 +222,8 @@ jobs:
             echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_core_url=http://core:8088" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_optout_url=http://optout:8090" >> $GITHUB_OUTPUT
           else
             echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
             if [ "$OPERATOR_TYPE" == "gcp" ]; then
@@ -231,6 +233,8 @@ jobs:
               echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
             fi
+            echo "uid2_e2e_pipeline_core_url=${{ steps.bore.outputs.BORE_URL_CORE }}" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_optout_url=${{ steps.bore.outputs.BORE_URL_OPTOUT }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Run E2E tests
