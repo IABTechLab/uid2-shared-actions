@@ -59,7 +59,6 @@ jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.operatorKeySecretName.valu
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.deploymentEnvironment.value "${DEPLOYMENT_ENV}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.coreBaseUrl.value "http://${BORE_URL_CORE}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.optoutBaseUrl.value "http://${BORE_URL_OPTOUT}"
-jq_number_boolean_update ${OUTPUT_PARAMETERS_FILE} parameters.enforceHttps.value false
 
 cat ${OUTPUT_PARAMETERS_FILE}
 
