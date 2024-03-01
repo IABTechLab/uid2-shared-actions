@@ -7,7 +7,7 @@ inputs:
     default: latest
   admin_root:
     description: The root path for uid2-admin folder
-    default: ../uid2-admin
+    default: uid2-admin
   aws_pcr0:
     description: The AWS PCR0
     required: true
@@ -45,4 +45,4 @@ runs:
         ENCLAVE_ID: ${{ inputs.aws_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/prepare_enclave_metadata.sh
+        bash uid2-shared-actions/scripts/prepare_enclave_metadata.sh

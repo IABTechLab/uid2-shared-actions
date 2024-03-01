@@ -29,12 +29,10 @@ inputs:
   uid2_e2e_pipeline_core_url:
     description: 'Environment variable for the Core service'
     required: false
-    type: string
     default: 'http://core:8088'
   uid2_e2e_pipeline_optout_url:
     description: 'Environment variable for the OptOut service'
     required: false
-    type: string
     default: 'http://optout:8090'
 
 runs:
