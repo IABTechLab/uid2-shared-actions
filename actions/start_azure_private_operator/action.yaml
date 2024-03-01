@@ -45,4 +45,4 @@ runs:
         OUTPUT_TEMPLATE_FILE: ${{ inputs.output_template_file }}
         OUTPUT_PARAMETERS_FILE: ${{ inputs.output_parameters_file }}
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/azure/start_azure_enclave.sh
+        bash uid2-shared-actions/scripts/azure/start_azure_enclave.sh

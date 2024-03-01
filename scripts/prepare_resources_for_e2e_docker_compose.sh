@@ -10,8 +10,8 @@ OPERATOR_CONFIG_FILE_DIR="${ROOT}/docker/uid2-operator/conf"
 CORE_RESOURCE_FILE_DIR="${ROOT}/docker/uid2-core/src"
 OPTOUT_RESOURCE_FILE_DIR="${ROOT}/docker/uid2-optout/src"
 
-source "../uid2-shared-actions/scripts/jq_helper.sh"
-source "../uid2-shared-actions/scripts/healthcheck.sh"
+source "uid2-shared-actions/scripts/jq_helper.sh"
+source "uid2-shared-actions/scripts/healthcheck.sh"
 
 if [ -z "${CORE_ROOT}" ]; then
   echo "CORE_ROOT can not be empty"
@@ -48,7 +48,7 @@ if [ ${OPERATOR_TYPE} == "public" ]; then
   cp "${OPERATOR_ROOT}/conf/local-e2e-docker-${OPERATOR_TYPE}-config.json" "${OPERATOR_CONFIG_FILE_DIR}/local-e2e-docker-config.json"
 fi
 
-cp "../uid2-e2e/docker-compose.yml" "${ROOT}"
+cp "uid2-e2e/docker-compose.yml" "${ROOT}"
 
 CORE_CONFIG_FILE="${ROOT}/docker/uid2-core/conf/local-e2e-docker-config.json"
 OPTOUT_CONFIG_FILE="${ROOT}/docker/uid2-optout/conf/local-e2e-docker-config.json"

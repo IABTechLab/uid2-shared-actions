@@ -5,20 +5,19 @@ on:
       core_root:
         description: The root path for uid2-core folder
         type: string
-        default: ../uid2-core
+        default: uid2-core
       optout_root:
         description: The root path for uid2-optout folder
         type: string
-        default: ../uid2-optout
+        default: uid2-optout
       admin_root:
         description: The root path for uid2-admin folder
         type: string
-        default: ../uid2-admin
+        default: uid2-admin
       operator_root:
         description: The root path for uid2-operator folder
         type: string
-        default: ../uid2-operator
-
+        default: uid2-operator
       operator_image_version:
         description: The uid2-operator image version
         type: string
@@ -101,52 +100,52 @@ jobs:
       id-token: write
     steps:
       - name: Log in to the Docker container registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
       - name: Checkout full history
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Checkout uid2-core repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.core_branch }}
           repository: IABTechLab/uid2-core
           path: uid2-core
 
       - name: Checkout uid2-optout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.optout_branch }}
           repository: IABTechLab/uid2-optout
           path: uid2-optout
 
       - name: Checkout uid2-admin repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.admin_branch }}
           repository: IABTechLab/uid2-admin
           path: uid2-admin
 
       - name: Checkout uid2-operator repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ inputs.operator_branch }}
           repository: IABTechLab/uid2-operator
           path: uid2-operator
 
       - name: Checkout uid2-shared-actions repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: gdm-UID2-2341-aws-test-pipeline
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
       - name: Checkout uid2-e2e repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
@@ -159,7 +158,7 @@ jobs:
         id: bore
         if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/setup_bore.sh
+          bash uid2-shared-actions/scripts/setup_bore.sh
 
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
@@ -204,7 +203,7 @@ jobs:
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
           BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
+          bash uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
 
       - name: Start GCP private operator
         id: start_gcp_private_operator
@@ -257,6 +256,8 @@ jobs:
             echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_core_url=http://core:8088" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_optout_url=http://optout:8090" >> $GITHUB_OUTPUT
           else
             echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
             if [ "${OPERATOR_TYPE}" == "gcp" ]; then
@@ -269,6 +270,8 @@ jobs:
               echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> $GITHUB_OUTPUT
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_aws_uid2_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
             fi
+            echo "uid2_e2e_pipeline_core_url=${{ steps.bore.outputs.BORE_URL_CORE }}" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_optout_url=${{ steps.bore.outputs.BORE_URL_OPTOUT }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Run E2E tests
@@ -287,14 +290,14 @@ jobs:
           SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+          bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
         env:
           AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+          bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 
       - name: Stop AWS private operator
         if: ${{ inputs.operator_type == 'aws' }}
@@ -302,4 +305,4 @@ jobs:
           AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
-          cd e2e && bash ../uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+          bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh

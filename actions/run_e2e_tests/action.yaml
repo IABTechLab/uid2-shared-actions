@@ -26,6 +26,16 @@ inputs:
     description: Environment variable to run the E2E test
     required: false
     default: 'true'
+  uid2_e2e_pipeline_core_url:
+    description: 'Environment variable for the Core service'
+    required: false
+    type: string
+    default: 'http://core:8088'
+  uid2_e2e_pipeline_optout_url:
+    description: 'Environment variable for the OptOut service'
+    required: false
+    type: string
+    default: 'http://optout:8090'
 
 runs:
   using: "composite"
@@ -40,9 +50,13 @@ runs:
         docker run \
         --env UID2_E2E_ENV='github-test-pipeline' \
         --env UID2_E2E_API_KEY='UID2-C-L-999-fCXrMM.fsR3mDqAXELtWWMS+xG1s7RdgRTMqdOH2qaAo=' \
+        --env UID2_E2E_API_KEY_NON_SHARING_RECIPIENT='UID2-C-L-123-t32pCM.5NCX1E94UgOd2f8zhsKmxzCoyhXohHYSSWR8U=' \
         --env UID2_E2E_API_KEY_OLD='UID2-C-L-1000-qxpBsF.ibeCDBpD2bq4Zm7inDacGioUk1aaLeNJrabow=' \
+        --env UID2_E2E_API_KEY_SHARING_RECIPIENT='UID2-C-L-1000-qxpBsF.ibeCDBpD2bq4Zm7inDacGioUk1aaLeNJrabow=' \
         --env UID2_E2E_API_SECRET='DzBzbjTJcYL0swDtFs2krRNu+g1Eokm2tBU4dEuD0Wk=' \
+        --env UID2_E2E_API_SECRET_NON_SHARING_RECIPIENT='FsD4bvtjMkeTonx6HvQp6u0EiI1ApGH4pIZzZ5P7UcQ=' \
         --env UID2_E2E_API_SECRET_OLD='VT7+t0G/RVueMuVZAL56I2c3JJFSYQfhbu8yo0V/Tds=' \
+        --env UID2_E2E_API_SECRET_SHARING_RECIPIENT='VT7+t0G/RVueMuVZAL56I2c3JJFSYQfhbu8yo0V/Tds=' \
         --env UID2_E2E_SUBSCRIPTION_ID='LBk2xJsgrS' \
         --env UID2_E2E_SERVER_PUBLIC_KEY='UID2-X-L-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWyCP9O/6ppffj8f5PUWsEhAoMNdTBnpnkiOPZBkVnLkxOyTjPsKzf5J3ApPHzutAGNGgKAzFc6TuCfo+BWsZtQ==' \
         --env UID2_E2E_ORIGIN='https://example.com' \
@@ -53,5 +67,8 @@ runs:
         --env UID2_E2E_PIPELINE_OPERATOR_TYPE='${{ inputs.uid2_e2e_pipeline_operator_type }}' \
         --env UID2_E2E_PIPELINE_OPERATOR_URL='${{ inputs.uid2_e2e_pipeline_operator_url }}' \
         --env UID2_E2E_SITE_ID='999' \
+        --env UID2_E2E_CORE_API_TOKEN='UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdEE=' \
+        --env UID2_E2E_CORE_URL='${{ inputs.uid2_e2e_pipeline_core_url }}' \
+        --env UID2_E2E_OPTOUT_URL='${{ inputs.uid2_e2e_pipeline_optout_url }}' \
         --network e2e_default \
         ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}

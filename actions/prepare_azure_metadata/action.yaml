@@ -7,8 +7,7 @@ inputs:
     default: latest
   admin_root:
     description: The root path for uid2-admin folder
-    default: ../uid2-admin
-
+    default: uid2-admin
 outputs:
   output_template_file:
     description: The output template file
@@ -27,7 +26,7 @@ runs:
       env:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/azure/prepare_azure_artifacts.sh
+        bash uid2-shared-actions/scripts/azure/prepare_azure_artifacts.sh
 
     - name: Prepare Azure enclave ID
       id: enclave_id
@@ -35,7 +34,7 @@ runs:
       env:
         OUTPUT_POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/azure/prepare_azure_enclave_id.sh
+        bash uid2-shared-actions/scripts/azure/prepare_azure_enclave_id.sh
 
     - name: Prepare Azure enclave metadata
       id: enclave_metadata

@@ -7,7 +7,7 @@ inputs:
     default: latest
   admin_root:
     description: The root path for uid2-admin folder
-    default: ../uid2-admin
+    default: uid2-admin
   gcp_service_account:
     description: The GCP service account
     required: true
@@ -40,8 +40,8 @@ runs:
         access_token_lifetime: 1200s
 
     - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v1
-
+      uses: google-github-actions/setup-gcloud@v2
+    
     - name: Log in to the GCP Registry
       uses: docker/login-action@v3
       with:
@@ -61,7 +61,7 @@ runs:
 
         # Get the digest
         IMAGE_HASH=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2)
-        echo "::set-output name=image_hash::${IMAGE_HASH}"
+        echo "image_hash=${IMAGE_HASH}" >> $GITHUB_OUTPUT
 
     - name: Prepare GCP enclave ID
       id: enclave_id
@@ -69,7 +69,7 @@ runs:
       env:
         IMAGE_HASH: ${{ steps.image_digest.outputs.image_hash }}
       run: |
-        cd e2e && bash ../uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_id.sh
+        bash uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_id.sh
 
     - name: Prepare GCP enclave metadata
       id: enclave_metadata

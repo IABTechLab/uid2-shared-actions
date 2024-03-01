@@ -30,12 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
         fetch-depth: 0
     - name: Restore timestamps
-      uses: thetradedesk/git-restore-mtime-action@v1.2
+      uses: thetradedesk/git-restore-mtime-action@v1.3
 
     - name: Set version number
       id: version
@@ -66,7 +66,7 @@ jobs:
         mask-password: 'true'
 
     - name: Set up JDK
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: ${{ inputs.java_version }}
@@ -83,7 +83,7 @@ jobs:
 
     - name: Extract metadata (tags, labels) for Docker
       id: meta
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v5
       env: 
         REGISTRY: ${{ steps.login-ecr.outputs.registry }}
       with:

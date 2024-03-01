@@ -1,0 +1,64 @@
+name: Setups for publishing a package
+description: Checkout branches and setup release types
+
+inputs:
+  release_type:
+    description: The type of version number to return. Must be one of [Snapshot, Patch, Minor or Major]
+    required: true
+  java_version:
+    description: The version of Java to use to compile the JAR. Defaults to 11
+  version_number_input:
+    description: If set, the version number will not be incremented and the given number will be used.
+    default: ''
+
+outputs:
+  is_release:
+    description: True if a release should be created
+    value: ${{ steps.checkRelease.outputs.IS_RELEASE }}
+  not_snapshot:
+    description: True if the release type is not a snapshot or pre-release build
+    value: ${{ steps.checkRelease.outputs.NOT_SNAPSHOT }}
+
+runs:
+  using: "composite" 
+
+  steps:
+    - name: Check branch and release type
+      id: checkRelease
+      uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2
+      with:
+        release_type: ${{ inputs.release_type }}
+
+    - name: Show Context
+      run: |
+        printenv
+        echo "$GITHUB_CONTEXT"
+      shell: bash
+      env: 
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+          IS_RELEASE: ${{ steps.checkRelease.outputs.IS_RELEASE }}
+
+    - name: Set up JDK
+      uses: actions/setup-java@v4
+      if: ${{ inputs.java_version != '' }}
+      with:
+        distribution: 'temurin'
+        java-version: ${{ inputs.java_version }}
+
+    - name: Checkout full history on Main
+      uses: actions/checkout@v4
+      if: ${{ inputs.version_number_input == ''}}
+      with:
+        # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
+        fetch-depth: 0
+
+    - name: Checkout full history at tag v${{ inputs.version_number_input }}
+      uses: actions/checkout@v4
+      if: ${{ inputs.version_number_input != ''}}
+      with:
+        ref: v${{ inputs.version_number_input }}
+        # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
+        fetch-depth: 0
+
+    - name: Restore timestamps
+      uses: thetradedesk/git-restore-mtime-action@v1.3
