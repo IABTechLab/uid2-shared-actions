@@ -24,7 +24,7 @@ ENCLAVE_FILE="${METADATA_ROOT}/enclaves/enclaves.json"
 # Fetch operator key
 OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .key' ${OPERATOR_FILE})
 
-# Update enclave id
+# Update enclave ID
 cat <<< $(jq '(.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .identifier) |="'${ENCLAVE_ID}'"' ${ENCLAVE_FILE}) > ${ENCLAVE_FILE}
 
 # Export to GitHub output
