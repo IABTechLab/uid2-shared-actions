@@ -147,6 +147,7 @@ jobs:
       - name: Checkout uid2-e2e repo
         uses: actions/checkout@v4
         with:
+          ref: gdm-UID2-2341-aws-test-pipeline
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
