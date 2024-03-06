@@ -9,6 +9,10 @@ OPTOUT_CONFIG_FILE_DIR="${ROOT}/docker/uid2-optout/conf"
 OPERATOR_CONFIG_FILE_DIR="${ROOT}/docker/uid2-operator/conf"
 CORE_RESOURCE_FILE_DIR="${ROOT}/docker/uid2-core/src"
 OPTOUT_RESOURCE_FILE_DIR="${ROOT}/docker/uid2-optout/src"
+ALERTMANAGER_RESOURCE_FILE_DIR="${ROOT}/docker/alertmanager/conf"
+LOKI_RESOURCE_FILE_DIR="${ROOT}/docker/loki/conf"
+PROMETHEUS_RESOURCE_FILE_DIR="${ROOT}/docker/prometheus/conf"
+GRAFANA_RESOURCE_FILE_DIR="${ROOT}/docker/grafana/conf"
 
 source "uid2-shared-actions/scripts/jq_helper.sh"
 source "uid2-shared-actions/scripts/healthcheck.sh"
@@ -37,16 +41,32 @@ mkdir -p "${CORE_CONFIG_FILE_DIR}"
 cp "${CORE_ROOT}/conf/default-config.json" "${CORE_CONFIG_FILE_DIR}"
 cp "${CORE_ROOT}/conf/local-e2e-docker-config.json" "${CORE_CONFIG_FILE_DIR}"
 cp -r "${ADMIN_ROOT}/src/main/resources/localstack" "${CORE_RESOURCE_FILE_DIR}"
+
 mkdir -p "${OPTOUT_CONFIG_FILE_DIR}"
 cp "${OPTOUT_ROOT}/conf/default-config.json" "${OPTOUT_CONFIG_FILE_DIR}"
 cp "${OPTOUT_ROOT}/conf/local-e2e-docker-config.json" "${OPTOUT_CONFIG_FILE_DIR}"
 cp "${OPTOUT_ROOT}/run_tool_local_e2e.sh" "${OPTOUT_CONFIG_FILE_DIR}"
 cp -r "${OPTOUT_ROOT}/src/main/resources/localstack" "${OPTOUT_RESOURCE_FILE_DIR}"
+
 mkdir -p "${OPERATOR_CONFIG_FILE_DIR}"
 cp "${OPERATOR_ROOT}/conf/default-config.json" "${OPERATOR_CONFIG_FILE_DIR}"
 if [ ${OPERATOR_TYPE} == "public" ]; then
   cp "${OPERATOR_ROOT}/conf/local-e2e-docker-${OPERATOR_TYPE}-config.json" "${OPERATOR_CONFIG_FILE_DIR}/local-e2e-docker-config.json"
 fi
+
+mkdir -p "${ALERTMANAGER_RESOURCE_FILE_DIR}"
+cp "uid2-shared-actions/tmp/monitorstack/alertmanager/alertmanager.yml" "${ALERTMANAGER_RESOURCE_FILE_DIR}"
+
+mkdir -p "${LOKI_RESOURCE_FILE_DIR}"
+cp "uid2-shared-actions/tmp/monitorstack/loki/loki.yml" "${LOKI_RESOURCE_FILE_DIR}"
+cp "uid2-shared-actions/tmp/monitorstack/loki/rules.yml" "${LOKI_RESOURCE_FILE_DIR}"
+
+mkdir -p "${PROMETHEUS_RESOURCE_FILE_DIR}"
+cp "uid2-shared-actions/tmp/monitorstack/prometheus/prometheus.yml" "${PROMETHEUS_RESOURCE_FILE_DIR}"
+cp "uid2-shared-actions/tmp/monitorstack/prometheus/rules.yml" "${PROMETHEUS_RESOURCE_FILE_DIR}"
+
+mkdir -p "${GRAFANA_RESOURCE_FILE_DIR}"
+cp "uid2-shared-actions/tmp/monitorstack/grafana/datasource.yml" "${GRAFANA_RESOURCE_FILE_DIR}"
 
 cp "uid2-e2e/docker-compose.yml" "${ROOT}"
 
@@ -109,6 +129,6 @@ mkdir -p "${OPTOUT_MOUNT}" && chmod 777 "${OPTOUT_MOUNT}"
 chmod 777 "${CORE_RESOURCE_FILE_DIR}/init-aws.sh"
 chmod 777 "${OPTOUT_RESOURCE_FILE_DIR}/init-aws.sh"
 
-docker compose --profile "${OPERATOR_TYPE}" -f "${DOCKER_COMPOSE_FILE}" up -d
+docker compose --profile "${OPERATOR_TYPE}" -f "${DOCKER_COMPOSE_FILE}" up -d --wait
 docker ps -a
 docker network ls

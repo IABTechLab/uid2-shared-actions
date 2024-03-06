@@ -1,0 +1,9 @@
+groups:
+  - name: UID2
+    rules:
+      - alert: JobDispatcher.LongRunningJob
+        expr: 'uid2_job_dispatcher_execution_duration_ms{application="uid2-admin"} >= 0'
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Long-running job'
