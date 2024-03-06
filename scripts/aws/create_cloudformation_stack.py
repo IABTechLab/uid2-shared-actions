@@ -4,6 +4,18 @@ import boto3
 import json
 import requests
 
+def create_egress(url, description):
+    return {
+        'IpProtocol': 'tcp',
+        'FromPort': get_port(url),
+        'ToPort': get_port(url),
+        'CidrIp': '0.0.0.0/0',
+        'Description': description
+    }
+
+def get_port(url):
+    return url.split(":")[1]
+
 def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_cfg, ip_address):
     result = client.create_stack(
         StackName=stack_name,
@@ -42,12 +54,18 @@ with open('{}/UID_CloudFormation.template.yml'.format(args.cftemplate_fp), 'r') 
 
 cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
 
+egress = cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress']
+egress.append(create_egress(args.core_url, 'E2E - Core'))
+egress.append(create_egress(args.optout_url, 'E2E - Optout'))
+cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
+
 user_data = cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub']
 first_line = user_data.find('\n')
 user_data = user_data[:first_line] + '''
-export CORE_BASE_URL="http://bore.pub:49620"
-export OPTOUT_BASE_URL="http://bore.pub:14987"'''.format(args.core_url, args.optout_url) + user_data[first_line:]
+export CORE_BASE_URL="http://{}"
+export OPTOUT_BASE_URL="http://{}"'''.format(args.core_url, args.optout_url) + user_data[first_line:]
 cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub'] = user_data
+
 print(dump_yaml(cft))
 
 ip = requests.get('https://ipinfo.io/ip').text.strip()
