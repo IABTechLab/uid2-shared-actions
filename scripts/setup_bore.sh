@@ -5,7 +5,7 @@ ROOT="."
 
 docker run --init --rm --network e2e_default ekzhang/bore local --local-host localstack --to bore.pub 5001  > ${ROOT}/bore_localstack.out &
 docker run --init --rm --network e2e_default ekzhang/bore local --local-host core --to bore.pub 8088  > ${ROOT}/bore_core.out &
-docker run --init --rm --network e2e_default ekzhang/bore local --local-host loki --to bore.pub 9088  > ${ROOT}/bore_loki.out &
+docker run --init --rm --network e2e_default ekzhang/bore local --local-host loki --to bore.pub 3100  > ${ROOT}/bore_loki.out &
 docker run --init --rm --network e2e_default ekzhang/bore local --local-host optout --to bore.pub 8081  > ${ROOT}/bore_optout.out &
 
 until [ -f ${ROOT}/bore_localstack.out ] && [ -f ${ROOT}/bore_core.out ] && [ -f ${ROOT}/bore_loki.out ] && [ -f ${ROOT}/bore_optout.out ]
