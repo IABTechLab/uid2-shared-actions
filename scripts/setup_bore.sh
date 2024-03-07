@@ -8,7 +8,7 @@ docker run --init --rm --network e2e_default ekzhang/bore local --local-host cor
 docker run --init --rm --network e2e_default ekzhang/bore local --local-host optout --to bore.pub 8081  > ${ROOT}/bore_optout.out &
 docker run --init --rm --network e2e_default ekzhang/bore local --local-host grafana --to bore.pub 3000  > ${ROOT}/bore_grafana.out &
 
-until [ -f ${ROOT}/bore_localstack.out ] && [ -f ${ROOT}/bore_core.out ] && [ -f ${ROOT}/bore_grafana.out ] && [ -f ${ROOT}/bore_optout.out ]
+until [ -f ${ROOT}/bore_localstack.out ] && [ -f ${ROOT}/bore_core.out ] && [ -f ${ROOT}/bore_optout.out ] && [ -f ${ROOT}/bore_grafana.out ]
 do
   sleep 5
 done
