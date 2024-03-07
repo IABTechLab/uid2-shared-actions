@@ -3,7 +3,7 @@ import argparse
 import boto3
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1'], dest='region', action='store', required='true', help='The target region')
+parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1', 'eu-central-1'], dest='region', action='store', required='true', help='The target region')
 parser.add_argument('--stack', dest='stack', action='store', required='true', help='The AWS stack name')
 args = parser.parse_args()
 
