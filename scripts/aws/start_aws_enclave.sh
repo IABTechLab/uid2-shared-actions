@@ -35,6 +35,11 @@ if [ -z "${IMAGE_HASH}" ]; then
   exit 1
 fi
 
+if [ -z "${IDENTITY_SCOPE}" ]; then
+  echo "IDENTITY_SCOPE can not be empty"
+  exit 1
+fi
+
 if [ -z "${OPERATOR_KEY}" ]; then
   echo "OPERATOR_KEY can not be empty"
   exit 1
@@ -43,15 +48,25 @@ fi
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${IMAGE_HASH}-${DATE}"
 
+CF_TEMPLATE_SCOPE=""
+case "${IDENTITY_SCOPE}" in
+  UID2) CF_TEMPLATE_SCOPE="UID" ;;
+  EUID) CF_TEMPLATE_SCOPE="EUID" ;;
+  *)
+    echo "IDENTITY_SCOPE is invalid"
+    exit 1 ;;
+esac
+
 python ${ROOT}/aws/create_cloudformation_stack.py \
-  --stackfp "${ROOT}/aws/stacks" \
-  --cftemplatefp "../uid2-operator/scripts/aws" \
-  --core "${BORE_URL_CORE}" \
-  --optout "${BORE_URL_OPTOUT}" \
-  --localstack "${BORE_URL_LOCALSTACK}" \
+  --stack_fp "${ROOT}/aws/stacks" \
+  --cftemplate_fp "../uid2-operator/scripts/aws/UID_CloudFormation.template.yml" \
+  --core_url "${BORE_URL_CORE}" \
+  --optout_url "${BORE_URL_OPTOUT}" \
+  --localstack_url "${BORE_URL_LOCALSTACK}" \
   --region "${AWS_REGION}" \
   --ami "${AWS_AMI}" \
   --stack "${AWS_STACK_NAME}" \
+  --scope "${CF_TEMPLATE_SCOPE}" \
   --key "${OPERATOR_KEY}"
 
 aws cloudformation describe-stacks \
