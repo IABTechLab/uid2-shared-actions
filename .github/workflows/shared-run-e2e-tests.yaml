@@ -141,14 +141,13 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: gdm-UID2-2341-aws-test-pipeline
+          ref: v2
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
       - name: Checkout uid2-e2e repo
         uses: actions/checkout@v4
         with:
-          ref: gdm-UID2-2341-aws-test-pipeline
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
@@ -165,7 +164,7 @@ jobs:
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@gdm-UID2-2341-aws-test-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -175,7 +174,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@gdm-UID2-2341-aws-test-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v2
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -183,7 +182,7 @@ jobs:
       - name: Prepare AWS metadata
         id: prepare_aws_metadata
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-2341-aws-test-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@v2
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -210,7 +209,7 @@ jobs:
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@gdm-UID2-2341-aws-test-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -223,7 +222,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@gdm-UID2-2341-aws-test-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v2
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -234,7 +233,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-2341-aws-test-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v2
         with:
           bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
@@ -279,7 +278,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@gdm-UID2-2341-aws-test-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
           uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
