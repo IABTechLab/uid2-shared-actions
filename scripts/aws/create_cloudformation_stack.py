@@ -41,7 +41,7 @@ parser.add_argument('--cftemplate_fp', dest='cftemplate_fp', action='store', req
 parser.add_argument('--core_url', dest='core_url', action='store', required='true', help='The core URL')
 parser.add_argument('--optout_url', dest='optout_url', action='store', required='true', help='The optout URL')
 parser.add_argument('--localstack_url', dest='localstack_url', action='store', required='true', help='The localstack URL')
-parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1'], dest='region', action='store', required='true', help='The AWS target region')
+parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1', 'eu-central-1'], dest='region', action='store', required='true', help='The AWS target region')
 parser.add_argument('--ami', dest='ami', action='store', required='true', help='The AMI ID')
 parser.add_argument('--stack', dest='stack', action='store', required='true', help='The AWS stack name')
 parser.add_argument('--scope', choices=['UID', 'EUID'], dest='scope', action='store', required='true', help='The identity scope')
