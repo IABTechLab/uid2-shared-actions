@@ -63,7 +63,7 @@ jobs:
 
       - name: Set version number
         id: version
-        uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@kcc-UID2-2329-add-dotnet-pipeline
         with:
           type: ${{ inputs.release_type }}
           branch_name: ${{ github.ref }}
@@ -73,32 +73,32 @@ jobs:
       - name: Update UID2.Client.nuspec
         run: |
           current_version=$(grep -o '<version>.*</version>' ${{ inputs.working_dir }}/UID2.Client.nuspec | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
-          new_version=${{ steps.version.outputs.new_version }} 
-          sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/UID2.Client.nuspec
-          echo "Version number updated from $current_version to $new_version"
+          simple_version=${{ steps.version.outputs.simple_version }} 
+          sed -i "s/$current_version/$simple_version/g" ${{ inputs.working_dir }}/UID2.Client.nuspec
+          echo "Version number updated from $current_version to $simple_version"
 
       - name: Publish to nuget.org
         run: | 
           cd ./${{ inputs.working_dir }}
           dotnet build UID2.Client.sln --configuration=Release
           dotnet pack -p:NuspecFile=../../UID2.Client.nuspec --configuration Release
-          dotnet nuget push ./src/UID2.Client/bin/Release/UID2.Client.${{ steps.version.outputs.new_version }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+          dotnet nuget push ./src/UID2.Client/bin/Release/UID2.Client.${{ steps.version.outputs.simple_version }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
       - name: Commit UID2.Client.nuspec, version.json and set tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
         with:
           add: '${{ inputs.working_dir }}/UID2.Client.nuspec ${{ inputs.working_dir }}/version.json'
-          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-          tag: v${{ steps.version.outputs.new_version }}          
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.simple_version }}'
+          tag: v${{ steps.version.outputs.simple_version }}          
 
       - name: Build Changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v4
         with:
-          toTag: v${{ steps.version.outputs.new_version }}
+          toTag: v${{ steps.version.outputs.simple_version }}
           configurationJson: |
             {
-                "template": "#{{CHANGELOG}}\n## NuGet\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Nuget Files\n- [UID2.Client.${{ steps.version.outputs.new_version }}.nupkg](https://www.nuget.org/packages/UID2.Client/#{{ steps.version.outputs.new_version }})\n\n## Changelog\n#{{UNCATEGORIZED}}",
+                "template": "#{{CHANGELOG}}\n## NuGet\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.simple_version }}</version>\n</dependency>\n```\n\n## Nuget Files\n- [UID2.Client.${{ steps.version.outputs.simple_version }}.nupkg](https://www.nuget.org/packages/UID2.Client/#{{ steps.version.outputs.simple_version }})\n\n## Changelog\n#{{UNCATEGORIZED}}",
                 "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
@@ -107,6 +107,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          name: v${{ steps.version.outputs.new_version }}
+          name: v${{ steps.version.outputs.simple_version }}
           body: ${{ steps.github_release.outputs.changelog }}
           draft: true
