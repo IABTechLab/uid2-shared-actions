@@ -270,7 +270,7 @@ jobs:
               echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
             elif [ "${OPERATOR_TYPE}" == "aws" ]; then
               echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> $GITHUB_OUTPUT
-              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_aws_uid2_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
+              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
             fi
             echo "uid2_e2e_pipeline_core_url=http://${{ steps.bore.outputs.BORE_URL_CORE }}" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_optout_url=http://${{ steps.bore.outputs.BORE_URL_OPTOUT }}" >> $GITHUB_OUTPUT
