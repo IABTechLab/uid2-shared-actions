@@ -9,10 +9,6 @@ OPTOUT_CONFIG_FILE_DIR="${ROOT}/docker/uid2-optout/conf"
 OPERATOR_CONFIG_FILE_DIR="${ROOT}/docker/uid2-operator/conf"
 CORE_RESOURCE_FILE_DIR="${ROOT}/docker/uid2-core/src"
 OPTOUT_RESOURCE_FILE_DIR="${ROOT}/docker/uid2-optout/src"
-ALERTMANAGER_RESOURCE_FILE_DIR="${ROOT}/docker/alertmanager/conf"
-LOKI_RESOURCE_FILE_DIR="${ROOT}/docker/loki/conf"
-PROMETHEUS_RESOURCE_FILE_DIR="${ROOT}/docker/prometheus/conf"
-GRAFANA_RESOURCE_FILE_DIR="${ROOT}/docker/grafana/conf"
 
 source "uid2-shared-actions/scripts/jq_helper.sh"
 source "uid2-shared-actions/scripts/healthcheck.sh"
@@ -53,20 +49,6 @@ cp "${OPERATOR_ROOT}/conf/default-config.json" "${OPERATOR_CONFIG_FILE_DIR}"
 if [ ${OPERATOR_TYPE} == "public" ]; then
   cp "${OPERATOR_ROOT}/conf/local-e2e-docker-${OPERATOR_TYPE}-config.json" "${OPERATOR_CONFIG_FILE_DIR}/local-e2e-docker-config.json"
 fi
-
-mkdir -p "${ALERTMANAGER_RESOURCE_FILE_DIR}"
-cp "uid2-shared-actions/tmp/monitorstack/alertmanager/alertmanager.yml" "${ALERTMANAGER_RESOURCE_FILE_DIR}"
-
-mkdir -p "${LOKI_RESOURCE_FILE_DIR}"
-cp "uid2-shared-actions/tmp/monitorstack/loki/loki.yml" "${LOKI_RESOURCE_FILE_DIR}"
-cp "uid2-shared-actions/tmp/monitorstack/loki/rules.yml" "${LOKI_RESOURCE_FILE_DIR}"
-
-mkdir -p "${PROMETHEUS_RESOURCE_FILE_DIR}"
-cp "uid2-shared-actions/tmp/monitorstack/prometheus/prometheus.yml" "${PROMETHEUS_RESOURCE_FILE_DIR}"
-cp "uid2-shared-actions/tmp/monitorstack/prometheus/rules.yml" "${PROMETHEUS_RESOURCE_FILE_DIR}"
-
-mkdir -p "${GRAFANA_RESOURCE_FILE_DIR}"
-cp "uid2-shared-actions/tmp/monitorstack/grafana/datasource.yml" "${GRAFANA_RESOURCE_FILE_DIR}"
 
 cp "uid2-e2e/docker-compose.yml" "${ROOT}"
 
