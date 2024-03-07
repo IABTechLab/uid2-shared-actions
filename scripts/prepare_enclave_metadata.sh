@@ -25,7 +25,7 @@ ENCLAVE_FILE="${METADATA_ROOT}/enclaves/enclaves.json"
 OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .key' ${OPERATOR_FILE})
 
 # Update enclave ID
-cat <<< $(jq '(.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .identifier) |="'${ENCLAVE_ID}'"' ${ENCLAVE_FILE}) > ${ENCLAVE_FILE}
+cat <<< $(jq '(.[] | select((.protocol=="'${ENCLAVE_PROTOCOL}'") and (.name | test(".*Debug.*") | not)) | .identifier) |="'${ENCLAVE_ID}'"' ${ENCLAVE_FILE}) > ${ENCLAVE_FILE}
 
 # Export to GitHub output
 echo "OPERATOR_KEY=${OPERATOR_KEY}"
