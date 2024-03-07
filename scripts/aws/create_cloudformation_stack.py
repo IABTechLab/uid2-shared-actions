@@ -40,6 +40,7 @@ parser.add_argument('--stackfp', dest='stack_fp', action='store', required='true
 parser.add_argument('--cftemplatefp', dest='cftemplate_fp', action='store', required='true', help='The filepath to the CloudFormation template')
 parser.add_argument('--core', dest='core_url', action='store', required='true', help='The core URL')
 parser.add_argument('--optout', dest='optout_url', action='store', required='true', help='The optout URL')
+parser.add_argument('--localstack', dest='localstack_url', action='store', required='true', help='The localstack URL')
 parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1'], dest='region', action='store', required='true', help='The target region')
 parser.add_argument('--ami', dest='ami', action='store', required='true', help='The AMI ID')
 parser.add_argument('--stack', dest='stack', action='store', required='true', help='The AWS stack name')
@@ -57,6 +58,7 @@ cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
 egress = cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress']
 egress.append(create_egress(args.core_url, 'E2E - Core'))
 egress.append(create_egress(args.optout_url, 'E2E - Optout'))
+egress.append(create_egress(args.localstack_url, 'E2E - Localstack'))
 cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
 
 user_data = cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub']

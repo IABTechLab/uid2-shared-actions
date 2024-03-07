@@ -15,6 +15,11 @@ if [ -z "${BORE_URL_OPTOUT}" ]; then
   exit 1
 fi
 
+if [ -z "${BORE_URL_LOCALSTACK}" ]; then
+  echo "BORE_URL_LOCALSTACK can not be empty"
+  exit 1
+fi
+
 if [ -z "${AWS_REGION}" ]; then
   echo "AWS_REGION can not be empty"
   exit 1
@@ -43,6 +48,7 @@ python ${ROOT}/aws/create_cloudformation_stack.py \
   --cftemplatefp "../uid2-operator/scripts/aws" \
   --core "${BORE_URL_CORE}" \
   --optout "${BORE_URL_OPTOUT}" \
+  --localstack "${BORE_URL_LOCALSTACK}" \
   --region "${AWS_REGION}" \
   --ami "${AWS_AMI}" \
   --stack "${AWS_STACK_NAME}" \

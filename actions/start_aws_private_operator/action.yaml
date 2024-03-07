@@ -2,6 +2,9 @@ name: Start AWS Private Operator
 description: Spins up an AWS private operator
 
 inputs:
+  bore_url_localstack:
+    description: The bore URL for localstack service
+    required: true
   bore_url_core:
     description: The bore URL for core service
     required: true
@@ -57,6 +60,7 @@ runs:
       env:
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        BORE_URL_LOCALSTACK: ${{ inputs.bore_url_localstack }}
         AWS_REGION: ${{ inputs.aws_region }}
         AWS_AMI: ${{ inputs.aws_ami }}
         IMAGE_HASH: ${{ inputs.image_hash }}

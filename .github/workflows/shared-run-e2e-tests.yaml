@@ -235,6 +235,7 @@ jobs:
         if: ${{ inputs.operator_type == 'aws' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-2341-aws-test-pipeline
         with:
+          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
           aws_region: ${{ inputs.aws_region }}
