@@ -2,14 +2,14 @@ name: Start AWS Private Operator
 description: Spins up an AWS private operator
 
 inputs:
-  bore_url_localstack:
-    description: The bore URL for localstack service
-    required: true
   bore_url_core:
     description: The bore URL for core service
     required: true
   bore_url_optout:
     description: The bore URL for optout service
+    required: true
+  bore_url_localstack:
+    description: The bore URL for localstack service
     required: true
   aws_region:
     description: The AWS region [us-east-1, us-west-1, ca-central-1]
