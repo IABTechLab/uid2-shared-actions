@@ -1,4 +1,4 @@
-name: Shared Pipeline to build and publish JAR Packages to NuGet Repos
+name: Shared Pipeline to build and publish Nuget Packages to NuGet Repos
 on:
   workflow_call:
     inputs:
@@ -82,7 +82,6 @@ jobs:
           cd ./${{ inputs.working_dir }}
           dotnet build UID2.Client.sln --configuration=Release
           dotnet pack -p:NuspecFile=../../UID2.Client.nuspec --configuration Release
-          ls ./src/UID2.Client/bin/Release/
           dotnet nuget push ./src/UID2.Client/bin/Release/UID2.Client.${{ steps.version.outputs.new_version }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
       - name: Commit UID2.Client.nuspec and version.json
