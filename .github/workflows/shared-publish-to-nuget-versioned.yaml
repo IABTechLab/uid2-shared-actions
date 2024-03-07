@@ -98,7 +98,7 @@ jobs:
           toTag: v${{ steps.version.outputs.simple_version }}
           configurationJson: |
             {
-                "template": "#{{CHANGELOG}}\n## NuGet\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.simple_version }}</version>\n</dependency>\n```\n\n## Nuget Files\n- [UID2.Client.${{ steps.version.outputs.simple_version }}.nupkg](https://www.nuget.org/packages/UID2.Client/#{{ steps.version.outputs.simple_version }})\n\n## Changelog\n#{{UNCATEGORIZED}}",
+                "template": "#{{CHANGELOG}}\n## NuGet\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.simple_version }}</version>\n</dependency>\n```\n\n## Nuget Files\n- [UID2.Client.${{ steps.version.outputs.simple_version }}.nupkg](https://www.nuget.org/packages/UID2.Client)\n\n## Changelog\n#{{UNCATEGORIZED}}",
                 "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
