@@ -107,8 +107,8 @@ jobs:
           toTag: v${{ steps.version.outputs.new_version }}
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/${{ env.REPO }}/${{ steps.version.outputs.new_version }}/${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
-              "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+                "template": "#{{CHANGELOG}}\n## NuGet\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Nuget Files\n- [UID2.Client.${{ steps.version.outputs.new_version }}.nupkg](https://www.nuget.org/packages/UID2.Client/#{{ steps.version.outputs.new_version }})\n\n## Changelog\n#{{UNCATEGORIZED}}",
+                "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
