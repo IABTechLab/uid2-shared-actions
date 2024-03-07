@@ -2,10 +2,6 @@ import os
 import argparse
 import boto3
 
-def set_output(name, value):
-    with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
-        print(f'{name}={value}', file=fh)
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1'], dest='region', action='store', required='true', help='The target region')
 parser.add_argument('--stack', dest='stack', action='store', required='true', help='The AWS stack name')
@@ -25,7 +21,6 @@ instances = [instance['InstanceId'] for instance in asgs['AutoScalingGroups'][0]
 public_endpoints = [r['PublicDnsName'] for r in boto3.client('ec2', region_name=args.region) \
     .describe_instances(InstanceIds=instances)['Reservations'][0]['Instances'] if 'PublicDnsName' in r]
 
-instance_url = public_endpoints[0]
+instance_url = 'http://' + public_endpoints[0]
 
 print(instance_url)
-set_output('AWS_INSTANCE_URL', 'http://' + instance_url)
