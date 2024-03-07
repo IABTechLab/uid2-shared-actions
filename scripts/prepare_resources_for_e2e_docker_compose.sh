@@ -75,11 +75,6 @@ if [ -z "${OPTOUT_VERSION}" ]; then
   exit 1
 fi
 
-if [ -z "${E2E_VERSION}" ]; then
-  echo "E2E_VERSION can not be empty"
-  exit 1
-fi
-
 # replace placeholders
 sed -i.bak "s#uid2-operator:latest#uid2-operator:${OPERATOR_VERSION}#g" ${DOCKER_COMPOSE_FILE}
 sed -i.bak "s#uid2-core:latest#uid2-core:${CORE_VERSION}#g" ${DOCKER_COMPOSE_FILE}
