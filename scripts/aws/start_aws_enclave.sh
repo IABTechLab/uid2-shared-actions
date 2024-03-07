@@ -59,7 +59,7 @@ esac
 
 python ${ROOT}/aws/create_cloudformation_stack.py \
   --stack_fp "${ROOT}/aws/stacks" \
-  --cftemplate_fp "../uid2-operator/scripts/aws/UID_CloudFormation.template.yml" \
+  --cftemplate_fp "../uid2-operator/scripts/aws" \
   --core_url "${BORE_URL_CORE}" \
   --optout_url "${BORE_URL_OPTOUT}" \
   --localstack_url "${BORE_URL_LOCALSTACK}" \
