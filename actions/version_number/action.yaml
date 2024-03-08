@@ -26,9 +26,6 @@ outputs:
   new_version:
     description: The complete version number 
     value: ${{ steps.version.outputs.new_version }}
-  simple_version:
-    description: The simple version number 
-    value: ${{ steps.version.outputs.simple_version }}
 runs:
   using: "composite"
   steps:
@@ -75,7 +72,6 @@ runs:
         REF_PREFIX="refs/heads/"
         BRANCH_NAME=${BRANCH_NAME_WITH_REF#$REF_PREFIX}
         BRANCH_NAME_TRUNC=${BRANCH_NAME#50}
-        echo "simple_version=$NBGV_SimpleVersion" >> $GITHUB_OUTPUT
         if [[ "${{ inputs.version_number }}" != "" ]]; then
           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
