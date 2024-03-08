@@ -223,7 +223,7 @@ jobs:
             echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
             echo "uid2_e2e_pipeline_core_url=http://core:8088" >> $GITHUB_OUTPUT
-            echo "uid2_e2e_pipeline_optout_url=http://optout:8090" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_optout_url=http://optout:8081" >> $GITHUB_OUTPUT
           else
             echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
             if [ "$OPERATOR_TYPE" == "gcp" ]; then
