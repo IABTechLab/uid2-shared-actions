@@ -63,7 +63,7 @@ jobs:
 
       - name: Set version number
         id: version
-        uses: IABTechLab/uid2-shared-actions/actions/version_number@kcc-UID2-2329-add-dotnet-pipeline
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
         with:
           type: ${{ inputs.release_type }}
           branch_name: ${{ github.ref }}
