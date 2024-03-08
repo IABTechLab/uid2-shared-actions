@@ -21,7 +21,7 @@ on:
         description: The path to the directory for which the version should be determined.
         type: string
         default: '.'
-
+ 
 env:
   IS_RELEASE: ${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name ) }}
   REPO: ${{ github.event.repository.name }}
@@ -92,6 +92,12 @@ jobs:
         run: | 
           cd ./${{ inputs.working_dir }}
           mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
+
+      - name: Compile
+        if: ${{ inputs.publish_to_maven != true }}
+        run: | 
+          cd ./${{ inputs.working_dir }}
+          mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile
 
       - name: Commit pom.xml and version.json
         if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 
