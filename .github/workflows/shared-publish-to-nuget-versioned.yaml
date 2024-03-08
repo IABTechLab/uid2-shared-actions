@@ -77,7 +77,7 @@ jobs:
           sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/UID2.Client.nuspec
           echo "Version number updated from $current_version to $new_version"
 
-      - name: Publish to nuget.org
+      - name: Build, Test and Publish to nuget.org
         run: | 
           cd ./${{ inputs.working_dir }}
           dotnet test --configuration=Release
