@@ -2,6 +2,6 @@
     "VpcId": "vpc-062e41962c91d37a2",
     "VpcSubnet1": "subnet-0c1cbb77d802bbe39",
     "VpcSubnet2": "subnet-08e0ed1aea00a0449",
-    "SSHKeyName": "github-runner-key",
+    "SSHKeyName": "gdm-UID2-2377-aws-euid",
     "TrustNetworkCidr": "172.31.0.0/16"
 }
