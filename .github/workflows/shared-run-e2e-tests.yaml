@@ -239,7 +239,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@tjm-UID2-2874-run-e2e-tests-on-publish
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
           uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
