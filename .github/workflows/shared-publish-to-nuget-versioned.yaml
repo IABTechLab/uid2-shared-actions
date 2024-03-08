@@ -80,7 +80,7 @@ jobs:
       - name: Publish to nuget.org
         run: | 
           cd ./${{ inputs.working_dir }}
-          dotnet build UID2.Client.sln --configuration=Release
+          dotnet test --configuration=Release
           dotnet pack -p:NuspecFile=../../UID2.Client.nuspec --configuration Release
           dotnet nuget push ./src/UID2.Client/bin/Release/UID2.Client.${{ steps.version.outputs.simple_version }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
