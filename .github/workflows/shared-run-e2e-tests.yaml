@@ -283,6 +283,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@gdm-UID2-2377-aws-euid
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
+          uid2_e2e_identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
           uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
           uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
           uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
