@@ -55,7 +55,7 @@ jobs:
 
       - name: Set version number
         id: version
-        uses: IABTechLab/uid2-shared-actions/actions/version_number@kcc-UID2-2330-create-workflow-for-python
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
         with:
           type: ${{ inputs.release_type }}
           branch_name: ${{ github.ref }}
