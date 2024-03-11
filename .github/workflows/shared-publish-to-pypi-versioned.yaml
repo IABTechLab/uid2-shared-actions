@@ -93,7 +93,11 @@ jobs:
           toTag: v${{ steps.version.outputs.new_version }}
           configurationJson: |
             {
+<<<<<<< HEAD
                 "template": "#{{CHANGELOG}}\n## Pypi\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Pypi Files\n- [uid2_client-${{ steps.version.outputs.new_version }}.tar.gz](https://pypi.org/project/uid2-client/)\n\n## Changelog\n#{{UNCATEGORIZED}}",
+=======
+                "template": "#{{CHANGELOG}}\n## NuGet\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Nuget Files\n- [UID2.Client.${{ steps.version.outputs.new_version }}.nupkg](https://www.nuget.org/packages/UID2.Client)\n\n## Changelog\n#{{UNCATEGORIZED}}",
+>>>>>>> d66b179 (Create .github/workflows/shared-publish-to-pypi-versioned.yaml)
                 "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
             }
         env:
