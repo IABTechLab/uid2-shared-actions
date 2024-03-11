@@ -14,6 +14,9 @@ on:
         description: The path to the directory for which the version should be determined.
         type: string
         default: '.'
+      publish_vulnerabilities:
+        type: string
+        default: true
 
 env:
   REPO: ${{ github.event.repository.name }}
@@ -52,6 +55,7 @@ jobs:
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_failure_severity }}
+          publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
 
       - name: Set version number
         id: version
