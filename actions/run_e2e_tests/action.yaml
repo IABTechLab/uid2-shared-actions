@@ -33,7 +33,7 @@ inputs:
   uid2_e2e_pipeline_optout_url:
     description: 'Environment variable for the OptOut service'
     required: false
-    default: 'http://optout:8090'
+    default: 'http://optout:8081'
 
 runs:
   using: "composite"

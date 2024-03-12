@@ -1,0 +1,116 @@
+name: Shared Pipeline to build and publish Nuget Packages to NuGet Repos
+on:
+  workflow_call:
+    inputs:
+      release_type:
+        description: The type of version number to return. Must be one of [Patch, Minor or Major]
+        required: true
+        type: string
+      vulnerability_failure_severity:
+        description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
+        type: string
+        default: 'CRITICAL,HIGH'
+      dotnet_version:
+        type: string
+        default: 5.0
+      working_dir:
+        description: The path to the directory for which the version should be determined.
+        type: string
+        default: '.'
+      publish_vulnerabilities:
+        type: string
+        default: true
+
+env:
+  REPO: ${{ github.event.repository.name }}
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+      security-events: write
+      packages: write
+    steps:
+      - name: Show Context
+        run: |
+          printenv
+          echo "$GITHUB_CONTEXT"
+        shell: bash
+        env: 
+            GITHUB_CONTEXT: ${{ toJson(github) }}
+
+      - name: Check branch and release type
+        id: checkRelease
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2
+        with:
+          release_type: ${{ inputs.release_type }}
+    
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup dotnet ${{ inputs.dotnet_version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ inputs.dotnet_version }}
+
+      - name: Vulnerability Scan
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2
+        with:
+          scan_severity: HIGH,CRITICAL
+          failure_severity: ${{ inputs.vulnerability_failure_severity }}
+          publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
+
+      - name: Set version number
+        id: version
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
+        with:
+          type: ${{ inputs.release_type }}
+          branch_name: ${{ github.ref }}
+          working_dir: ${{ inputs.working_dir }}
+          short_name: Yes
+
+      - name: Update UID2.Client.nuspec
+        run: |
+          current_version=$(grep -o '<version>.*</version>' ${{ inputs.working_dir }}/UID2.Client.nuspec | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
+          new_version=${{ steps.version.outputs.new_version }} 
+          sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/UID2.Client.nuspec
+          echo "Version number updated from $current_version to $new_version"
+
+      - name: Build, Test and Publish to nuget.org
+        run: | 
+          cd ./${{ inputs.working_dir }}
+          dotnet test --configuration=Release
+          dotnet pack -p:NuspecFile=../../UID2.Client.nuspec --configuration Release
+          dotnet nuget push ./src/UID2.Client/bin/Release/UID2.Client.${{ steps.version.outputs.new_version }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+
+      - name: Commit UID2.Client.nuspec, version.json and set tag
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
+        with:
+          add: '${{ inputs.working_dir }}/UID2.Client.nuspec ${{ inputs.working_dir }}/version.json'
+          message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          tag: v${{ steps.version.outputs.new_version }}          
+
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          toTag: v${{ steps.version.outputs.new_version }}
+          configurationJson: |
+            {
+                "template": "#{{CHANGELOG}}\n## NuGet\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Nuget Files\n- [UID2.Client.${{ steps.version.outputs.new_version }}.nupkg](https://www.nuget.org/packages/UID2.Client)\n\n## Changelog\n#{{UNCATEGORIZED}}",
+                "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ steps.version.outputs.new_version }}
+          body: ${{ steps.github_release.outputs.changelog }}
+          draft: true
