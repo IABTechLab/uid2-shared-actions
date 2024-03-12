@@ -44,4 +44,4 @@ runs:
         ENCLAVE_ID: ${{ steps.enclave_id.outputs.ENCLAVE_ID }}
         ENCLAVE_PROTOCOL: azure-cc
       run: |
-        bash uid2-shared-actions/scripts/prepare_enclave_metadata.sh
+        bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh
