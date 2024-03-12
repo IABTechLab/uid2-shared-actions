@@ -79,7 +79,7 @@ on:
         type: string
 
       aws_region:
-        description: The AWS region [us-east-1, us-west-1, ca-central-1]
+        description: The AWS region [us-east-1, us-west-1, ca-central-1, eu-central-1]
         type: string
       aws_ami:
         description: The AWS AMI ID
