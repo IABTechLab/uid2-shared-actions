@@ -4,14 +4,21 @@ set -ex
 # Prepare conf files
 
 ROOT="."
+
+OPERATOR_CONFIG_FILE_DIR="${ROOT}/docker/uid2-operator/conf"
 CORE_CONFIG_FILE_DIR="${ROOT}/docker/uid2-core/conf"
 OPTOUT_CONFIG_FILE_DIR="${ROOT}/docker/uid2-optout/conf"
-OPERATOR_CONFIG_FILE_DIR="${ROOT}/docker/uid2-operator/conf"
+
 CORE_RESOURCE_FILE_DIR="${ROOT}/docker/uid2-core/src"
 OPTOUT_RESOURCE_FILE_DIR="${ROOT}/docker/uid2-optout/src"
 
 source "uid2-shared-actions/scripts/jq_helper.sh"
 source "uid2-shared-actions/scripts/healthcheck.sh"
+
+if [ -z "${OPERATOR_ROOT}" ]; then
+  echo "${OPERATOR_ROOT} can not be empty"
+  exit 1
+fi
 
 if [ -z "${CORE_ROOT}" ]; then
   echo "CORE_ROOT can not be empty"
@@ -28,9 +35,10 @@ if [ -z "${ADMIN_ROOT}" ]; then
   exit 1
 fi
 
-if [ -z "${OPERATOR_ROOT}" ]; then
-  echo "${OPERATOR_ROOT} can not be empty"
-  exit 1
+mkdir -p "${OPERATOR_CONFIG_FILE_DIR}"
+cp "${OPERATOR_ROOT}/conf/default-config.json" "${OPERATOR_CONFIG_FILE_DIR}"
+if [ ${OPERATOR_TYPE} == "public" ]; then
+  cp "${OPERATOR_ROOT}/conf/local-e2e-docker-${OPERATOR_TYPE}-config.json" "${OPERATOR_CONFIG_FILE_DIR}/local-e2e-docker-config.json"
 fi
 
 mkdir -p "${CORE_CONFIG_FILE_DIR}"
@@ -44,19 +52,18 @@ cp "${OPTOUT_ROOT}/conf/local-e2e-docker-config.json" "${OPTOUT_CONFIG_FILE_DIR}
 cp "${OPTOUT_ROOT}/run_tool_local_e2e.sh" "${OPTOUT_CONFIG_FILE_DIR}"
 cp -r "${OPTOUT_ROOT}/src/main/resources/localstack" "${OPTOUT_RESOURCE_FILE_DIR}"
 
-mkdir -p "${OPERATOR_CONFIG_FILE_DIR}"
-cp "${OPERATOR_ROOT}/conf/default-config.json" "${OPERATOR_CONFIG_FILE_DIR}"
-if [ ${OPERATOR_TYPE} == "public" ]; then
-  cp "${OPERATOR_ROOT}/conf/local-e2e-docker-${OPERATOR_TYPE}-config.json" "${OPERATOR_CONFIG_FILE_DIR}/local-e2e-docker-config.json"
-fi
-
 cp "uid2-e2e/docker-compose.yml" "${ROOT}"
 
+OPERATOR_CONFIG_FILE="${ROOT}/docker/uid2-operator/conf/local-e2e-docker-config.json"
 CORE_CONFIG_FILE="${ROOT}/docker/uid2-core/conf/local-e2e-docker-config.json"
 OPTOUT_CONFIG_FILE="${ROOT}/docker/uid2-optout/conf/local-e2e-docker-config.json"
-OPERATOR_CONFIG_FILE="${ROOT}/docker/uid2-operator/conf/local-e2e-docker-config.json"
 DOCKER_COMPOSE_FILE="${ROOT}/docker-compose.yml"
 OPTOUT_MOUNT="${ROOT}/docker/uid2-optout/mount"
+
+if [ -z "${OPERATOR_VERSION}" ]; then
+  echo "OPERATOR_VERSION can not be empty"
+  exit 1
+fi
 
 if [ -z "${CORE_VERSION}" ]; then
   echo "CORE_VERSION can not be empty"
@@ -68,20 +75,10 @@ if [ -z "${OPTOUT_VERSION}" ]; then
   exit 1
 fi
 
-if [ -z "${OPERATOR_VERSION}" ]; then
-  echo "OPERATOR_VERSION can not be empty"
-  exit 1
-fi
-
-if [ -z "${E2E_VERSION}" ]; then
-  echo "E2E_VERSION can not be empty"
-  exit 1
-fi
-
 # replace placeholders
+sed -i.bak "s#uid2-operator:latest#uid2-operator:${OPERATOR_VERSION}#g" ${DOCKER_COMPOSE_FILE}
 sed -i.bak "s#uid2-core:latest#uid2-core:${CORE_VERSION}#g" ${DOCKER_COMPOSE_FILE}
 sed -i.bak "s#uid2-optout:latest#uid2-optout:${OPTOUT_VERSION}#g" ${DOCKER_COMPOSE_FILE}
-sed -i.bak "s#uid2-operator:latest#uid2-operator:${OPERATOR_VERSION}#g" ${DOCKER_COMPOSE_FILE}
 
 # set provide_private_site_data to false to workaround the private site path
 if [ ${OPERATOR_TYPE} != "public" ]; then
