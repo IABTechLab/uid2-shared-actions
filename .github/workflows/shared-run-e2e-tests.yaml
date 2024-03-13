@@ -1,78 +1,92 @@
-name: Run operator E2E tests
+name: Run Operator E2E Tests
 on:
   workflow_call:
     inputs:
-      core_root:
-        description: 'The root path for uid2-core folder'
-        type: string
-        default: 'uid2-core'
-      optout_root:
-        description: 'The root path for uid2-optout folder'
-        type: string
-        default: 'uid2-optout'
-      admin_root:
-        description: 'The root path for uid2-admin folder'
-        type: string
-        default: 'uid2-admin'
       operator_root:
-        description: 'The root path for uid2-operator folder'
+        description: The root path for uid2-operator folder
         type: string
-        default: 'uid2-operator'
+        default: uid2-operator
+      core_root:
+        description: The root path for uid2-core folder
+        type: string
+        default: uid2-core
+      optout_root:
+        description: The root path for uid2-optout folder
+        type: string
+        default: uid2-optout
+      admin_root:
+        description: The root path for uid2-admin folder
+        type: string
+        default: uid2-admin
+
       operator_image_version:
-        description: 'The version of UID2 operator image'
+        description: 'Image: Operator image version'
         type: string
-        default: 'latest'
+        default: latest
       core_image_version:
-        description: 'The version of UID2 core image'
+        description: 'Image: Core image version'
         type: string
-        default: 'latest'
+        default: latest
       optout_image_version:
-        description: 'The version of UID2 optout image'
+        description: 'Image: Optout image version'
         type: string
-        default: 'latest'
+        default: latest
       e2e_image_version:
-        description: 'The version of E2E image'
+        description: 'Image: E2E image version'
         type: string
-        default: 'latest'
-      core_branch:
-        description: 'The branch of UID2-core to test on'
-        type: string
-        default: 'main'
-      optout_branch:
-        description: 'The branch of UID2-optout to test on'
-        type: string
-        default: 'main'
-      admin_branch:
-        description: 'The branch of UID2-admin to test on'
-        type: string
-        default: 'main'
+        default: latest
+
       operator_branch:
-        description: 'The branch of UID2-operator to test on'
+        description: 'Config: Operator branch for config'
         type: string
-        default: 'main'
+        default: main
+      core_branch:
+        description: 'Config: Core branch for config'
+        type: string
+        default: main
+      optout_branch:
+        description: 'Config: Optout branch for config'
+        type: string
+        default: main
+      admin_branch:
+        description: 'Config: Admin branch for config'
+        type: string
+        default: main
+
       operator_type:
-        description: 'The type of operator [either public or gcp or azure]'
+        description: The operator type [public, gcp, azure, aws]
         type: string
-        default: 'public'
-      gcp_project:
-        description: 'The name of the GCP project'
-        type: string
-      gcp_service_account:
-        description: 'The GCP service account'
-        type: string
-      gcp_workload_identity_provider_id:
-        description: 'The GCP workload identity provider id'
-        type: string
+        default: public
       uid2_e2e_identity_scope:
-        description: 'Environment variable to run the E2E test'
+        description: Environment variable to run the E2E test for identity scope [UID2, EUID]
         required: false
         type: string
-        default: 'UID2'
+        default: UID2
       uid2_e2e_phone_support:
-        description: 'Environment variable to run the E2E test'
+        description: Environment variable to run the E2E test for phone support [true, false]
         required: false
         type: string
         default: 'true'
+
+      gcp_project:
+        description: The name of the GCP project
+        type: string
+      gcp_service_account:
+        description: The GCP service account
+        type: string
+      gcp_workload_identity_provider_id:
+        description: The GCP workload identity provider ID
+        type: string
+
+      aws_region:
+        description: The AWS region [us-east-1, us-west-1, ca-central-1, eu-central-1]
+        type: string
+      aws_ami:
+        description: The AWS AMI ID
+        type: string
+      aws_pcr0:
+        description: The AWS PCR0
+        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -96,6 +110,13 @@ jobs:
       - name: Checkout full history
         uses: actions/checkout@v4
 
+      - name: Checkout uid2-operator repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.operator_branch }}
+          repository: IABTechLab/uid2-operator
+          path: uid2-operator
+
       - name: Checkout uid2-core repo
         uses: actions/checkout@v4
         with:
@@ -117,13 +138,6 @@ jobs:
           repository: IABTechLab/uid2-admin
           path: uid2-admin
 
-      - name: Checkout uid2-operator repo
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.operator_branch }}
-          repository: IABTechLab/uid2-operator
-          path: uid2-operator
-
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
@@ -137,19 +151,19 @@ jobs:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
-      - name: Create docker network
+      - name: Create Docker network
         run: |
           docker network create e2e_default
 
       - name: Bring up bore
         id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' }}
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' }}
         run: |
           bash uid2-shared-actions/scripts/setup_bore.sh
 
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
-        if: ${{ inputs.operator_type == 'gcp'}}
+        if: ${{ inputs.operator_type == 'gcp' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
@@ -165,16 +179,25 @@ jobs:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
 
-      - name: Bring up docker compose
+      - name: Prepare AWS metadata
+        id: prepare_aws_metadata
+        if: ${{ inputs.operator_type == 'aws' }}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@v2
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+          aws_pcr0: ${{ inputs.aws_pcr0 }}
+
+      - name: Bring up Docker Compose
         id: docker-compose
         env:
+          OPERATOR_ROOT: ${{ inputs.operator_root }}
           CORE_ROOT: ${{ inputs.core_root }}
           OPTOUT_ROOT: ${{ inputs.optout_root }}
           ADMIN_ROOT: ${{ inputs.admin_root }}
-          OPERATOR_ROOT: ${{ inputs.operator_root }}
+          OPERATOR_VERSION: ${{ inputs.operator_image_version }}
           CORE_VERSION: ${{ inputs.core_image_version }}
           OPTOUT_VERSION: ${{ inputs.optout_image_version }}
-          OPERATOR_VERSION: ${{ inputs.operator_image_version }}
           E2E_VERSION: ${{ inputs.e2e_image_version }}
           OPERATOR_TYPE: ${{ inputs.operator_type }}
           BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
@@ -185,7 +208,7 @@ jobs:
 
       - name: Start GCP private operator
         id: start_gcp_private_operator
-        if: ${{ inputs.operator_type == 'gcp'}}
+        if: ${{ inputs.operator_type == 'gcp' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
@@ -207,34 +230,65 @@ jobs:
           output_parameters_file: ${{ steps.prepare_azure_metadata.outputs.output_parameters_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Start AWS private operator
+        id: start_aws_private_operator
+        if: ${{ inputs.operator_type == 'aws' }}
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v2
+        with:
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+          aws_region: ${{ inputs.aws_region }}
+          aws_ami: ${{ inputs.aws_ami }}
+          image_hash: ${{ steps.prepare_aws_metadata.outputs.image_hash }}
+          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
+
       - name: Decide E2E test environment variables
         id: decide_env_var
         shell: bash
         env:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
           OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
         run: |
-          if [ -z "$GITHUB_OUTPUT" ]; then
-            echo "not in github action"
-          elif [ -z "$OPERATOR_TYPE" ]; then
-            echo "$OPERATOR_TYPE not set"
-          elif [ "$OPERATOR_TYPE" == "public" ]; then
-            echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> $GITHUB_OUTPUT
-            echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> $GITHUB_OUTPUT
-            echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> $GITHUB_OUTPUT
-            echo "uid2_e2e_pipeline_core_url=http://core:8088" >> $GITHUB_OUTPUT
-            echo "uid2_e2e_pipeline_optout_url=http://optout:8081" >> $GITHUB_OUTPUT
+          if [ -z "${GITHUB_OUTPUT}" ]; then
+            echo "Not in GitHub action"
+            exit 1
+          fi
+
+          if [ -z "${OPERATOR_TYPE}" ]; then
+            echo "OPERATOR_TYPE not set"
+            exit 1
+          elif [ "${OPERATOR_TYPE}" == "public" ]; then
+            echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> ${GITHUB_OUTPUT}
+            echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> ${GITHUB_OUTPUT}
+            echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> ${GITHUB_OUTPUT}
+            echo "uid2_e2e_pipeline_core_url=http://core:8088" >> ${GITHUB_OUTPUT}
+            echo "uid2_e2e_pipeline_optout_url=http://optout:8081" >> ${GITHUB_OUTPUT}
           else
-            echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> $GITHUB_OUTPUT
-            if [ "$OPERATOR_TYPE" == "gcp" ]; then
-              echo "uid2_e2e_pipeline_operator_cloud_provider=GCP" >> $GITHUB_OUTPUT
-              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
-            elif [ "$OPERATOR_TYPE" == "azure" ]; then
-              echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> $GITHUB_OUTPUT
-              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> ${GITHUB_OUTPUT}
+            if [ "${OPERATOR_TYPE}" == "gcp" ]; then
+              echo "uid2_e2e_pipeline_operator_cloud_provider=GCP" >> ${GITHUB_OUTPUT}
+              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> ${GITHUB_OUTPUT}
+            elif [ "${OPERATOR_TYPE}" == "azure" ]; then
+              echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> ${GITHUB_OUTPUT}
+              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> ${GITHUB_OUTPUT}
+            elif [ "${OPERATOR_TYPE}" == "aws" ]; then
+              echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
+              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> ${GITHUB_OUTPUT}
             fi
-            echo "uid2_e2e_pipeline_core_url=http://${{ steps.bore.outputs.BORE_URL_CORE }}" >> $GITHUB_OUTPUT
-            echo "uid2_e2e_pipeline_optout_url=http://${{ steps.bore.outputs.BORE_URL_OPTOUT }}" >> $GITHUB_OUTPUT
+            echo "uid2_e2e_pipeline_core_url=http://${{ steps.bore.outputs.BORE_URL_CORE }}" >> ${GITHUB_OUTPUT}
+            echo "uid2_e2e_pipeline_optout_url=http://${{ steps.bore.outputs.BORE_URL_OPTOUT }}" >> ${GITHUB_OUTPUT}
+          fi
+
+          if [ -z "${IDENTITY_SCOPE}" ]; then
+            echo "IDENTITY_SCOPE not set"
+            exit 1
+          elif [ "${IDENTITY_SCOPE}" == "UID2" ]; then
+            echo "uid2_e2e_phone_support=true" >> ${GITHUB_OUTPUT}
+          elif [ "${IDENTITY_SCOPE}" == "EUID" ]; then
+            echo "uid2_e2e_phone_support=false" >> ${GITHUB_OUTPUT}
           fi
 
       - name: Run E2E tests
@@ -242,14 +296,16 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
+          uid2_e2e_identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
           uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
           uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
           uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
+          uid2_e2e_phone_support: ${{ steps.decide_env_var.outputs.uid2_e2e_phone_support }}
           uid2_e2e_pipeline_core_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_core_url }}
           uid2_e2e_pipeline_optout_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_optout_url }}
 
       - name: Stop GCP private operator
-        if: ${{ inputs.operator_type == 'gcp'}}
+        if: ${{ inputs.operator_type == 'gcp' }}
         env:
           GCP_PROJECT: ${{ vars.GCP_PROJECT }}
           SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
@@ -260,6 +316,14 @@ jobs:
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
         env:
-          CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.container_group_name }}
+          AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
-          bash uid2-shared-actions/scripts/azure/stop_azure_cc_enclave.sh
+          bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+
+      - name: Stop AWS private operator
+        if: ${{ inputs.operator_type == 'aws' }}
+        env:
+          AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
+          AWS_REGION: ${{ inputs.aws_region }}
+        run: |
+          bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh

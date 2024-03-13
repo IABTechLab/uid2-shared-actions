@@ -1,5 +1,4 @@
 name: 'Update major version tags'
-
 on:
   release:
     types:

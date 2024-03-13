@@ -41,13 +41,13 @@
     "coreBaseUrl": {
       "type": "string",
       "metadata": {
-        "description": "UID2 core base url override"
+        "description": "UID2 core base URL override"
       }
     },
     "optoutBaseUrl": {
       "type": "string",
       "metadata": {
-        "description": "UID2 optout base url override"
+        "description": "UID2 optout base URL override"
       }
     }
   },

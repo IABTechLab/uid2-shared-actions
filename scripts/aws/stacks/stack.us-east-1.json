@@ -1,0 +1,7 @@
+{
+    "VpcId": "vpc-02eee1cafb6b43c32",
+    "VpcSubnet1": "subnet-083eb09a72dc3cb22",
+    "VpcSubnet2": "subnet-03489adb672cafa50",
+    "SSHKeyName": "github-runner-key",
+    "TrustNetworkCidr": "172.31.0.0/16"
+}

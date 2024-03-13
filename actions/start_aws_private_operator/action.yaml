@@ -1,0 +1,73 @@
+name: Start AWS Private Operator
+description: Spins up an AWS private operator
+
+inputs:
+  bore_url_core:
+    description: The bore URL for core service
+    required: true
+  bore_url_optout:
+    description: The bore URL for optout service
+    required: true
+  bore_url_localstack:
+    description: The bore URL for localstack service
+    required: true
+  aws_region:
+    description: The AWS region [us-east-1, us-west-1, ca-central-1, eu-central-1]
+    required: true
+  aws_ami:
+    description: The AWS AMI ID
+    required: true
+  image_hash:
+    description: The operator image hash
+    required: true
+  identity_scope:
+    description: The identity scope [UID2, EUID]
+    required: true
+  operator_key:
+    description: The operator key
+    required: true
+
+outputs:
+  aws_stack_name:
+    description: The AWS instance name
+    value: ${{ steps.start_aws.outputs.AWS_STACK_NAME }}
+  uid2_e2e_pipeline_operator_url:
+    description: The AWS operator URL
+    value: ${{ steps.start_aws.outputs.uid2_e2e_pipeline_operator_url }}
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Setup Python 3
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.x
+
+    - name: Install Python dependencies
+      uses: py-actions/py-dependency-install@v4
+      with:
+        path: ./uid2-shared-actions/scripts/aws/requirements.txt
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-east-2
+        role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
+    - run: aws sts get-caller-identity
+      shell: bash
+
+    - name: Start AWS private operator
+      id: start_aws
+      shell: bash
+      env:
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        BORE_URL_LOCALSTACK: ${{ inputs.bore_url_localstack }}
+        AWS_REGION: ${{ inputs.aws_region }}
+        AWS_AMI: ${{ inputs.aws_ami }}
+        IMAGE_HASH: ${{ inputs.image_hash }}
+        IDENTITY_SCOPE: ${{ inputs.identity_scope }}
+        OPERATOR_KEY: ${{ inputs.operator_key }}
+      run: |
+        bash uid2-shared-actions/scripts/aws/start_aws_enclave.sh
