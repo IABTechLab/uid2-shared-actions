@@ -4,7 +4,7 @@ description: Create releases and build changelogs
 inputs:
   is_release:
     description: True if a release should be created
-    default: false
+    default: 'false'
   new_version:
     description: The new version number to be incremented to
     required: true
@@ -58,7 +58,7 @@ runs:
 
     - name: Create Docker Release
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker' }}
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         name: v${{ inputs.new_version }}
         body: ${{ steps.github_release_docker.outputs.changelog }}
@@ -66,7 +66,7 @@ runs:
 
     - name: Create Maven Release
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         name: v${{ inputs.new_version }}
         body: ${{ steps.github_release_maven.outputs.changelog }}
