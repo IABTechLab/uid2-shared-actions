@@ -19,20 +19,16 @@ inputs:
     default: ''
   publish_vulnerabilities:
     description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
-    type: string
-    default: true
+    default: 'true'
   docker_image_name:
     description: The docker image name
     required: true
-    type: string
   docker_registry:
     description: The docker registry
     required: true
-    type: string
   docker_context:
     description: The docker context
     default: .
-    type: string
   scan_type:
     description: The scan-type for aquasecurity/trivy-action action. Default to a fs scan.
     default: fs
