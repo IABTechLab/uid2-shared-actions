@@ -51,7 +51,7 @@ runs:
           IMAGE_VERSION=${{ steps.package.outputs.jar_version }}-${{ steps.package.outputs.git_commit }}
 
     - name: Local vulnerability scanner
-      uses: aquasecurity/trivy-action@0.12.0
+      uses: aquasecurity/trivy-action@0.14.0
       with:
         image-ref: ${{ steps.meta.outputs.tags }}
         format: 'table'
@@ -61,7 +61,7 @@ runs:
         hide-progress: true
 
     - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@0.12.0
+      uses: aquasecurity/trivy-action@0.14.0
       with:
         image-ref: ${{ steps.meta.outputs.tags }}
         format: 'sarif'
