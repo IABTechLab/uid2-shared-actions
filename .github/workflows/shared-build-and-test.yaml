@@ -8,6 +8,10 @@ on:
       publish_vulnerabilities:
         type: string
         default: 'true'
+      vulnerability_severity:
+        description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
+        type: string
+        default: 'CRITICAL,HIGH'
 
 jobs:
   build:
@@ -39,5 +43,5 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2
         with:
           scan_severity: HIGH,CRITICAL
-          failure_severity: CRITICAL
+          failure_severity: ${{ inputs.vulnerability_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
