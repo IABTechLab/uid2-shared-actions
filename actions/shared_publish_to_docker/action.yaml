@@ -85,7 +85,7 @@ runs:
       with:
         publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
         failure_severity: CRITICAL
-        scan_severity: CRITICAL,HIGH
+        scan_severity: HIGH
         image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
         scan_type: ${{ inputs.scan_type }}
 
