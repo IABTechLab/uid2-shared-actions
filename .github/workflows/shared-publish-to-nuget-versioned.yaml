@@ -12,14 +12,14 @@ on:
         default: 'CRITICAL,HIGH'
       dotnet_version:
         type: string
-        default: 5.0
+        default: "6.0"
       working_dir:
         description: The path to the directory for which the version should be determined.
         type: string
         default: '.'
       publish_vulnerabilities:
         type: string
-        default: true
+        default: "true"
 
 env:
   REPO: ${{ github.event.repository.name }}
@@ -54,7 +54,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup dotnet ${{ inputs.dotnet_version }}
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
 
