@@ -53,6 +53,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@v2
         with:
           release_type: ${{ inputs.release_type }}
+          version_number_input: ${{ inputs.new_version }}
 
       - name: Publish to Docker
         id: publishToDocker

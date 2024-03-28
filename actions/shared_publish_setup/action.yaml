@@ -8,7 +8,7 @@ inputs:
   java_version:
     description: The version of Java to use to compile the JAR. Defaults to 11
   version_number_input:
-    description: If set, the version number will not be incremented and the given number will be used.
+    description: If set, this will check out the repo at a specific tag by prepending v to this version number.
     default: ''
 
 outputs:
@@ -45,7 +45,7 @@ runs:
         distribution: 'temurin'
         java-version: ${{ inputs.java_version }}
 
-    - name: Checkout full history on Main
+    - name: Checkout full history on the commit that triggered the workflow
       uses: actions/checkout@v4
       if: ${{ inputs.version_number_input == ''}}
       with:
