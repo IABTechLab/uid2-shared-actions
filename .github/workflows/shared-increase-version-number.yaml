@@ -76,7 +76,7 @@ jobs:
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/package-lock.json, ${{ inputs.working_dir }}/version.json and set tag
         if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE == 'true' }} 
-        id: commit-without-tag
+        id: commit-and-tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
           add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
