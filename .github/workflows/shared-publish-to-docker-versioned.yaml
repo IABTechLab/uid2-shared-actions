@@ -14,14 +14,6 @@ on:
         description: The image tag used to extract metadata for Docker
         required: true
         type: string
-      publish_vulnerabilities:
-        description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
-        type: string
-        default: 'true'
-      force_release:
-        description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
-        type: string
-        default: 'branch'
       docker_file:
         description: The Dockerfile used to build and publish Docker image
         type: string
