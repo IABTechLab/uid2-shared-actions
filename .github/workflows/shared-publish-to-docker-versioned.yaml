@@ -30,6 +30,10 @@ on:
         description: The docker context
         default: .
         type: string
+      git_tag_or_hash:
+        description: The git tag or hash to checkout. If not provided, the commit that triggered the workflow will be used.
+        default: ''
+        type: string
 jobs:
   buildImage:
     name: Build Image
@@ -46,6 +50,7 @@ jobs:
         with:
           release_type: ${{ inputs.release_type }}
           version_number_input: ${{ inputs.new_version }}
+          git_tag_or_hash: ${{ inputs.git_tag_or_hash }}
 
       - name: Publish to Docker
         id: publishToDocker
