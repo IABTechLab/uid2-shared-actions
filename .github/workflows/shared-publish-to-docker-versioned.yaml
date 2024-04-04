@@ -49,7 +49,6 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@ff92d3109cfcfb5de8f7346991dbf6205eaf75cc
         with:
           release_type: ${{ inputs.release_type }}
-          version_number_input: ${{ inputs.new_version }}
           git_tag_or_hash: ${{ inputs.git_tag_or_hash }}
 
       - name: Publish to Docker

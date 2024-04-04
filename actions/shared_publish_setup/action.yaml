@@ -7,9 +7,6 @@ inputs:
     required: true
   java_version:
     description: The version of Java to use to compile the JAR. Defaults to 11
-  version_number_input:
-    description: If set, this will check out the repo at a specific tag by prepending v to this version number.
-    default: ''
   git_tag_or_hash:
     description: The git tag or hash to checkout. If not provided, the commit that triggered the workflow will be used.
     default: ''
