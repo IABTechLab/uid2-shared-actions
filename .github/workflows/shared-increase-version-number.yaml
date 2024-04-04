@@ -23,7 +23,7 @@ on:
         value: ${{ jobs.incrementVersionNumber.outputs.image_tag }}
       git_tag_or_hash:
         description: The git tag or hash (for snapshots) containing the updated version.
-        value: ${{ jobs.incrementVersionNumber.git_tag_or_hash }}
+        value: ${{ jobs.incrementVersionNumber.outputs.git_tag_or_hash }}
 
 jobs:
   incrementVersionNumber:

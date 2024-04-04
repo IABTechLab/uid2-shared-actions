@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: Setup
         id: setup
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@b2d7bdcbb47d161f38ec5e9540e72b16ac6b3c80
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@llp-UID2-3114-pass-commit-tag-to-setup
         with:
           release_type: ${{ inputs.release_type }}
           git_tag_or_hash: ${{ inputs.git_tag_or_hash }}
