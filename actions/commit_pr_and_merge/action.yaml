@@ -88,4 +88,11 @@ runs:
           })).data;
           console.log(`Returning commit SHA ${pr.merge_commit_sha}`);
           core.setOutput('commit_sha', pr.merge_commit_sha);
-   
+
+    - name: Print outputs
+      uses: actions/github-script@v7
+      if: ${{ inputs.tag }}
+      with:
+        script: |
+          console.log('Result', '${{ steps.tag-commit.result }}');
+          console.log('Commit and tag', '${{ steps.tag-commit.outputs.commit_tag }}');
