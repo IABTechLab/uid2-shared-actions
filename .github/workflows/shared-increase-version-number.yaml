@@ -82,3 +82,11 @@ jobs:
           add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
+
+      - name: Print outputs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('Result', '${{ steps.commit-and-tag.result }}');
+            console.log('Commit and tag', '${{ steps.commit-and-tag.outputs.git_tag_or_hash }}');
+            console.log('No tag', '${{ steps.commit-without-tag.outputs.git_tag_or_hash }}');
