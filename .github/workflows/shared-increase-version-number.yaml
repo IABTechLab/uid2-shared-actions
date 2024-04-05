@@ -21,6 +21,9 @@ on:
       image_tag:
         description: The image tag used to extract metadata for Docker
         value: ${{ jobs.incrementVersionNumber.outputs.image_tag }}
+      git_tag_or_hash:
+        description: The git tag or hash (for snapshots) containing the updated version.
+        value: ${{ jobs.incrementVersionNumber.outputs.git_tag_or_hash }}
 
 jobs:
   incrementVersionNumber:
@@ -28,6 +31,7 @@ jobs:
     outputs:
       new_version: ${{ steps.version.outputs.new_version }}
       image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
+      git_tag_or_hash: ${{ steps.commit-and-tag.result == 'success' && steps.commit-and-tag.outputs.git_tag_or_hash || steps.commit-without-tag.outputs.git_tag_or_hash }}
     steps:
       - name: Setup
         id: setup
@@ -64,6 +68,7 @@ jobs:
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/package-lock.json and ${{ inputs.working_dir }}/version.json
         if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE != 'true' }} 
+        id: commit-without-tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
           add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
@@ -71,6 +76,7 @@ jobs:
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/package-lock.json, ${{ inputs.working_dir }}/version.json and set tag
         if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE == 'true' }} 
+        id: commit-and-tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
         with:
           add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
