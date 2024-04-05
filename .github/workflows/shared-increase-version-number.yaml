@@ -31,7 +31,7 @@ jobs:
     outputs:
       new_version: ${{ steps.version.outputs.new_version }}
       image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
-      git_tag_or_hash: ${{ steps.commit-and-tag.result == 'success' && steps.commit-and-tag.outputs.git_tag_or_hash || steps.commit-without-tag.outputs.git_tag_or_hash }}
+      git_tag_or_hash: ${{ steps.commit-and-tag.outcome == 'success' && steps.commit-and-tag.outputs.git_tag_or_hash || steps.commit-without-tag.outputs.git_tag_or_hash }}
     steps:
       - name: Setup
         id: setup
@@ -87,6 +87,6 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            console.log('Result', '${{ steps.commit-and-tag.result }}');
+            console.log('Result', '${{ steps.commit-and-tag.outcome }}');
             console.log('Commit and tag', '${{ steps.commit-and-tag.outputs.git_tag_or_hash }}');
             console.log('No tag', '${{ steps.commit-without-tag.outputs.git_tag_or_hash }}');
