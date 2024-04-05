@@ -15,7 +15,7 @@ inputs:
 outputs:
   git_tag_or_hash: 
     description: The git tag (or hash if no tag provided) of the merge commit
-    value: ${{ inputs.tag && inputs.tag || steps.get-commit-hash.outputs.commit_sha }}
+    value: ${{ inputs.tag != '' && inputs.tag || steps.get-commit-hash.outputs.commit_sha }}
 
 runs:
   using: "composite"
