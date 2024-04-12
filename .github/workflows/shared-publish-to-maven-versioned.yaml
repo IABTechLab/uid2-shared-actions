@@ -98,7 +98,7 @@ jobs:
         if: ${{ inputs.publish_to_maven != true }}
         run: | 
           cd ./${{ inputs.working_dir }}
-          mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile
+          mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile test
 
       - name: Commit pom.xml and version.json
         if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 
