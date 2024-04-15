@@ -21,6 +21,10 @@ on:
         description: The path to the directory for which the version should be determined.
         type: string
         default: '.'
+      vulnerability_failure_severity:
+        description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
+        type: string
+        default: 'CRITICAL,HIGH'
  
 env:
   IS_RELEASE: ${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name ) }}
@@ -70,7 +74,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2
         with:
           scan_severity: HIGH,CRITICAL
-          failure_severity: CRITICAL
+          failure_severity: ${{ inputs.vulnerability_failure_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
 
       - name: Set version number
