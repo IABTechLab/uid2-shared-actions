@@ -71,7 +71,7 @@ jobs:
           key: ${{ secrets.GPG_KEY }}
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@tjm-UID2--1281-fix-vulnerability-scan
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_failure_severity }}
