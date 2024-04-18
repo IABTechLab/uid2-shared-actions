@@ -66,7 +66,7 @@ jobs:
           java-version: ${{ inputs.java_version }}
 
       - name: Download key
-        uses: IABTechLab/uid2-shared-actions/actions/download_gpg_key@v1.0
+        uses: IABTechLab/uid2-shared-actions/actions/download_gpg_key@v2
         with:
           key: ${{ secrets.GPG_KEY }}
 
