@@ -77,10 +77,9 @@ runs:
         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
           if [[ -f "pom.xml" ]]; then
             MVN_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
-            echo $MVN_VERSION
             IFS='.' read -r -a parts <<< "$MVN_VERSION"
             PATCH="${parts[2]}"
-            echo $PATCH
+            PATCH=$(echo $PATCH | cut -d'-' -f 1)
             NEW_PATCH=$(($PATCH+1))
             echo "new_version=$NBGV_MajorMinorVersion.$NEW_PATCH-alpha-$GITHUB_RUN_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
           else
