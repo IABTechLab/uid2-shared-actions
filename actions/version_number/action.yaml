@@ -75,11 +75,21 @@ runs:
         if [[ "${{ inputs.version_number }}" != "" ]]; then
           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
-          echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
+          if [[ -f "pom.xml" ]]; then
+            MVN_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+            echo $MVN_VERSION
+            IFS='.' read -r -a parts <<< "$MVN_VERSION"
+            PATCH="${parts[2]}"
+            echo $PATCH
+            NEW_PATCH=$(($PATCH+1))
+            echo "new_version=$NBGV_MajorMinorVersion.$NEW_PATCH-alpha-$GITHUB_RUN_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
+          else
+            echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
+          fi
         elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
-          echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
+          echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.short_name }}" == "Yes" ]]; then
           echo "new_version=$NBGV_SimpleVersion" >> $GITHUB_OUTPUT
         else
-          echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort" >> $GITHUB_OUTPUT
+          echo "new_version=$NBGV_SimpleVersion" >> $GITHUB_OUTPUT
         fi
