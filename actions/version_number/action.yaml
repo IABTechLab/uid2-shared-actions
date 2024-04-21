@@ -14,13 +14,8 @@ inputs:
     description: The name of the branch being built/deployed. If the branch is master or main, the branch name will not be included
     required: false
     default: ''
-  short_name:
-    description: Yes for a short name that does not include the git hash
-    required: false
-    default: ''
   working_dir:
     description: The path to the directory for which the version should be determined.
-    type: string
     default: '.'
 outputs:
   new_version:
@@ -87,8 +82,6 @@ runs:
           fi
         elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
           echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
-        elif [[ "${{ inputs.short_name }}" == "Yes" ]]; then
-          echo "new_version=$NBGV_SimpleVersion" >> $GITHUB_OUTPUT
         else
           echo "new_version=$NBGV_SimpleVersion" >> $GITHUB_OUTPUT
         fi

@@ -64,7 +64,6 @@ jobs:
           type: ${{ inputs.release_type }}
           branch_name: ${{ github.ref }}
           working_dir: ${{ inputs.working_dir }}
-          short_name: Yes
 
       - name: Update pyproject.toml
         run: |
