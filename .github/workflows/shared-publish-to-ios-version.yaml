@@ -1,4 +1,4 @@
-name: Shared Pipeline to build and publish Nuget Packages to NuGet Repos
+name: Shared Pipeline to build and publish iOS packages
 on:
   workflow_call:
     inputs:
