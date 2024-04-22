@@ -51,7 +51,7 @@ runs:
         path: ${{ inputs.working_dir }}
         setAllVars: true
     
-    - run: Echo State
+    - name: Echo State
       if: inputs.version_number == ''
       shell: bash
       run: |
