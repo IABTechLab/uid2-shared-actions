@@ -51,15 +51,14 @@ runs:
         path: ${{ inputs.working_dir }}
         setAllVars: true
     
-    - run: echo "NBGV_SemVer2 $NBGV_SemVer2"
-      if:  inputs.version_number == ''
+    - run: Echo State
+      if: inputs.version_number == ''
       shell: bash
-      
-    - run: env
-      if:  inputs.version_number == ''
-      shell: bash
+      run: |
+        echo "NBGV_SemVer2 $NBGV_SemVer2"
+        env
 
-    - name: Set version number for snapshot
+    - name: Calculate Version Number
       id: version
       shell: bash
       run: |
@@ -70,8 +69,8 @@ runs:
         if [[ "${{ inputs.version_number }}" != "" ]]; then
           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
-          if [[ -f "pom.xml" ]]; then
-            MVN_VERSION=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+          if [[ -f ${{ inputs.working_dir }}/pom.xml ]]; then
+            MVN_VERSION=$(grep -o '<version>.*</version>' ${{ inputs.working_dir }}/pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
             IFS='.' read -r -a parts <<< "$MVN_VERSION"
             PATCH="${parts[2]}"
             PATCH=$(echo $PATCH | cut -d'-' -f 1)
