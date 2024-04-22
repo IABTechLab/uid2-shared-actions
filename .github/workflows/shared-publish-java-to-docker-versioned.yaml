@@ -99,7 +99,7 @@ jobs:
 
       - name: Set version number
         id: version
-        uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@tjm-UID2-1405-remove-hash-from-version
         with:
           type: ${{ inputs.release_type }}
           version_number: ${{ inputs.version_number_input }}
