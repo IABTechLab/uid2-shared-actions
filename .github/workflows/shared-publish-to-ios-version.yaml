@@ -76,7 +76,6 @@ jobs:
           echo "Version number updated from $current_version to $new_version"
 
       - name: Build, Test
-      -- ? Should we make the iOS version configurable? Is that even possible
         run: | 
           cd ./${{ inputs.working_dir }}
           xcodebuild -scheme UID2 -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14"
