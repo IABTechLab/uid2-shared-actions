@@ -6,17 +6,10 @@ on:
         description: The type of version number to return. Must be one of [Patch, Minor or Major]
         required: true
         type: string
-      vulnerability_failure_severity:
-        description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
-        type: string
-        default: 'CRITICAL,HIGH'
       working_dir:
         description: The path to the directory for which the version should be determined.
         type: string
         default: '.'
-      publish_vulnerabilities:
-        type: string
-        default: "true"
 
 env:
   REPO: ${{ github.event.repository.name }}
@@ -49,13 +42,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2
-        with:
-          scan_severity: HIGH,CRITICAL
-          failure_severity: ${{ inputs.vulnerability_failure_severity }}
-          publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
 
       - name: Set version number
         id: version
