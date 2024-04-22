@@ -14,13 +14,8 @@ inputs:
     description: The name of the branch being built/deployed. If the branch is master or main, the branch name will not be included
     required: false
     default: ''
-  short_name:
-    description: Yes for a short name that does not include the git hash
-    required: false
-    default: ''
   working_dir:
     description: The path to the directory for which the version should be determined.
-    type: string
     default: '.'
 outputs:
   new_version:
@@ -56,15 +51,14 @@ runs:
         path: ${{ inputs.working_dir }}
         setAllVars: true
     
-    - run: echo "NBGV_SemVer2 $NBGV_SemVer2"
-      if:  inputs.version_number == ''
+    - name: Echo State
+      if: inputs.version_number == ''
       shell: bash
-      
-    - run: env
-      if:  inputs.version_number == ''
-      shell: bash
+      run: |
+        echo "NBGV_SemVer2 $NBGV_SemVer2"
+        env
 
-    - name: Set version number for snapshot
+    - name: Calculate Version Number
       id: version
       shell: bash
       run: |
@@ -75,11 +69,18 @@ runs:
         if [[ "${{ inputs.version_number }}" != "" ]]; then
           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
-          echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
+          if [[ -f ${{ inputs.working_dir }}/pom.xml ]]; then
+            MVN_VERSION=$(grep -o '<version>.*</version>' ${{ inputs.working_dir }}/pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
+            IFS='.' read -r -a parts <<< "$MVN_VERSION"
+            PATCH="${parts[2]}"
+            PATCH=$(echo $PATCH | cut -d'-' -f 1)
+            NEW_PATCH=$(($PATCH+1))
+            echo "new_version=$NBGV_MajorMinorVersion.$NEW_PATCH-alpha-$GITHUB_RUN_NUMBER-SNAPSHOT" >> $GITHUB_OUTPUT
+          else
+            echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
+          fi
         elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
-          echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
-        elif [[ "${{ inputs.short_name }}" == "Yes" ]]; then
-          echo "new_version=$NBGV_SimpleVersion" >> $GITHUB_OUTPUT
+          echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
         else
-          echo "new_version=$NBGV_SimpleVersion-$NBGV_GitCommitIdShort" >> $GITHUB_OUTPUT
+          echo "new_version=$NBGV_SimpleVersion" >> $GITHUB_OUTPUT
         fi
