@@ -58,7 +58,7 @@ jobs:
         run: |
           current_version=$(grep -o '<string>.*</string>' ${{ inputs.working_dir }}/Sources/UID2/Properties/sdk_properties.plist | head -1 | sed 's/<string>\(.*\)<\/string>/\1/')
           new_version=${{ steps.version.outputs.new_version }} 
-          sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/Sources/UID2/Properties/sdk_properties.plist
+          sed -i '' -e "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/Sources/UID2/Properties/sdk_properties.plist
           echo "Version number updated from $current_version to $new_version"
 
       - name: Build, Test
