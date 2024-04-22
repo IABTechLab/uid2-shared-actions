@@ -12,6 +12,10 @@ on:
         description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
         type: string
         default: 'CRITICAL,HIGH'
+      working_dir:
+        description: The path to the pom.xml file.
+        type: string
+        default: '.'
 
 jobs:
   build:
@@ -29,15 +33,17 @@ jobs:
 
       - name: Build and run unit tests
         run: mvn -B clean compile test
+        working-directory: ${{ inputs.working_dir }}
 
       - name: Generate code coverage
         run: mvn jacoco:report
+        working-directory: ${{ inputs.working_dir }}
 
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
-          path: target/site/jacoco/*
+          path: ${{ inputs.working_dir }}/target/site/jacoco/*
 
       - name: Vulnerability Scan
         uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2
