@@ -35,6 +35,10 @@ on:
         description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
         type: string
         default: 'CRITICAL,HIGH'
+      working_dir:
+        description: The path to the pom.xml and Dockerfile.
+        type: string
+        default: '.'
     outputs:
       version_number_output:
         description: The complete version number 
@@ -108,15 +112,18 @@ jobs:
       - name: Update pom.xml
         id: updatePom
         run: |
+          pushd ${{ inputs.working_dir }}
           current_version=$(grep -o '<version>.*</version>' pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
           new_version=${{ steps.version.outputs.new_version }} 
           sed -i "0,/$current_version/s/$current_version/$new_version/" pom.xml
           echo "Version number updated from $current_version to $new_version"
           echo "image_tag=${{ steps.version.outputs.new_version }}-${{ inputs.cloud_provider }}" >> $GITHUB_OUTPUT
+          popd
 
       - name: Package JAR
         id: package
         run: |
+          pushd ${{ inputs.working_dir }}
           if [[ "${{ inputs.skip_tests }}" == "false" ]]; then
             mvn -B package -P ${{ inputs.cloud_provider }}
           else
@@ -124,19 +131,20 @@ jobs:
           fi
           echo "jar_version=$(mvn help:evaluate -Dexpression=project.version | grep -e '^[1-9][^\[]')" >> $GITHUB_OUTPUT
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
+          popd
 
       - name: Commit pom.xml and version.json
         if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.is_release != 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
         with:
-          add: 'pom.xml version.json'
+          add: '${{inputs.working_dir}}/pom.xml version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
 
       - name: Commit pom.xml, version.json and set tag
         if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.is_release == 'true' }} 
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
         with:
-          add: 'pom.xml version.json'
+          add: '${{inputs.working_dir}}/pom.xml version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
 
@@ -165,7 +173,7 @@ jobs:
       - name: Build and export to Docker
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ${{inputs.working_dir}}
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -204,7 +212,7 @@ jobs:
       - name: Push to Docker
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ${{inputs.working_dir}}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
