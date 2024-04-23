@@ -62,7 +62,7 @@ jobs:
 
       - name: Publish to Docker
         id: publishToDocker
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@v2
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@ian-UID2-3200-use-shared-pipelines
         with:
           new_version: ${{ inputs.new_version }}
           image_tag: ${{ inputs.image_tag }}
