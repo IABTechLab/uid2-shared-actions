@@ -34,6 +34,10 @@ on:
         description: The git tag or hash to checkout. If not provided, the commit that triggered the workflow will be used.
         default: ''
         type: string
+      force_release:
+        description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
+        type: string
+        default: 'branch'
 jobs:
   buildImage:
     name: Build Image
@@ -50,6 +54,7 @@ jobs:
         with:
           release_type: ${{ inputs.release_type }}
           git_tag_or_hash: ${{ inputs.git_tag_or_hash }}
+          force_release: ${{ inputs.force_release }}
 
       - name: Publish to Docker
         id: publishToDocker

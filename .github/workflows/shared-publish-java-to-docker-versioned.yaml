@@ -39,6 +39,10 @@ on:
         description: The path to the pom.xml and Dockerfile.
         type: string
         default: '.'
+      append_image_name:
+        description: Additional string to append to the image name.
+        type: string
+        default: ''
     outputs:
       version_number_output:
         description: The complete version number 
@@ -159,7 +163,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}
           tags: |
             type=raw,value=${{ steps.updatePom.outputs.image_tag }}
             type=raw,value=${{ steps.checkRelease.outputs.not_snapshot == 'true' && 'latest' || '' }}
