@@ -72,6 +72,6 @@ jobs:
           is_release: ${{ steps.setup.outputs.is_release }}
           new_version: ${{ inputs.new_version }}
           tags: ${{ steps.publishToDocker.outputs.tags }}
-          image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
+          image_tag: ${{ inputs.docker_image_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: Docker
