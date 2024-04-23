@@ -38,6 +38,10 @@ on:
         description: If 'yes', will force the creation a release, if 'no' will not create a release. 'branch' will use release_type and the branch to determine if a release should be created.
         type: string
         default: 'branch'
+      publish_vulnerabilities:
+        description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
+        type: string
+        default: 'true'
 jobs:
   buildImage:
     name: Build Image
@@ -68,6 +72,7 @@ jobs:
           docker_image_name: ${{ inputs.docker_image_name }}
           docker_registry: ${{ inputs.docker_registry }}
           docker_context: ${{ inputs.docker_context }}
+          publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           scan_type: image
 
       - name: Create Release
