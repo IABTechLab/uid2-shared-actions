@@ -54,7 +54,7 @@ jobs:
     steps:
       - name: Setup
         id: setup
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@ian-UID2-3200-use-shared-pipelines
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@v2
         with:
           release_type: ${{ inputs.release_type }}
           git_tag_or_hash: ${{ inputs.git_tag_or_hash }}
@@ -62,7 +62,7 @@ jobs:
 
       - name: Publish to Docker
         id: publishToDocker
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@ian-UID2-3200-use-shared-pipelines
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@v2
         with:
           new_version: ${{ inputs.new_version }}
           image_tag: ${{ inputs.image_tag }}
