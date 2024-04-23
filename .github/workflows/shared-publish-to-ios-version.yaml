@@ -86,8 +86,6 @@ jobs:
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Zip and Tar repo
-        run: 
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
