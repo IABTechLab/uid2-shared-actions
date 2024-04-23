@@ -5,6 +5,10 @@ on:
       java_version:
         type: string
         default: '11'
+      vulnerability_scan_only:
+        description: If true, only the vulnerability scanning step will run.
+        type: string
+        default: 'false'
       publish_vulnerabilities:
         type: string
         default: 'true'
@@ -22,18 +26,22 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK
+        if: ${{ inputs.vulnerability_scan_only == 'false' }}
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{ inputs.java_version }}
 
       - name: Build and run unit tests
+        if: ${{ inputs.vulnerability_scan_only == 'false' }}
         run: mvn -B clean compile test
 
       - name: Generate code coverage
+        if: ${{ inputs.vulnerability_scan_only == 'false' }}
         run: mvn jacoco:report
 
       - name: Archive code coverage results
+        if: ${{ inputs.vulnerability_scan_only == 'false' }}
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
