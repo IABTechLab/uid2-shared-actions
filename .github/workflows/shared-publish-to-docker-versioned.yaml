@@ -50,7 +50,7 @@ jobs:
     steps:
       - name: Setup
         id: setup
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@v2
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_setup@ian-UID2-3200-use-shared-pipelines
         with:
           release_type: ${{ inputs.release_type }}
           git_tag_or_hash: ${{ inputs.git_tag_or_hash }}
