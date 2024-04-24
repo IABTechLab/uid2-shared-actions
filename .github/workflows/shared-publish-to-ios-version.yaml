@@ -64,8 +64,10 @@ jobs:
       - name: Build, Test
         run: | 
           cd ./${{ inputs.working_dir }}
-          xcodebuild -scheme UID2 -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14"
+          xcodebuild -scheme UID2 -destination "generic/platform=iOS"
           xcodebuild test -scheme UID2Tests -sdk iphonesimulator16.2 -destination "OS=16.2,name=iPhone 14"
+          xcodebuild -scheme UID2 -destination "generic/platform=tvOS"
+          xcodebuild test -scheme UID2Tests -sdk appletvsimulator16.1 -destination "OS=16.1,name=Apple TV"
 
       - name: Commit sdk_properties, version.json and set tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
