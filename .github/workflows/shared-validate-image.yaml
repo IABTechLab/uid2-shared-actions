@@ -85,7 +85,7 @@ jobs:
             type=sha,prefix=${{ steps.package.outputs.jar_version }}-,suffix=-${{ inputs.cloud_provider }},format=short
 
       - name: Build Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
