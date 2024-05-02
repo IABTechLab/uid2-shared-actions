@@ -52,7 +52,9 @@ jobs:
           working_dir: ${{ inputs.working_dir }}
 
       - name: Lint code
-        run: swiftlint lint --config .swiftlint.yml --reporter github-actions-logging
+        run: |
+          brew install swiftlint
+          swiftlint lint --config .swiftlint.yml --reporter github-actions-logging
 
       - name: Update UID2.Client.ios
         run: |
