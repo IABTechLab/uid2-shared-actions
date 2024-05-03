@@ -64,7 +64,7 @@ jobs:
         run: | 
           cd ./${{ inputs.working_dir }}
           xcodebuild -scheme UID2 -sdk iphonesimulator17.4 -destination "OS=17.4,name=iPhone 15"
-          xcodebuild test -scheme UID2Tests -sdk iphonesimulator17.4 -destination "OS=17.4,name=iPhone 15"
+          xcodebuild test -scheme UID2 -sdk iphonesimulator17.4 -destination "OS=17.4,name=iPhone 15"
 
       - name: Commit sdk_properties, version.json and set tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
