@@ -2,6 +2,6 @@
     "VpcId": "vpc-039fb7973c7957db2",
     "VpcSubnet1": "subnet-0f8fd16ffa7e5ba4c",
     "VpcSubnet2": "subnet-02e453f860e074e0c",
-    "SSHKeyName": "github-runner-key",
+    "SSHKeyName": "tfstate-operator-build-pipeline-bucket-key",
     "TrustNetworkCidr": "172.31.0.0/16"
 }
