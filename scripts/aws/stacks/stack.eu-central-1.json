@@ -2,6 +2,6 @@
     "VpcId": "vpc-062e41962c91d37a2",
     "VpcSubnet1": "subnet-0c1cbb77d802bbe39",
     "VpcSubnet2": "subnet-08e0ed1aea00a0449",
-    "SSHKeyName": "tfstate-operator-build-pipeline-bucket-key",
+    "SSHKeyName": "uid2-tjm-test-key-pair",
     "TrustNetworkCidr": "172.31.0.0/16"
 }
