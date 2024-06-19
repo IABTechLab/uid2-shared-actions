@@ -233,7 +233,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v2
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@kcc-fix-aws-e2e-test
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
