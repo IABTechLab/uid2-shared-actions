@@ -77,6 +77,10 @@ jobs:
           python3 -m pip install --upgrade build
           python3 -m build
 
+      - name: Test
+        run: |
+          python3 -m unittest discover -s ./tests
+
       - name: Publish
         run: |
           python3 -m pip install --upgrade twine
