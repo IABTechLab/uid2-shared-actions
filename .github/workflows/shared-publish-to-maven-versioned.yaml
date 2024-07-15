@@ -91,18 +91,31 @@ jobs:
           new_version=${{ steps.version.outputs.new_version }} 
           sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/pom.xml
           echo "Version number updated from $current_version to $new_version"
+      - name: Create Maven Settings
+        run: |
+          cd ./${{ inputs.working_dir }}
+          echo "<settings>
+                    <servers>
+                        <server>
+                            <id>ossrh</id>
+                            <username>${{ secrets.SONATYPE_REPO_USERNAME }}</username>
+                            <password>${{ secrets.SONATYPE_REPO_TOKEN }}</password>
+                        </server>
+                    </servers>
+                </settings>
+                " >> settings.xml
 
       - name: Publish
         if: ${{ inputs.publish_to_maven }}
         run: | 
           cd ./${{ inputs.working_dir }}
-          mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
+          mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
 
       - name: Compile
         if: ${{ inputs.publish_to_maven != true }}
         run: | 
           cd ./${{ inputs.working_dir }}
-          mvn -B -Drepo.id=ossrh -Drepo.login=${{ secrets.SONATYPE_REPO_ACCOUNT }} -Drepo.pwd="${{ secrets.SONATYPE_REPO_PASSWORD }}" -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile test
+          mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile test
 
       - name: Commit pom.xml and version.json
         if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 
