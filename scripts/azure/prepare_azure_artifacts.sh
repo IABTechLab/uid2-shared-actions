@@ -39,6 +39,8 @@ else
   if [[ $? -ne 0 ]]; then
     echo "Failed to add current user to Docker group"
     exit 1
+  else
+    echo "Successfully added current user to Docker group"
   fi
 
   # Generate deployment template
