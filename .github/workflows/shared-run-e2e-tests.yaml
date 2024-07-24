@@ -109,6 +109,8 @@ jobs:
 
       - name: Checkout full history
         uses: actions/checkout@v4
+        with:
+          ref: kcc-UID2-3726-expose-prometheus-port-azure
 
       - name: Checkout uid2-operator repo
         uses: actions/checkout@v4
@@ -141,7 +143,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v2
+          ref: kcc-UID2-3726-expose-prometheus-port-azure
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
