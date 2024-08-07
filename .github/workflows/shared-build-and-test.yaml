@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: wzh-uid2-3574-check-version-update-presignedurl
 
       - name: Set up JDK
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
