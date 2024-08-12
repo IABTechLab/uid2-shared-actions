@@ -157,7 +157,7 @@ jobs:
 
       - name: Bring up bore
         id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' }}
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks'}}
         run: |
           bash uid2-shared-actions/scripts/setup_bore.sh
 
