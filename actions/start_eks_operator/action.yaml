@@ -40,7 +40,7 @@ runs:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
         OPERATOR_ROOT: ${{ inputs.operator_root }}
       run: |
-        bash uid2-shared-actions/scripts/prepare_eks_deployment_files.sh
+        bash uid2-shared-actions/scripts/eks/prepare_eks_deployment_files.sh
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
