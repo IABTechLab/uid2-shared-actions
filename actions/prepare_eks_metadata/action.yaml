@@ -1,0 +1,24 @@
+name: Prepare EKS Metadata
+description: Prepares the EKS enclave metadata
+
+inputs:
+  operator_image_version:
+    description: The uid2-operator image version
+    default: latest
+  operator_root:
+    description: The root path for uid2-operator folder
+    default: uid2-operator
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Prepare EKS enclave deployment files
+      id: enclave_metadata
+      shell: bash
+      env:
+        IMAGE_VERSION: ${{ inputs.operator_image_version }}
+        OPERATOR_ROOT: ${{ inputs.operator_root }}
+      run: |
+        bash uid2-shared-actions/scripts/prepare_eks_deployment_files.sh
+
