@@ -12,7 +12,7 @@ if [ -z "${IMAGE_VERSION}" ]; then
 fi
 
 ROOT="."
-DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/aws/eks/deployment-files"
+DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/aws/eks/deployment_files"
 
 ls -al
 

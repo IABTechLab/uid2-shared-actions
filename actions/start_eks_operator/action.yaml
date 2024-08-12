@@ -57,4 +57,5 @@ runs:
       shell: bash
       run: |
         aws eks --region us-east-2 update-kubeconfig --name uid-test-git-us-east-2
-        kubectl apply -f ${{ inputs.operator_root }}/scripts/eks/deployment-files/deployment.yaml
+        cat ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/deployment.yaml
+        kubectl apply -f ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/deployment.yaml
