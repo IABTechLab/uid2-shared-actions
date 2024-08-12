@@ -12,9 +12,9 @@ if [ -z "${IMAGE_VERSION}" ]; then
 fi
 
 ROOT="."
-DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/eks/deployment-files"
+DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/aws/eks/deployment-files"
 
-ls -al DEPLOYMENT_FILES_ROOT
+ls -al ${DEPLOYMENT_FILES_ROOT}
 
 IMAGE="ghcr.io/iabtechlab/uid2-operator-eks-uid2:${IMAGE_VERSION}"
 
