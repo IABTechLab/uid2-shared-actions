@@ -1,0 +1,69 @@
+name: Start AWS Private Operator
+description: Spins up an AWS private operator
+
+inputs:
+  bore_url_core:
+    description: The bore URL for core service
+    required: true
+  bore_url_optout:
+    description: The bore URL for optout service
+    required: true
+  bore_url_localstack:
+    description: The bore URL for localstack service
+    required: true
+  aws_region:
+    description: The AWS region [us-east-1, us-west-1, ca-central-1, eu-central-1]
+    required: true
+  aws_ami:
+    description: The AWS AMI ID
+    required: true
+  image_hash:
+    description: The operator image hash
+    required: true
+  identity_scope:
+    description: The identity scope [UID2, EUID]
+    required: true
+  operator_image_version:
+    description: The uid2-operator image version
+    default: latest
+  operator_root:
+    description: The root path for uid2-operator folder
+    default: uid2-operator
+
+# outputs:
+#   aws_stack_name:
+#     description: The AWS instance name
+#     value: ${{ steps.start_aws.outputs.AWS_STACK_NAME }}
+#   uid2_e2e_pipeline_operator_url:
+#     description: The EKS operator URL
+#     value: ${{ steps.start_aws.outputs.uid2_e2e_pipeline_operator_url }}
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Prepare EKS enclave deployment files
+      id: enclave_metadata
+      shell: bash
+      env:
+        IMAGE_VERSION: ${{ inputs.operator_image_version }}
+        OPERATOR_ROOT: ${{ inputs.operator_root }}
+      run: |
+        bash uid2-shared-actions/scripts/prepare_eks_deployment_files.sh
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-east-2
+        role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
+    
+    - name: Check AWS caller identity
+      run: aws sts get-caller-identity
+      shell: bash
+
+    - name: Start EKS operator
+      id: start_eks
+      shell: bash
+      run: |
+        aws eks --region us-east-2 update-kubeconfig --name uid-test-git-us-east-2
+        kubectl apply -f ${{ inputs.operator_root }}/scripts/eks/deployment-files/deployment.yaml

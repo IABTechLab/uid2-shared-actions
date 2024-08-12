@@ -188,14 +188,13 @@ jobs:
           admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
-      - name: Prepare EKS metadata
-        id: prepare_eks_metadata
-        if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@kcc-UID2-3783-e2e-test-for-eks
-        with:
-          operator_image_version: ${{ inputs.operator_image_version }}
-          operator_root: ${{ inputs.operator_root }}
-          aws_pcr0: ${{ inputs.aws_pcr0 }}
+      # - name: Prepare EKS metadata
+      #   id: prepare_eks_metadata
+      #   if: ${{ inputs.operator_type == 'eks' }}
+      #   uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@kcc-UID2-3783-e2e-test-for-eks
+      #   with:
+      #     operator_image_version: ${{ inputs.operator_image_version }}
+      #     operator_root: ${{ inputs.operator_root }}
 
       - name: Bring up Docker Compose
         id: docker-compose
@@ -252,6 +251,22 @@ jobs:
           image_hash: ${{ steps.prepare_aws_metadata.outputs.image_hash }}
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
           operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
+
+      - name: Start EKS operator
+        id: start_EKS_operator
+        if: ${{ inputs.operator_type == 'eks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@kcc-UID2-3783-e2e-test-for-eks
+        with:
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+          aws_region: ${{ inputs.aws_region }}
+          aws_ami: ${{ inputs.aws_ami }}
+          image_hash: ${{ steps.prepare_aws_metadata.outputs.image_hash }}
+          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
+          operator_image_version: ${{ inputs.operator_image_version }}
+          operator_root: ${{ inputs.operator_root }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
