@@ -188,14 +188,6 @@ jobs:
           admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
-      # - name: Prepare EKS metadata
-      #   id: prepare_eks_metadata
-      #   if: ${{ inputs.operator_type == 'eks' }}
-      #   uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@kcc-UID2-3783-e2e-test-for-eks
-      #   with:
-      #     operator_image_version: ${{ inputs.operator_image_version }}
-      #     operator_root: ${{ inputs.operator_root }}
-
       - name: Bring up Docker Compose
         id: docker-compose
         env:
