@@ -14,7 +14,7 @@ fi
 ROOT="."
 DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/aws/eks/deployment-files"
 
-ls -al ${DEPLOYMENT_FILES_ROOT}
+ls -al
 
 IMAGE="ghcr.io/iabtechlab/uid2-operator-eks-uid2:${IMAGE_VERSION}"
 
