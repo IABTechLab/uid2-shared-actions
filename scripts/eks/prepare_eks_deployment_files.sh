@@ -14,6 +14,8 @@ fi
 ROOT="."
 DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/eks/deployment-files"
 
+ls -al DEPLOYMENT_FILES_ROOT
+
 IMAGE="ghcr.io/iabtechlab/uid2-operator-eks-uid2:${IMAGE_VERSION}"
 
 sed -i "s#IMAGE_PLACEHOLDER#${IMAGE}#g" "${DEPLOYMENT_FILES_ROOT}/deployment.yaml"
