@@ -195,7 +195,7 @@ jobs:
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
-          aws_pcr0: 6a1e54ed1480467bf2d4e2570c69f690f1a61ec0ee7cba581b9bf7234028d3128bd625a230de99c70d22cdd758a5b2d3
+          aws_pcr0: ah5U7RSARnvy1OJXDGn2kPGmHsDufLpYG5v3I0Ao0xKL1iWiMN6Zxw0izddYpbLT
 
       - name: Bring up Docker Compose
         id: docker-compose
