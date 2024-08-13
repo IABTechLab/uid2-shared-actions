@@ -8,9 +8,6 @@ inputs:
   bore_url_optout:
     description: The bore URL for optout service
     required: true
-  bore_url_localstack:
-    description: The bore URL for localstack service
-    required: true
   gcp_project:
     description: The name of the GCP project
     required: true
@@ -44,7 +41,6 @@ runs:
         SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
-        BORE_URL_LOCALSTACK: ${{ inputs.bore_url_localstack }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
         IMAGE_HASH: ${{ inputs.image_hash }}
       run: |
