@@ -12,4 +12,4 @@ jq_string_update ${SECRET_JSON_FILE} core_base_url "http://${BORE_URL_CORE}"
 jq_string_update ${SECRET_JSON_FILE} optout_base_url "http://${BORE_URL_OPTOUT}"
 jq_string_update ${SECRET_JSON_FILE} api_token "${OPERATOR_KEY}"
 
-kubectl create secret generic github-test-secret --from-file=config=scripts/aws/eks/deployment_files/secret.json
+kubectl create secret generic github-test-secret --from-file=config=uid2-shared-actions/scripts/eks/secret.json
