@@ -8,8 +8,8 @@ inputs:
   admin_root:
     description: The root path for uid2-admin folder
     default: uid2-admin
-  aws_pcr0:
-    description: The AWS PCR0
+  eks_pcr0:
+    description: The EKS PCR0
     required: true
 
 outputs:
@@ -26,7 +26,7 @@ runs:
       shell: bash
       env:
         ADMIN_ROOT: ${{ inputs.admin_root }}
-        ENCLAVE_ID: ${{ inputs.aws_pcr0 }}
+        ENCLAVE_ID: ${{ inputs.eks_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |
         bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh

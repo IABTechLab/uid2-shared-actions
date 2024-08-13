@@ -88,6 +88,10 @@ on:
         description: The AWS PCR0
         type: string
 
+      eks_pcr0:
+        description: The EKS PCR0
+        type: string
+
 env:
   REGISTRY: ghcr.io
 
@@ -195,7 +199,7 @@ jobs:
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
-          aws_pcr0: ah5U7RSARnvy1OJXDGn2kPGmHsDufLpYG5v3I0Ao0xKL1iWiMN6Zxw0izddYpbLT
+          eks_pcr0: ${{ inputs.eks_pcr0 }}
 
       - name: Bring up Docker Compose
         id: docker-compose
