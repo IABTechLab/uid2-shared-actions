@@ -33,6 +33,12 @@ runs:
   using: "composite"
 
   steps:
+    - name: Create secrets in the kubernetes cluster
+      id: create_secrets
+      shell: bash
+      run: |
+        bash uid2-shared-actions/scripts/eks/create_secret_in_k8.sh
+
     - name: Prepare EKS enclave deployment files
       id: enclave_metadata
       shell: bash
