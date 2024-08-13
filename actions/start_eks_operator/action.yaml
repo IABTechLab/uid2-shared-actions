@@ -1,5 +1,5 @@
-name: Start AWS Private Operator
-description: Spins up an AWS private operator
+name: Start EKS Private Operator
+description: Spins up an EKS private operator
 
 inputs:
   bore_url_core:
@@ -25,9 +25,6 @@ inputs:
     required: true
 
 # outputs:
-#   aws_stack_name:
-#     description: The AWS instance name
-#     value: ${{ steps.start_aws.outputs.AWS_STACK_NAME }}
 #   uid2_e2e_pipeline_operator_url:
 #     description: The EKS operator URL
 #     value: ${{ steps.start_aws.outputs.uid2_e2e_pipeline_operator_url }}
