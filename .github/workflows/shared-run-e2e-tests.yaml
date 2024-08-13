@@ -352,3 +352,7 @@ jobs:
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
           bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+
+      - name: Stop EKS operator
+        if: ${{ inputs.operator_type == 'eks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@kcc-UID2-3783-e2e-test-for-eks
