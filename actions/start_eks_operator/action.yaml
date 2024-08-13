@@ -51,6 +51,9 @@ runs:
     - name: Create secrets in the kubernetes cluster
       id: create_secrets
       shell: bash
+      env:
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
       run: |
         bash uid2-shared-actions/scripts/eks/create_secret_in_k8.sh
 
