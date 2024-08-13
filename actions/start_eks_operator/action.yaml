@@ -20,6 +20,9 @@ inputs:
   operator_root:
     description: The root path for uid2-operator folder
     default: uid2-operator
+  admin_root:
+    description: The root path for uid2-admin folder
+    default: uid2-admin
 
 # outputs:
 #   aws_stack_name:
@@ -52,6 +55,7 @@ runs:
       id: create_secrets
       shell: bash
       env:
+        ADMIN_ROOT: ${{ inputs.admin_root }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
       run: |

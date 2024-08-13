@@ -255,6 +255,7 @@ jobs:
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
           operator_image_version: ${{ inputs.operator_image_version }}
           operator_root: ${{ inputs.operator_root }}
+          admin_root: ${{ inputs.admin_root }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
