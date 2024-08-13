@@ -40,15 +40,15 @@ on:
         description: 'Config: Operator branch for config'
         type: string
         default: main
-      core_branch:
+      branch_core:
         description: 'Config: Core branch for config'
         type: string
         default: main
-      optout_branch:
+      branch_optout:
         description: 'Config: Optout branch for config'
         type: string
         default: main
-      admin_branch:
+      branch_admin:
         description: 'Config: Admin branch for config'
         type: string
         default: main
@@ -120,21 +120,21 @@ jobs:
       - name: Checkout uid2-core repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.core_branch }}
+          ref: ${{ inputs.branch_core }}
           repository: IABTechLab/uid2-core
           path: uid2-core
 
       - name: Checkout uid2-optout repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.optout_branch }}
+          ref: ${{ inputs.branch_optout }}
           repository: IABTechLab/uid2-optout
           path: uid2-optout
 
       - name: Checkout uid2-admin repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.admin_branch }}
+          ref: ${{ inputs.branch_admin }}
           repository: IABTechLab/uid2-admin
           path: uid2-admin
 
