@@ -33,6 +33,21 @@ runs:
   using: "composite"
 
   steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-east-2
+        role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
+    
+    - name: Check AWS caller identity
+      shell: bash
+      run: aws sts get-caller-identity
+
+    - name: Set up kubernetes context
+      shell: bash
+      run: |
+        aws eks --region us-east-2 update-kubeconfig --name uid-test-git-us-east-2
+
     - name: Create secrets in the kubernetes cluster
       id: create_secrets
       shell: bash
@@ -48,20 +63,9 @@ runs:
       run: |
         bash uid2-shared-actions/scripts/eks/prepare_eks_deployment_files.sh
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: us-east-2
-        role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
-    
-    - name: Check AWS caller identity
-      run: aws sts get-caller-identity
-      shell: bash
-
     - name: Start EKS operator
       id: start_eks
       shell: bash
       run: |
-        aws eks --region us-east-2 update-kubeconfig --name uid-test-git-us-east-2
         cat ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/deployment.yaml
         kubectl apply -f ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/deployment.yaml
