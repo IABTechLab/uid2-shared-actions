@@ -304,6 +304,10 @@ jobs:
             echo "uid2_e2e_phone_support=false" >> ${GITHUB_OUTPUT}
           fi
 
+      - name: Test
+        shell: bash
+        run: sleep 600
+
       - name: Run E2E tests
         id: e2e
         uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
