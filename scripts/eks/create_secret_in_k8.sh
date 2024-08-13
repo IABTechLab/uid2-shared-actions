@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -ex
 
-if [ -z "${ADMIN_ROOT}" ]; then
-  echo "ADMIN_ROOT can not be empty"
+if [ -z "${OPERATOR_KEY}" ]; then
+  echo "OPERATOR_KEY can not be empty"
   exit 1
 fi
 
@@ -17,12 +17,6 @@ if [ -z "${BORE_URL_OPTOUT}" ]; then
 fi
 
 source "uid2-shared-actions/scripts/jq_helper.sh"
-
-ENCLAVE_PROTOCOL="aws-nitro"
-METADATA_ROOT="${ADMIN_ROOT}/src/main/resources/localstack/s3/core"
-OPERATOR_FILE="${METADATA_ROOT}/operators/operators.json"
-# Fetch operator key
-OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .key' ${OPERATOR_FILE})
 
 SECRET_JSON_FILE="uid2-shared-actions/scripts/eks/secret.json"
 

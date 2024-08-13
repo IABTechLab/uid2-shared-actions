@@ -188,6 +188,15 @@ jobs:
           admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
+      - name: Prepare EKS metadata
+        id: prepare_eks_metadata
+        if: ${{ inputs.operator_type == 'eks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@kcc-UID2-3783-e2e-test-for-eks
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+          aws_pcr0: 6a1e54ed1480467bf2d4e2570c69f690f1a61ec0ee7cba581b9bf7234028d3128bd625a230de99c70d22cdd758a5b2d3
+
       - name: Bring up Docker Compose
         id: docker-compose
         env:
@@ -255,7 +264,7 @@ jobs:
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
           operator_image_version: ${{ inputs.operator_image_version }}
           operator_root: ${{ inputs.operator_root }}
-          admin_root: ${{ inputs.admin_root }}
+          operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
