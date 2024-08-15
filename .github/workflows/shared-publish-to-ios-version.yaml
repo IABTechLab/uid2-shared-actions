@@ -63,8 +63,8 @@ jobs:
           new_version=${{ steps.version.outputs.new_version }} 
           formatted_new_version=$(echo "$new_version" | sed 's/\([[:digit:]]\)\.\([[:digit:]]\)\.\([[:digit:]]\)/\1, \2, \3/')
           sed -i '' -e "s/$formatted_current_version/$formatted_new_version/g" ${{ inputs.working_dir }}/Sources/UID2/Properties/UID2SDKProperties.swift
-          sed -i '' -e "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/UID2.podspec.json
-          sed -i '' -e "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/UID2Prebid.podspec.json
+          jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}/UID2.podspec.json >${{ inputs.working_dir }}/UID2.podspec.json.tmp && mv ${{ inputs.working_dir }}/UID2.podspec.json.tmp ${{ inputs.working_dir }}/UID2.podspec.json
+          jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}/UID2Prebid.podspec.json > ${{ inputs.working_dir }}/UID2Prebid.podspec.json.tmp && mv ${{ inputs.working_dir }}/UID2Prebid.podspec.json.tmp ${{ inputs.working_dir }}/UID2Prebid.podspec.json
           echo "Version number updated from $current_version to $new_version"
 
       - name: Select Xcode 15.3
