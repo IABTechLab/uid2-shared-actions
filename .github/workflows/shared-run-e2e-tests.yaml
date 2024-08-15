@@ -40,15 +40,15 @@ on:
         description: 'Config: Operator branch for config'
         type: string
         default: main
-      core_branch:
+      branch_core:
         description: 'Config: Core branch for config'
         type: string
         default: main
-      optout_branch:
+      branch_optout:
         description: 'Config: Optout branch for config'
         type: string
         default: main
-      admin_branch:
+      branch_admin:
         description: 'Config: Admin branch for config'
         type: string
         default: main
@@ -88,6 +88,10 @@ on:
         description: The AWS PCR0
         type: string
 
+      eks_pcr0:
+        description: The EKS PCR0
+        type: string
+
 env:
   REGISTRY: ghcr.io
 
@@ -120,28 +124,28 @@ jobs:
       - name: Checkout uid2-core repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.core_branch }}
+          ref: ${{ inputs.branch_core }}
           repository: IABTechLab/uid2-core
           path: uid2-core
 
       - name: Checkout uid2-optout repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.optout_branch }}
+          ref: ${{ inputs.branch_optout }}
           repository: IABTechLab/uid2-optout
           path: uid2-optout
 
       - name: Checkout uid2-admin repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.admin_branch }}
+          ref: ${{ inputs.branch_admin }}
           repository: IABTechLab/uid2-admin
           path: uid2-admin
 
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v2
+          ref: v3
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -157,7 +161,7 @@ jobs:
 
       - name: Bring up bore
         id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' }}
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks'}}
         run: |
           bash uid2-shared-actions/scripts/setup_bore.sh
 
@@ -188,6 +192,15 @@ jobs:
           admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
+      - name: Prepare EKS metadata
+        id: prepare_eks_metadata
+        if: ${{ inputs.operator_type == 'eks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@v3
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+          eks_pcr0: ${{ inputs.eks_pcr0 }}
+
       - name: Bring up Docker Compose
         id: docker-compose
         env:
@@ -213,7 +226,6 @@ jobs:
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
           gcp_project: ${{ inputs.gcp_project }}
           gcp_service_account: ${{ inputs.gcp_service_account }}
           image_hash: ${{ steps.prepare_gcp_metadata.outputs.image_hash }}
@@ -243,6 +255,19 @@ jobs:
           image_hash: ${{ steps.prepare_aws_metadata.outputs.image_hash }}
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
           operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
+
+      - name: Start EKS operator
+        id: start_EKS_operator
+        if: ${{ inputs.operator_type == 'eks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@v3
+        with:
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          operator_image_version: ${{ inputs.operator_image_version }}
+          operator_root: ${{ inputs.operator_root }}
+          operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
@@ -327,3 +352,7 @@ jobs:
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
           bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+
+      - name: Stop EKS operator
+        if: ${{ inputs.operator_type == 'eks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@v3
