@@ -15,9 +15,11 @@ runs:
             repo: context.repo.repo
           })
 
+          console.log("Releases found: " + allReleases.length);
+
           let draftReleases = allReleases.data.filter((release) => {
             return release.draft == true && !release.body.contains("--editing--")
-          })
+          });
 
           draftReleases.forEach((release) => {
             console.log("Deleting draft release: " + release.id)
