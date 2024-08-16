@@ -13,7 +13,7 @@ runs:
           let allReleases = await github.rest.repos.listReleases({
             owner: context.repo.owner,
             repo: context.repo.repo
-          })
+          });
 
           console.log("Releases found: " + allReleases.length);
 
