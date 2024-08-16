@@ -1,17 +1,6 @@
 name: Delete draft releases
 description: Delete any draft releases
 
-inputs:
-  github_token:
-    description: The GITHUB_TOKEN to use for the target repo
-    required: false
-  repo_owner:
-    description: The owner of the target repo
-    required: true
-  repo_name:
-    description: The name of the target repo
-    required: true
-
 runs:
   using: "composite" 
 
@@ -20,21 +9,22 @@ runs:
       uses: actions/github-script@v7
       id: delete-release
       with:
-        github-token: ${{ inputs.github_token }}
         result-encoding: string
         script: |
           console.log(context);
-
+          
           let allReleases = await github.rest.repos.listReleases({
-            owner: '${{ inputs.repo_owner }}',
-            repo: '${{ inputs.repo_name }}'
-          });
+            owner: context.repo.owner,
+            repo: context.repo.repo
+          }).data;
 
-          console.log("Releases found: " + allReleases.length);
+          console.log(allReleases);
 
-          let draftReleases = allReleases.data.filter((release) => {
+          let draftReleases = allReleases.filter((release) => {
             return release.draft == true && !release.body.contains("--editing--")
           });
+
+          console.log("Draft count: " + draftReleases.length);
 
           draftReleases.forEach((release) => {
             console.log("Deleting draft release: " + release.id)
