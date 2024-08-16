@@ -19,7 +19,7 @@ runs:
             return release.draft == true && !release.body.contains("--editing--")
           })
 
-          draftRelease.forEach((release) => {
+          draftReleases.forEach((release) => {
             console.log("Deleting draft release: " + release.id)
             //await github.rest.repos.deleteRelease({
             //  owner: '${{ inputs.repo_owner }}',
