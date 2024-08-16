@@ -10,6 +10,8 @@ runs:
       id: delete-release
       with:
         script: |
+          console.log(context);
+          
           let allReleases = await github.rest.repos.listReleases({
             owner: context.repo.owner,
             repo: context.repo.repo
