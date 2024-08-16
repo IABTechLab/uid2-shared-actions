@@ -24,11 +24,12 @@ runs:
 
           console.log("Draft count: " + draftReleases.length);
 
-          draftReleases.forEach((release) => {
+          for (const release of draftReleases) {
             console.log("Deleting draft release: " + release.id)
             await github.rest.repos.deleteRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: release.id
             });
-          });
+          }
+
