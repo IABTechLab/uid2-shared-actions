@@ -28,10 +28,12 @@ runs:
             repo: '${{ inputs.repo_name }}'
           })).data;
 
+          console.log("Total release count: " + allReleases.length);
+
           console.log(allReleases);
 
           let draftReleases = allReleases.filter((release) => {
-            return release.draft == true && !release.body.contains("--editing--")
+            return release.draft == true && !release.body.includes('--editing--');
           });
 
           console.log("Draft count: " + draftReleases.length);
