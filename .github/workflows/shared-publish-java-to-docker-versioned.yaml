@@ -66,6 +66,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2
         with:
           release_type: ${{ inputs.release_type }}
+          force_release: 'yes' #revert before merging
 
       - name: Show Context
         run: |
@@ -234,13 +235,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Delete Draft Releases
-        if: v${{ steps.checkRelease.outputs.is_release == 'true' }}
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
         uses: IABTechLab/uid2-shared-actions/actions/delete_draft_releases@tjm-UID2-3102-delete-draft-releases
 
       - name: Create Release
-        if: v${{ steps.checkRelease.outputs.is_release == 'true' }}
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ steps.version.outputs.new_version }}
+          name: v${{ steps.version.outputs.new_version }}
           body: ${{ steps.github_release.outputs.changelog }}
           draft: true
