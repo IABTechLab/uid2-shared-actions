@@ -233,8 +233,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Delete Draft Releases
+        if: v${{ steps.checkRelease.outputs.is_release == 'true' }}
+        uses: IABTechLab/uid2-shared-actions/actions/delete_draft_releases@tjm-UID2-3102-delete-draft-releases
+
       - name: Create Release
-        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
+        if: v${{ steps.checkRelease.outputs.is_release == 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           name: ${{ steps.version.outputs.new_version }}
