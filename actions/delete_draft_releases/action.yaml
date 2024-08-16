@@ -1,0 +1,32 @@
+name: Delete draft releases
+description: Delete any draft releases
+
+runs:
+  using: "composite" 
+
+  steps:
+    - name: Delete draft releases
+      uses: actions/github-script@v7
+      id: delete-release
+      with:
+        script: |
+          let allReleases = await github.rest.repos.listReleases({
+            owner: '${{ inputs.repo_owner }}',
+            repo: '${{ inputs.repo_name }}'
+          })
+
+          let draftReleases = allReleases.data.filter((release) => {
+            return release.draft == true && !release.body.contains("--editing--")
+          })
+
+          draftRelease.forEach((release) => {
+            console.log("Deleting draft release: " + release.id)
+            //await github.rest.repos.deleteRelease({
+            //  owner: '${{ inputs.repo_owner }}',
+            //  repo: '${{ inputs.repo_name }}',
+            //  release_id: release.id
+            //})
+          });
+
+
+
