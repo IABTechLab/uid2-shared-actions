@@ -12,6 +12,8 @@ runs:
         result-encoding: string
         script: |
           console.log(context);
+          console.log(context.repo.owner);
+          console.log(context.repo.repo);
           
           let allReleases = await github.rest.repos.listReleases({
             owner: context.repo.owner,
