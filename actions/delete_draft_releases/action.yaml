@@ -11,8 +11,8 @@ runs:
       with:
         script: |
           let allReleases = await github.rest.repos.listReleases({
-            owner: '${{ inputs.repo_owner }}',
-            repo: '${{ inputs.repo_name }}'
+            owner: context.repo.owner,
+            repo: context.repo.repo
           })
 
           let draftReleases = allReleases.data.filter((release) => {
