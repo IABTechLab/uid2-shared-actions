@@ -27,6 +27,8 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_c
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
+            # Get UID2 private key from: https://start.1password.com/open/i?a=SWHBRR7FURBBXPZORJWBGP5UBM&v=cknem3yiubq6f2guyizd2ifsnm&i=bbwg7xqc6dbwadonevxfrtlovi&h=thetradedesk.1password.com
+            # Get EUID private key from: https://start.1password.com/open/i?a=SWHBRR7FURBBXPZORJWBGP5UBM&v=cknem3yiubq6f2guyizd2ifsnm&i=f2zjzvz334scuyiy2bcb3f2d3m&h=thetradedesk.1password.com
             { 'ParameterKey': 'SSHKeyName', 'ParameterValue': dc_cfg['SSHKeyName'] },
             { 'ParameterKey': 'TrustNetworkCidr', 'ParameterValue': ip_address + '/32' },
         ],
