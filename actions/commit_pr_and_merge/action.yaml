@@ -15,7 +15,10 @@ inputs:
 outputs:
   git_tag_or_hash: 
     description: The git tag (or hash if no tag provided) of the merge commit
-    value: ${{ steps.tag-commit.outcome == 'success' && steps.tag-commit.outputs.commit_tag || steps.get-commit-hash.outputs.commit_sha }}
+    value: ${{ steps.tag-commit.outcome == 'success' && steps.tag-commit.outputs.commit_tag || steps.get-commit-sha.outputs.commit_sha }}
+  commit_sha:
+    description: The git hash of the merge commit
+    value: ${{ steps.get-commit-sha.outputs.commit_sha }}
 
 runs:
   using: "composite"
@@ -75,10 +78,9 @@ runs:
           });
           core.setOutput('commit_tag', '${{ inputs.tag }}');
 
-    - name: Get commit hash
+    - name: Get commit SHA
       uses: actions/github-script@v7
-      id: get-commit-hash
-      if: ${{ ! inputs.tag }}
+      id: get-commit-sha
       with:
         script: |
           const pr = (await github.rest.pulls.get({
@@ -96,3 +98,4 @@ runs:
         script: |
           console.log('Result', '${{ steps.tag-commit.outcome }}');
           console.log('Commit tag', '${{ steps.tag-commit.outputs.commit_tag }}');
+          console.log('Commit sha', '${{ steps.get-commit-sha.outputs.commit_sha }}');
