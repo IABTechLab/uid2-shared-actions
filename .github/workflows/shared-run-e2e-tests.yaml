@@ -145,7 +145,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: tjm-UID2-3620-publish-all-use-ami
+          ref: v3
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -186,7 +186,7 @@ jobs:
       - name: Prepare AWS metadata
         id: prepare_aws_metadata
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@tjm-UID2-3620-publish-all-use-ami
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@v3
         with:
           admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
@@ -244,7 +244,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@tjm-UID2-3620-publish-all-use-ami
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
