@@ -145,7 +145,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: tjm-UID2-3620-publish-all-use-ami
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
