@@ -2,9 +2,6 @@ name: Prepare AWS Metadata
 description: Prepares the AWS Nitro enclave metadata
 
 inputs:
-  operator_image_version:
-    description: The uid2-operator image version
-    default: latest
   admin_root:
     description: The root path for uid2-admin folder
     default: uid2-admin
@@ -13,9 +10,6 @@ inputs:
     required: true
 
 outputs:
-  image_hash:
-    description: The operator image hash
-    value: ${{ steps.image_digest.outputs.IMAGE_HASH }}
   operator_key:
     description: The operator key
     value: ${{ steps.enclave_metadata.outputs.OPERATOR_KEY }}
@@ -24,19 +18,6 @@ runs:
   using: "composite"
 
   steps:
-    - name: Get image digest
-      id: image_digest
-      shell: bash
-      run: |
-        # Pull the image to make sure it's available locally
-        IMAGE_NAME="ghcr.io/iabtechlab/uid2-operator"
-        IMAGE_TAG="${{ inputs.operator_image_version }}"
-        docker pull "${IMAGE_NAME}:${IMAGE_TAG}"
-
-        # Get the digest
-        IMAGE_HASH=$(docker inspect --format='{{index .RepoDigests 0}}' "${IMAGE_NAME}:${IMAGE_TAG}" | cut -d'@' -f2 | cut -d':' -f2)
-        echo "::set-output name=image_hash::${IMAGE_HASH}"
-
     - name: Prepare AWS enclave metadata
       id: enclave_metadata
       shell: bash

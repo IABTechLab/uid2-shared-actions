@@ -17,9 +17,6 @@ inputs:
   aws_ami:
     description: The AWS AMI ID
     required: true
-  image_hash:
-    description: The operator image hash
-    required: true
   identity_scope:
     description: The identity scope [UID2, EUID]
     required: true
@@ -40,7 +37,7 @@ runs:
 
   steps:
     - name: Setup Python 3
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: 3.x
 
@@ -66,7 +63,6 @@ runs:
         BORE_URL_LOCALSTACK: ${{ inputs.bore_url_localstack }}
         AWS_REGION: ${{ inputs.aws_region }}
         AWS_AMI: ${{ inputs.aws_ami }}
-        IMAGE_HASH: ${{ inputs.image_hash }}
         IDENTITY_SCOPE: ${{ inputs.identity_scope }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
       run: |
