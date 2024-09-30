@@ -2,9 +2,6 @@ name: Prepare AWS Metadata
 description: Prepares the AWS Nitro enclave metadata
 
 inputs:
-  aws_eif:
-    description: The uid2-operator image version
-    default: latest
   admin_root:
     description: The root path for uid2-admin folder
     default: uid2-admin
