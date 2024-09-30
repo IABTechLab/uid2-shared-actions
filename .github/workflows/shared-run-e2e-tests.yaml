@@ -188,7 +188,6 @@ jobs:
         if: ${{ inputs.operator_type == 'aws' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@tjm-UID2-3620-publish-all-use-ami
         with:
-          operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
