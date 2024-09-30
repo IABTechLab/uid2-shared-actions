@@ -30,10 +30,6 @@ if [ -z "${AWS_AMI}" ]; then
   exit 1
 fi
 
-if [ -z "${IMAGE_HASH}" ]; then
-  echo "IMAGE_HASH can not be empty"
-  exit 1
-fi
 
 if [ -z "${IDENTITY_SCOPE}" ]; then
   echo "IDENTITY_SCOPE can not be empty"
@@ -46,7 +42,7 @@ if [ -z "${OPERATOR_KEY}" ]; then
 fi
 
 DATE=$(date '+%Y%m%d%H%M%S')
-AWS_STACK_NAME="uid2-operator-e2e-${IMAGE_HASH}-${DATE}"
+AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
 
 CF_TEMPLATE_SCOPE=""
 case "${IDENTITY_SCOPE}" in
