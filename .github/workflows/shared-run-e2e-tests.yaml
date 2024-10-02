@@ -91,6 +91,14 @@ on:
       eks_pcr0:
         description: The EKS PCR0
         type: string
+      eks_test_cluster:
+        description: The EKS Test Cluster Name
+        type: string
+      eks_test_cluster_region:
+        description: The EKS Test Cluster Region
+        type: string
+
+      
 
 env:
   REGISTRY: ghcr.io
@@ -266,6 +274,9 @@ jobs:
           operator_image_version: ${{ inputs.operator_image_version }}
           operator_root: ${{ inputs.operator_root }}
           operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
+          eks_test_cluster: ${{ inputs.eks_test_cluster }}
+          eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
+
 
       - name: Decide E2E test environment variables
         id: decide_env_var
@@ -316,7 +327,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
         with:
           e2e_image_version: ${{ inputs.e2e_image_version }}
           uid2_e2e_identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
@@ -330,8 +341,8 @@ jobs:
       - name: Stop GCP private operator
         if: ${{ inputs.operator_type == 'gcp' }}
         env:
-          GCP_PROJECT: ${{ vars.GCP_PROJECT }}
-          SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          GCP_PROJECT: ${{ inputs.gcp_project }}
+          SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
           bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
@@ -353,4 +364,7 @@ jobs:
 
       - name: Stop EKS operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@tjm-UID2-4147-correct-eif-version-number
+        with:
+          eks_test_cluster: ${{ inputs.eks_test_cluster }}
+          eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}

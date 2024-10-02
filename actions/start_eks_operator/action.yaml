@@ -23,6 +23,13 @@ inputs:
   operator_key:
     description: The operator key
     required: true
+  eks_test_cluster:
+    description: The EKS Test Cluster Name
+    required: true
+  eks_test_cluster_region:
+    description: The EKS Test Cluster Region
+    required: true
+  
 
 
 # outputs:
@@ -37,7 +44,7 @@ runs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: ${{ vars.EKS_TEST_CLUSTER_REGION }}
+        aws-region: ${{ inputs.eks_test_cluster_region }}
         role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
     
     - name: Check AWS caller identity
@@ -47,7 +54,7 @@ runs:
     - name: Set up kubernetes context
       shell: bash
       run: |
-        aws eks --region ${{ vars.EKS_TEST_CLUSTER_REGION }} update-kubeconfig --name ${{ vars.EKS_TEST_CLUSTER }}
+        aws eks --region ${{ inputs.eks_test_cluster_region }} update-kubeconfig --name ${{ inputs.eks_test_cluster }}
 
     - name: Create secrets in the kubernetes cluster
       id: create_secrets
