@@ -145,7 +145,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: tjm-UID2-4147-correct-eif-version-number
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -257,7 +257,7 @@ jobs:
       - name: Start EKS operator
         id: start_EKS_operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@tjm-UID2-4147-correct-eif-version-number
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
