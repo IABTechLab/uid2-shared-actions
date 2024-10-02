@@ -24,6 +24,7 @@ inputs:
     description: The operator key
     required: true
 
+
 # outputs:
 #   uid2_e2e_pipeline_operator_url:
 #     description: The EKS operator URL
@@ -36,7 +37,7 @@ runs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: us-east-2
+        aws-region: ${{ vars.EKS_TEST_CLUSTER_REGION }}
         role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
     
     - name: Check AWS caller identity
@@ -46,7 +47,7 @@ runs:
     - name: Set up kubernetes context
       shell: bash
       run: |
-        aws eks --region us-east-2 update-kubeconfig --name uid-test-git-us-east-2
+        aws eks --region ${{ vars.EKS_TEST_CLUSTER_REGION }} update-kubeconfig --name ${{ vars.EKS_TEST_CLUSTER }}
 
     - name: Create secrets in the kubernetes cluster
       id: create_secrets
