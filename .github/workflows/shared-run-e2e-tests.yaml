@@ -226,6 +226,11 @@ jobs:
         run: |
           bash uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
 
+      - name: test
+        shell: bash
+        run: |
+          sleep infinity
+      
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
