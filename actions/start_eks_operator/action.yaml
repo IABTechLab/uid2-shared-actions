@@ -94,9 +94,17 @@ runs:
           kubectl get pods "$OPERATOR_POD_NAME" -n compute -o 'jsonpath={.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null | grep "True" >/dev/null
         }
 
+        MAX_RETRIES=100
+        etry_count=0
         while ! is_pod_ready; do
+          if [[ $retry_count -eq $MAX_RETRIES ]]; then
+            echo "Error: Pod $OPERATOR_POD_NAME did not become ready after $MAX_RETRIES retries."
+            exit 1
+          fi
+
           echo "Waiting for pod $OPERATOR_POD_NAME to be ready..."
           sleep 5
+          retry_count=$((retry_count+1))
         done
 
         echo "Pod $OPERATOR_POD_NAME is ready!"
