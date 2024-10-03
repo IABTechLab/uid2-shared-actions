@@ -33,3 +33,4 @@ runs:
       run: |
         kubectl delete namespace compute --ignore-not-found=true
         kubectl delete namespace nitro-enclaves --ignore-not-found=true
+        kubectl delete secret github-test-secret --ignore-not-found=true
