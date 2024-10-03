@@ -82,3 +82,21 @@ runs:
         cat ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/test-deployment.yaml
         kubectl apply -f ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/test-deployment.yaml
         kubectl get pods --all-namespaces
+
+        # Function to get the operator pod name
+        function get_operator_pod_name() {
+          kubectl get pods -n compute -o name | grep "operator" | head -n 1
+        }
+
+        OPERATOR_POD_NAME=$(get_operator_pod_name)
+
+        function is_pod_ready() {
+          kubectl get pods "$OPERATOR_POD_NAME" -n compute -o 'jsonpath={.status.conditions[?(@.type=="Ready")].status}' 2>/dev/null | grep "True" >/dev/null
+        }
+
+        while ! is_pod_ready; do
+          echo "Waiting for pod $OPERATOR_POD_NAME to be ready..."
+          sleep 5
+        done
+
+        echo "Pod $OPERATOR_POD_NAME is ready!"
