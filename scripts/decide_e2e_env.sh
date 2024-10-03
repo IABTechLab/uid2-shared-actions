@@ -27,7 +27,7 @@ else
         echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
         kubectl get services -n compute
         kubectl port-forward svc/operator-service -n compute 8888:80 > /dev/null 2>&1 &
-        EKS_OPERATOR_URL="localhost:8888"
+        EKS_OPERATOR_URL="http://localhost:8888"
         echo "uid2_e2e_pipeline_operator_url=${EKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
     fi
     echo "uid2_e2e_pipeline_core_url=http://${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}
