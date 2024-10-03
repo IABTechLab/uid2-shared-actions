@@ -31,6 +31,6 @@ runs:
       id: stop_eks
       shell: bash
       run: |
-        kubectl delete service operator-service
-        kubectl delete deployment operator
-        kubectl delete secret github-test-secret
+        kubectl delete service operator-service --ignore-not-found=true
+        kubectl delete deployment operator --ignore-not-found=true
+        kubectl delete secret github-test-secret --ignore-not-found=true
