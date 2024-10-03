@@ -80,5 +80,6 @@ runs:
       shell: bash
       run: |
         cat ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/test-deployment.yaml
+        kubectl create namespace compute
         kubectl apply -f ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/test-deployment.yaml
         kubectl get pods --all-namespace
