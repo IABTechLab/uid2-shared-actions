@@ -29,6 +29,12 @@ inputs:
   eks_test_cluster_region:
     description: The EKS Test Cluster Region
     required: true
+  github_username:
+    description: github username
+    required: true
+  github_pat:
+    description: github pat
+    required: true
   
 outputs:
   uid2_e2e_pipeline_operator_url:
@@ -70,6 +76,8 @@ runs:
       env:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
         OPERATOR_ROOT: ${{ inputs.operator_root }}
+        GITHUB_USERNAME: ${{ inputs.github_username }}
+        GITHUB_PAT: ${{ inputs.github_pat }}
       run: |
         bash uid2-shared-actions/scripts/eks/prepare_eks_deployment_files.sh
 

@@ -281,6 +281,8 @@ jobs:
           operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
+          github_username: ${{ github.actor }}
+          github_pat: ${{ secrets.GHCR_PAT }}
 
 
       - name: Decide E2E test environment variables
