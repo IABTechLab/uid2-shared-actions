@@ -67,6 +67,8 @@ runs:
         OPERATOR_KEY: ${{ inputs.operator_key }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        GITHUB_USERNAME: ${{ inputs.github_username }}
+        GITHUB_PAT: ${{ inputs.github_pat }}
       run: |
         bash uid2-shared-actions/scripts/eks/create_secret_in_k8.sh
 
@@ -84,8 +86,6 @@ runs:
       shell: bash
       env:
         OPERATOR_ROOT: ${{ inputs.operator_root }}
-        GITHUB_USERNAME: ${{ inputs.github_username }}
-        GITHUB_PAT: ${{ inputs.github_pat }}
       run: |
         bash uid2-shared-actions/scripts/eks/start_eks_enclave.sh
 

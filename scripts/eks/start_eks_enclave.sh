@@ -9,24 +9,8 @@ if [ -z "${OPERATOR_ROOT}" ]; then
   exit 1
 fi
 
-if [ -z "${GITHUB_USERNAME}" ]; then
-  echo "GITHUB_USERNAME can not be empty"
-  exit 1
-fi
-
-if [ -z "${GITHUB_PAT}" ]; then
-  echo "GITHUB_PAT can not be empty"
-  exit 1
-fi
-
 cat "${OPERATOR_ROOT}/scripts/aws/eks/deployment_files/test-deployment.yaml"
-kubectl create namespace compute
-kubectl create secret generic github-test-secret --from-file=config=secret.json -n compute
-kubectl create secret docker-registry gh-uid2-docker \
-  --docker-server=ghcr.io \
-  --docker-username="${GITHUB_USERNAME}" \
-  --docker-password="${GITHUB_PAT}" \
-  -n compute
+
 kubectl apply -f "${OPERATOR_ROOT}/scripts/aws/eks/deployment_files/test-deployment.yaml"
 kubectl get pods --all-namespaces
 
