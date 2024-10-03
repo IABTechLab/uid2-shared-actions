@@ -290,6 +290,7 @@ jobs:
           GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          EKS_OPERATOR_URL: ${{ steps.start_EKS_operator.outputs.uid2_e2e_pipeline_operator_url }}
         run: |
           bash uid2-shared-actions/scripts/decide_e2e_env.sh
 
