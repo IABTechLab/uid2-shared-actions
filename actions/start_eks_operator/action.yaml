@@ -76,8 +76,6 @@ runs:
       env:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
         OPERATOR_ROOT: ${{ inputs.operator_root }}
-        GITHUB_USERNAME: ${{ inputs.github_username }}
-        GITHUB_PAT: ${{ inputs.github_pat }}
       run: |
         bash uid2-shared-actions/scripts/eks/prepare_eks_deployment_files.sh
 
@@ -86,6 +84,8 @@ runs:
       shell: bash
       env:
         OPERATOR_ROOT: ${{ inputs.operator_root }}
+        GITHUB_USERNAME: ${{ inputs.github_username }}
+        GITHUB_PAT: ${{ inputs.github_pat }}
       run: |
         bash uid2-shared-actions/scripts/eks/start_eks_enclave.sh
 
