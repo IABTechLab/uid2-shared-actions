@@ -13,7 +13,7 @@ fi
 
 ROOT="."
 DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/aws/eks/deployment_files"
-DEPLOYMENT_FILE="${DEPLOYMENT_FILES_ROOT}/tets-deployment.yaml"
+DEPLOYMENT_FILE="${DEPLOYMENT_FILES_ROOT}/test-deployment.yaml"
 
 ls -al
 
