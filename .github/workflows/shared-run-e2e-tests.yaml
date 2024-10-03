@@ -163,12 +163,6 @@ jobs:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
 
-      - name: Checkout uid2-operator-deployment repo
-        uses: actions/checkout@v4
-        with:
-          repository: UnifiedID2/uid2-operator-deployment
-          path: uid2-operator-deployment
-
       - name: Create Docker network
         run: |
           docker network create e2e_default
