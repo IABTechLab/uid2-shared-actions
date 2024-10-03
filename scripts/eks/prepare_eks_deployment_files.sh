@@ -11,13 +11,18 @@ if [ -z "${IMAGE_VERSION}" ]; then
   exit 1
 fi
 
+if [ -z "${IDENTITY_SCOPE}" ]; then
+  echo "IDENTITY_SCOPE can not be empty"
+  exit 1
+fi
+
 ROOT="."
 DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/aws/eks/deployment_files"
 DEPLOYMENT_FILE="${DEPLOYMENT_FILES_ROOT}/test-deployment.yaml"
 
 ls -al
 
-IMAGE="ghcr.io/iabtechlab/uid2-operator-eks-uid2:${IMAGE_VERSION}"
+IMAGE="ghcr.io/iabtechlab/uid2-operator-eks-${IDENTITY_SCOPE,,}:${IMAGE_VERSION}"
 
 sed -i "s#IMAGE_PLACEHOLDER#${IMAGE}#g" "${DEPLOYMENT_FILE}"
 if [[ $? -ne 0 ]]; then

@@ -78,6 +78,7 @@ runs:
       env:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
         OPERATOR_ROOT: ${{ inputs.operator_root }}
+        IDENTITY_SCOPE: ${{ inputs.identity_scope }}
       run: |
         bash uid2-shared-actions/scripts/eks/prepare_eks_deployment_files.sh
 
