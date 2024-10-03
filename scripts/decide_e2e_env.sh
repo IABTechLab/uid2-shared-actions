@@ -12,14 +12,6 @@ elif [ "${OPERATOR_TYPE}" == "public" ]; then
     echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> ${GITHUB_OUTPUT}
     echo "uid2_e2e_pipeline_core_url=http://core:8088" >> ${GITHUB_OUTPUT}
     echo "uid2_e2e_pipeline_optout_url=http://optout:8081" >> ${GITHUB_OUTPUT}
-elif [ "${OPERATOR_TYPE}" == "eks" ]; then
-    echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> ${GITHUB_OUTPUT}
-
-    echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> ${GITHUB_OUTPUT}
-    echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> ${GITHUB_OUTPUT}
-    
-    echo "uid2_e2e_pipeline_core_url=http://${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}
-    echo "uid2_e2e_pipeline_optout_url=http://${BORE_URL_OPTOUT}" >> ${GITHUB_OUTPUT}
 else
     echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> ${GITHUB_OUTPUT}
     if [ "${OPERATOR_TYPE}" == "gcp" ]; then
@@ -31,6 +23,12 @@ else
     elif [ "${OPERATOR_TYPE}" == "aws" ]; then
         echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
         echo "uid2_e2e_pipeline_operator_url=${AWS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
+    elif [ "${OPERATOR_TYPE}" == "eks" ]; then
+        echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
+        kubectl get services -n compute
+        kubectl port-forward svc/operator-service -n compute 8888:80 > /dev/null 2>&1 &
+        EKS_OPERATOR_URL="localhost:8888"
+        echo "uid2_e2e_pipeline_operator_url=${EKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
     fi
     echo "uid2_e2e_pipeline_core_url=http://${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}
     echo "uid2_e2e_pipeline_optout_url=http://${BORE_URL_OPTOUT}" >> ${GITHUB_OUTPUT}
