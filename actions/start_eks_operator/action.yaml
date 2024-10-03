@@ -73,11 +73,14 @@ runs:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
         OPERATOR_ROOT: ${{ inputs.operator_root }}
       run: |
+        ls -al
+        cd uid2-operator-deployment/overlays/uid2/overlays/uid2-test/operator
+        kustomize build > ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/test-deployment.yaml
         bash uid2-shared-actions/scripts/eks/prepare_eks_deployment_files.sh
 
     - name: Start EKS operator
       id: start_eks
       shell: bash
       run: |
-        cat ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/deployment.yaml
-        kubectl apply -f ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/deployment.yaml
+        cat ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/test-deployment.yaml
+        kubectl apply -f ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/test-deployment.yaml
