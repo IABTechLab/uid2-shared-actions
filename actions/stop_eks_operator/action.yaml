@@ -31,5 +31,6 @@ runs:
       id: stop_eks
       shell: bash
       run: |
-        kubectl delete deployment uid2-operator
+        kubectl delete service operator-service
+        kubectl delete deployment operator
         kubectl delete secret github-test-secret
