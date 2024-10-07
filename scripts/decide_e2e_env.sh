@@ -3,6 +3,8 @@ if [ -z "${GITHUB_OUTPUT}" ]; then
     exit 1
 fi
 
+E2E_NETWORK="e2e_default"
+
 if [ -z "${OPERATOR_TYPE}" ]; then
     echo "OPERATOR_TYPE not set"
     exit 1
@@ -26,10 +28,12 @@ else
     elif [ "${OPERATOR_TYPE}" == "eks" ]; then
         echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
         echo "uid2_e2e_pipeline_operator_url=${EKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
+        $E2E_NETWORK = "host"
     fi
     echo "uid2_e2e_pipeline_core_url=http://${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}
     echo "uid2_e2e_pipeline_optout_url=http://${BORE_URL_OPTOUT}" >> ${GITHUB_OUTPUT}
 fi
+echo "e2e_network=${E2E_NETWORK}" >> ${GITHUB_OUTPUT}
 
 if [ -z "${IDENTITY_SCOPE}" ]; then
     echo "IDENTITY_SCOPE not set"
