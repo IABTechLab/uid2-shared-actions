@@ -26,6 +26,7 @@ healthcheck() {
       OPERATOR_POD_NAME=$(get_operator_pod_name)
       kubectl get pods -n compute
       kubectl describe $OPERATOR_POD_NAME -n compute
+      kubectl logs $OPERATOR_POD_NAME -n compute
       printf '.'
       attempt_counter=$((attempt_counter+1))
       sleep 5
