@@ -18,7 +18,14 @@ healthcheck() {
         exit 1
       fi
 
+      function get_operator_pod_name() {
+        kubectl get pods -n compute -o name | grep "operator" | head -n 1
+      }
+
+      # Get the operator pod name
+      OPERATOR_POD_NAME=$(get_operator_pod_name)
       kubectl get pods -n compute
+      kubectl describe $OPERATOR_POD_NAME -n compute
       printf '.'
       attempt_counter=$((attempt_counter+1))
       sleep 5
