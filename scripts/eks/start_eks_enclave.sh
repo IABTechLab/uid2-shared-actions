@@ -18,10 +18,6 @@ kubectl get services -n compute
 kubectl port-forward svc/operator-service -n compute 27015:80 > /dev/null 2>&1 &
 EKS_OPERATOR_URL="http://localhost:27015"
 
-HEALTHCHECK_URL="${EKS_OPERATOR_URL}/ops/healthcheck"
-
-# Health check - for 5 mins
-healthcheck "${HEALTHCHECK_URL}" 60
 
 kubectl get pods --all-namespaces
 
@@ -35,4 +31,10 @@ done
 cat ${ROOT}/bore_eksoperator.out
 
 BORE_URL_EKSOPERATOR=$(cat ${ROOT}/bore_eksoperator.out | grep at | cut -d ' ' -f7)
-echo "uid2_e2e_pipeline_operator_url=${BORE_URL_EKSOPERATOR}" >> ${GITHUB_OUTPUT}
+
+HEALTHCHECK_URL="http://${BORE_URL_EKSOPERATOR}/ops/healthcheck"
+
+# Health check - for 5 mins
+healthcheck "${HEALTHCHECK_URL}" 60
+
+echo "uid2_e2e_pipeline_operator_url=http://${BORE_URL_EKSOPERATOR}" >> ${GITHUB_OUTPUT}
