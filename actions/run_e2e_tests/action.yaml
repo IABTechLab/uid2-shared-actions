@@ -71,6 +71,8 @@ runs:
       if: ${{ inputs.operator_type == 'eks' }}
       shell: bash
       run: |
+        source "uid2-shared-actions/scripts/healthcheck.sh"
+
         kubectl get services -n compute
         kubectl port-forward svc/operator-service -n compute 27015:80 > /dev/null 2>&1 &
         EKS_OPERATOR_URL="http://localhost:27015"
