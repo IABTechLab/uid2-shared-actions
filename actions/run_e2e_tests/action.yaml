@@ -73,5 +73,5 @@ runs:
         --env UID2_E2E_OPTOUT_TO_CALL_CORE_API_TOKEN='UID2-O-L-127-pDqphU.6FuXzThQMY8YEsCA8crqvAlzyGrjcF8P6XO84=' \
         --env UID2_E2E_CORE_URL='${{ inputs.uid2_e2e_pipeline_core_url }}' \
         --env UID2_E2E_OPTOUT_URL='${{ inputs.uid2_e2e_pipeline_optout_url }}' \
-        --network e2e_default \
+        --network host \
         ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
