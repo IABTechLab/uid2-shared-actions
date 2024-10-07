@@ -6,6 +6,9 @@ inputs:
     description: The operator type [public, gcp, azure, aws, eks]
     type: string
     default: public
+  eks_test_cluster:
+    description: The EKS Test Cluster Name
+    type: string
   eks_test_cluster_region:
     description: The EKS Test Cluster Region
     type: string

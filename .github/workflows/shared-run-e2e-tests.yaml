@@ -300,6 +300,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@tjm-UID2-4147-correct-eif-version-number
         with:
           operator_type: ${{ inputs.operator_type }}
+          eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
           uid2_e2e_identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
