@@ -18,6 +18,7 @@ healthcheck() {
         exit 1
       fi
 
+      kubectl get pods -n compute
       printf '.'
       attempt_counter=$((attempt_counter+1))
       sleep 5
