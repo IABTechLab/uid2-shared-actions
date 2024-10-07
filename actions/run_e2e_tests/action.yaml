@@ -6,12 +6,6 @@ inputs:
     description: The operator type [public, gcp, azure, aws, eks]
     type: string
     default: public
-  eks_test_cluster:
-    description: The EKS Test Cluster Name
-    type: string
-  eks_test_cluster_region:
-    description: The EKS Test Cluster Region
-    type: string
   e2e_image_version:
     description: The version of E2E image
     required: false
@@ -49,39 +43,6 @@ runs:
   using: "composite"
 
   steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      if: ${{ inputs.operator_type == 'eks' }}
-      with:
-        aws-region: ${{ inputs.eks_test_cluster_region }}
-        role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
-    
-    - name: Check AWS caller identity
-      if: ${{ inputs.operator_type == 'eks' }}
-      shell: bash
-      run: aws sts get-caller-identity
-
-    - name: Set up kubernetes context
-      if: ${{ inputs.operator_type == 'eks' }}
-      shell: bash
-      run: |
-        aws eks --region ${{ inputs.eks_test_cluster_region }} update-kubeconfig --name ${{ inputs.eks_test_cluster }}
-
-    - name: Port forward EKS cluster
-      if: ${{ inputs.operator_type == 'eks' }}
-      shell: bash
-      run: |
-        source "uid2-shared-actions/scripts/healthcheck.sh"
-
-        kubectl get services -n compute
-        kubectl port-forward svc/operator-service -n compute 27015:80 > /dev/null 2>&1 &
-        EKS_OPERATOR_URL="http://localhost:27015"
-
-        HEALTHCHECK_URL="${EKS_OPERATOR_URL}/ops/healthcheck"
-
-        # Health check - for 5 mins
-        healthcheck "${HEALTHCHECK_URL}" 60
-
     - name: Run E2E tests
       shell: bash
       run: |
