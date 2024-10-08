@@ -9,7 +9,6 @@ healthcheck() {
   echo "Healthcheck $1 for $max_attempts times"
 
   until (curl -m 5 --output /dev/null --silent --fail "$1"); do
-      curl "$1"
       if [ -n "$3" ]; then
         docker compose logs --tail 100
       fi
