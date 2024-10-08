@@ -54,6 +54,11 @@ runs:
       run: |
         aws eks --region ${{ inputs.eks_test_cluster_region }} update-kubeconfig --name ${{ inputs.eks_test_cluster }}
 
+    - name: Clean up previous run
+      shell: bash
+      run: |
+        bash uid2-shared-actions/scripts/eks/stop_eks_enclave.sh
+    
     - name: Create secrets in the kubernetes cluster
       id: create_secrets
       shell: bash
