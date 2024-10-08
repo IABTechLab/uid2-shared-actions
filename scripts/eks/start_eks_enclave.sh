@@ -21,7 +21,15 @@ kubectl get pods --all-namespaces
 
 kubectl get services -n ${IDENTITY_SCOPE,,}
 kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27015:80 > /dev/null 2>&1 &
-EKS_OPERATOR_URL="http://localhost:27015"
+
+if [ "${IDENTITY_SCOPE}" == "UID2" ]; then
+  EKS_OPERATOR_URL="http://localhost:27015"
+elif [ "${IDENTITY_SCOPE}" == "EUID" ]; then
+  EKS_OPERATOR_URL="http://localhost:27016"
+else
+  echo "IDENTITY_SCOPE provided with wrong value"
+  exit 1
+fi
 
 kubectl get pods --all-namespaces
 HEALTHCHECK_URL="${EKS_OPERATOR_URL}/ops/healthcheck"
