@@ -9,13 +9,18 @@ if [ -z "${OPERATOR_ROOT}" ]; then
   exit 1
 fi
 
+if [ -z "${IDENTITY_SCOPE}" ]; then
+  echo "IDENTITY_SCOPE can not be empty"
+  exit 1
+fi
+
 cat "${OPERATOR_ROOT}/scripts/aws/eks/deployment_files/test-deployment.yaml"
 
 kubectl apply -f "${OPERATOR_ROOT}/scripts/aws/eks/deployment_files/test-deployment.yaml"
 kubectl get pods --all-namespaces
 
-kubectl get services -n compute
-kubectl port-forward svc/operator-service -n compute 27015:80 > /dev/null 2>&1 &
+kubectl get services -n ${IDENTITY_SCOPE,,}
+kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27015:80 > /dev/null 2>&1 &
 EKS_OPERATOR_URL="http://localhost:27015"
 
 kubectl get pods --all-namespaces

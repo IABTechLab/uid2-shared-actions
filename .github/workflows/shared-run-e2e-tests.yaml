@@ -153,7 +153,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: kcc-UID2-4243-fix-e2e
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -337,3 +337,4 @@ jobs:
         with:
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
+          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
