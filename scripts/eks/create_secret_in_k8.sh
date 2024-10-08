@@ -38,8 +38,8 @@ cat ${SECRET_JSON_FILE}
 
 kubectl create namespace compute
 kubectl create secret generic github-test-secret --from-file=config=uid2-shared-actions/scripts/eks/secret.json -n compute
-kubectl create secret docker-registry gh-uid2-docker \
-  --docker-server=ghcr.io \
-  --docker-username="${GITHUB_USERNAME}" \
-  --docker-password="${GITHUB_PAT}" \
-  -n compute
+# kubectl create secret docker-registry gh-uid2-docker \
+#   --docker-server=ghcr.io \
+#   --docker-username="${GITHUB_USERNAME}" \
+#   --docker-password="${GITHUB_PAT}" \
+#   -n compute
