@@ -265,7 +265,7 @@ jobs:
       - name: Start EKS operator
         id: start_EKS_operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@kcc-UID2-4243-fix-e2e
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -333,7 +333,7 @@ jobs:
 
       - name: Stop EKS operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@kcc-UID2-4243-fix-e2e
         with:
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
