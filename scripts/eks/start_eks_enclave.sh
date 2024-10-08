@@ -24,10 +24,10 @@ kubectl get services -n ${IDENTITY_SCOPE,,}
 ps aux
 
 if [ "${IDENTITY_SCOPE}" == "UID2" ]; then
-  kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27777:80 > /dev/null 2>&1 &
+  kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27777:80 &
   EKS_OPERATOR_URL="http://localhost:27777"
 elif [ "${IDENTITY_SCOPE}" == "EUID" ]; then
-  kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27778:80 > /dev/null 2>&1 &
+  kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27778:80 &
   EKS_OPERATOR_URL="http://localhost:27778"
 else
   echo "IDENTITY_SCOPE provided with wrong value"
