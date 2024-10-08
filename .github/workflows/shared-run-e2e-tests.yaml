@@ -91,6 +91,14 @@ on:
       eks_pcr0:
         description: The EKS PCR0
         type: string
+      eks_test_cluster:
+        description: The EKS Test Cluster Name
+        type: string
+      eks_test_cluster_region:
+        description: The EKS Test Cluster Region
+        type: string
+
+      
 
 env:
   REGISTRY: ghcr.io
@@ -217,7 +225,7 @@ jobs:
           BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
         run: |
           bash uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
-
+      
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
@@ -266,6 +274,8 @@ jobs:
           operator_image_version: ${{ inputs.operator_image_version }}
           operator_root: ${{ inputs.operator_root }}
           operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
+          eks_test_cluster: ${{ inputs.eks_test_cluster }}
+          eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
@@ -274,50 +284,20 @@ jobs:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
           OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
+          BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          EKS_OPERATOR_URL: ${{ steps.start_EKS_operator.outputs.uid2_e2e_pipeline_operator_url }}
         run: |
-          if [ -z "${GITHUB_OUTPUT}" ]; then
-            echo "Not in GitHub action"
-            exit 1
-          fi
-
-          if [ -z "${OPERATOR_TYPE}" ]; then
-            echo "OPERATOR_TYPE not set"
-            exit 1
-          elif [ "${OPERATOR_TYPE}" == "public" ]; then
-            echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> ${GITHUB_OUTPUT}
-            echo "uid2_e2e_pipeline_operator_url=http://publicoperator:8080" >> ${GITHUB_OUTPUT}
-            echo "uid2_e2e_pipeline_operator_cloud_provider=PUBLIC" >> ${GITHUB_OUTPUT}
-            echo "uid2_e2e_pipeline_core_url=http://core:8088" >> ${GITHUB_OUTPUT}
-            echo "uid2_e2e_pipeline_optout_url=http://optout:8081" >> ${GITHUB_OUTPUT}
-          else
-            echo "uid2_e2e_pipeline_operator_type=PRIVATE" >> ${GITHUB_OUTPUT}
-            if [ "${OPERATOR_TYPE}" == "gcp" ]; then
-              echo "uid2_e2e_pipeline_operator_cloud_provider=GCP" >> ${GITHUB_OUTPUT}
-              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> ${GITHUB_OUTPUT}
-            elif [ "${OPERATOR_TYPE}" == "azure" ]; then
-              echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> ${GITHUB_OUTPUT}
-              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> ${GITHUB_OUTPUT}
-            elif [ "${OPERATOR_TYPE}" == "aws" ]; then
-              echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
-              echo "uid2_e2e_pipeline_operator_url=${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}" >> ${GITHUB_OUTPUT}
-            fi
-            echo "uid2_e2e_pipeline_core_url=http://${{ steps.bore.outputs.BORE_URL_CORE }}" >> ${GITHUB_OUTPUT}
-            echo "uid2_e2e_pipeline_optout_url=http://${{ steps.bore.outputs.BORE_URL_OPTOUT }}" >> ${GITHUB_OUTPUT}
-          fi
-
-          if [ -z "${IDENTITY_SCOPE}" ]; then
-            echo "IDENTITY_SCOPE not set"
-            exit 1
-          elif [ "${IDENTITY_SCOPE}" == "UID2" ]; then
-            echo "uid2_e2e_phone_support=true" >> ${GITHUB_OUTPUT}
-          elif [ "${IDENTITY_SCOPE}" == "EUID" ]; then
-            echo "uid2_e2e_phone_support=false" >> ${GITHUB_OUTPUT}
-          fi
+          bash uid2-shared-actions/scripts/decide_e2e_env.sh
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v2
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
         with:
+          e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
           uid2_e2e_identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
           uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
@@ -330,8 +310,8 @@ jobs:
       - name: Stop GCP private operator
         if: ${{ inputs.operator_type == 'gcp' }}
         env:
-          GCP_PROJECT: ${{ vars.GCP_PROJECT }}
-          SERVICE_ACCOUNT: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          GCP_PROJECT: ${{ inputs.gcp_project }}
+          SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
           bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
@@ -354,3 +334,6 @@ jobs:
       - name: Stop EKS operator
         if: ${{ inputs.operator_type == 'eks' }}
         uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@v3
+        with:
+          eks_test_cluster: ${{ inputs.eks_test_cluster }}
+          eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}

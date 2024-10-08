@@ -1,5 +1,13 @@
 name: Stop EKS Operator
 
+inputs:
+  eks_test_cluster:
+    description: The EKS Test Cluster Name
+    required: true
+  eks_test_cluster_region:
+    description: The EKS Test Cluster Region
+    required: true
+
 runs:
   using: "composite"
 
@@ -7,7 +15,7 @@ runs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: us-east-2
+        aws-region: ${{ inputs.eks_test_cluster_region }}
         role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
     
     - name: Check AWS caller identity
@@ -17,11 +25,10 @@ runs:
     - name: Set up kubernetes context
       shell: bash
       run: |
-        aws eks --region us-east-2 update-kubeconfig --name uid-test-git-us-east-2
+        aws eks --region ${{ inputs.eks_test_cluster_region }} update-kubeconfig --name ${{ inputs.eks_test_cluster }}
 
     - name: Stop EKS operator
       id: stop_eks
       shell: bash
       run: |
-        kubectl delete deployment uid2-operator
-        kubectl delete secret github-test-secret
+        bash uid2-shared-actions/scripts/eks/stop_eks_enclave.sh

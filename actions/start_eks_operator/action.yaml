@@ -23,11 +23,17 @@ inputs:
   operator_key:
     description: The operator key
     required: true
-
-# outputs:
-#   uid2_e2e_pipeline_operator_url:
-#     description: The EKS operator URL
-#     value: ${{ steps.start_aws.outputs.uid2_e2e_pipeline_operator_url }}
+  eks_test_cluster:
+    description: The EKS Test Cluster Name
+    required: true
+  eks_test_cluster_region:
+    description: The EKS Test Cluster Region
+    required: true
+  
+outputs:
+  uid2_e2e_pipeline_operator_url:
+    description: The EKS operator URL
+    value: ${{ steps.start_eks.outputs.uid2_e2e_pipeline_operator_url }}
 
 runs:
   using: "composite"
@@ -36,7 +42,7 @@ runs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-region: us-east-2
+        aws-region: ${{ inputs.eks_test_cluster_region }}
         role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
     
     - name: Check AWS caller identity
@@ -46,8 +52,13 @@ runs:
     - name: Set up kubernetes context
       shell: bash
       run: |
-        aws eks --region us-east-2 update-kubeconfig --name uid-test-git-us-east-2
+        aws eks --region ${{ inputs.eks_test_cluster_region }} update-kubeconfig --name ${{ inputs.eks_test_cluster }}
 
+    - name: Clean up previous run
+      shell: bash
+      run: |
+        bash uid2-shared-actions/scripts/eks/stop_eks_enclave.sh
+    
     - name: Create secrets in the kubernetes cluster
       id: create_secrets
       shell: bash
@@ -64,12 +75,15 @@ runs:
       env:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
         OPERATOR_ROOT: ${{ inputs.operator_root }}
+        IDENTITY_SCOPE: ${{ inputs.identity_scope }}
       run: |
         bash uid2-shared-actions/scripts/eks/prepare_eks_deployment_files.sh
 
     - name: Start EKS operator
       id: start_eks
       shell: bash
+      env:
+        OPERATOR_ROOT: ${{ inputs.operator_root }}
       run: |
-        cat ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/deployment.yaml
-        kubectl apply -f ${{ inputs.operator_root }}/scripts/aws/eks/deployment_files/deployment.yaml
+        bash uid2-shared-actions/scripts/eks/start_eks_enclave.sh
+

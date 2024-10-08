@@ -26,4 +26,5 @@ jq_string_update ${SECRET_JSON_FILE} api_token "${OPERATOR_KEY}"
 
 cat ${SECRET_JSON_FILE}
 
-kubectl create secret generic github-test-secret --from-file=config=uid2-shared-actions/scripts/eks/secret.json
+kubectl create namespace compute
+kubectl create secret generic github-test-secret --from-file=config=uid2-shared-actions/scripts/eks/secret.json -n compute

@@ -2,6 +2,10 @@ name: Shared E2E Test
 description: Pull uid2-e2e Docker image and run E2E test suite
 
 inputs:
+  e2e_network:
+    description: The network to use for the E2E test
+    type: string
+    default: e2e_default
   e2e_image_version:
     description: The version of E2E image
     required: false
@@ -69,5 +73,5 @@ runs:
         --env UID2_E2E_OPTOUT_TO_CALL_CORE_API_TOKEN='UID2-O-L-127-pDqphU.6FuXzThQMY8YEsCA8crqvAlzyGrjcF8P6XO84=' \
         --env UID2_E2E_CORE_URL='${{ inputs.uid2_e2e_pipeline_core_url }}' \
         --env UID2_E2E_OPTOUT_URL='${{ inputs.uid2_e2e_pipeline_optout_url }}' \
-        --network e2e_default \
+        --network '${{ inputs.e2e_network }}' \
         ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
