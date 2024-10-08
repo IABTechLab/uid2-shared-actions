@@ -153,7 +153,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: tjm-UID2-4147-correct-eif-version-number
+          ref: v3
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -265,7 +265,7 @@ jobs:
       - name: Start EKS operator
         id: start_EKS_operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@tjm-UID2-4147-correct-eif-version-number
+        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -295,7 +295,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@tjm-UID2-4147-correct-eif-version-number
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
@@ -333,7 +333,7 @@ jobs:
 
       - name: Stop EKS operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@tjm-UID2-4147-correct-eif-version-number
+        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@v3
         with:
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
