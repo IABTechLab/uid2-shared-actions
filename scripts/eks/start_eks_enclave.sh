@@ -18,23 +18,22 @@ cat "${OPERATOR_ROOT}/scripts/aws/eks/deployment_files/test-deployment.yaml"
 
 kubectl apply -f "${OPERATOR_ROOT}/scripts/aws/eks/deployment_files/test-deployment.yaml"
 kubectl get pods --all-namespaces
-
 kubectl get services -n ${IDENTITY_SCOPE,,}
 
-ps aux
+POD_NAME=$(kubectl get pods -n ${IDENTITY_SCOPE,,} -o name | grep "operator")
+kubectl wait --for=condition=Ready "$POD_NAME" -n ${IDENTITY_SCOPE,,} --timeout=120s
 
 if [ "${IDENTITY_SCOPE}" == "UID2" ]; then
-  kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27777:80 &
+  kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27777:80 > /dev/null 2>&1 &
   EKS_OPERATOR_URL="http://localhost:27777"
 elif [ "${IDENTITY_SCOPE}" == "EUID" ]; then
-  kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27778:80 &
+  kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27778:80 > /dev/null 2>&1 &
   EKS_OPERATOR_URL="http://localhost:27778"
 else
   echo "IDENTITY_SCOPE provided with wrong value"
   exit 1
 fi
 
-ps aux
 kubectl get pods --all-namespaces
 HEALTHCHECK_URL="${EKS_OPERATOR_URL}/ops/healthcheck"
 
