@@ -25,6 +25,7 @@ ls -al
 IMAGE="ghcr.io/iabtechlab/uid2-operator-eks-${IDENTITY_SCOPE,,}:${IMAGE_VERSION}"
 
 sed -i "s#IMAGE_PLACEHOLDER#${IMAGE}#g" "${DEPLOYMENT_FILE}"
+sed -i "s#NAMESPACE_PLACEHOLDER#${IDENTITY_SCOPE,,}#g" "${DEPLOYMENT_FILE}"
 if [[ $? -ne 0 ]]; then
   echo "Failed to pre-process deployment file"
   exit 1
