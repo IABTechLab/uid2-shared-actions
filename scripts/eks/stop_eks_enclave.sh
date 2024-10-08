@@ -4,4 +4,3 @@ if [ -z "${IDENTITY_SCOPE}" ]; then
 fi
 
 kubectl delete namespace ${IDENTITY_SCOPE,,} --ignore-not-found=true
-kubectl delete namespace nitro-enclaves --ignore-not-found=true
