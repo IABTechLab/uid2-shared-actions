@@ -2,10 +2,6 @@ name: Shared E2E Test
 description: Pull uid2-e2e Docker image and run E2E test suite
 
 inputs:
-  operator_type:
-    description: The operator type [public, gcp, azure, aws, eks]
-    type: string
-    default: public
   e2e_network:
     description: The network to use for the E2E test
     type: string
