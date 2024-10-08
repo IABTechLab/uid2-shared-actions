@@ -18,6 +18,10 @@ healthcheck() {
         exit 1
       fi
 
+      if [ $attempt_counter -eq 30 ];then
+        curl $1
+      fi
+
       printf '.'
       attempt_counter=$((attempt_counter+1))
       sleep 5
