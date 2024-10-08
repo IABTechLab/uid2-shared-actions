@@ -21,7 +21,7 @@ kubectl get pods --all-namespaces
 
 kubectl get services -n ${IDENTITY_SCOPE,,}
 
-ps aux | grep kubectl
+ps aux
 
 if [ "${IDENTITY_SCOPE}" == "UID2" ]; then
   kubectl port-forward svc/operator-service -n ${IDENTITY_SCOPE,,} 27777:80 > /dev/null 2>&1 &
@@ -34,6 +34,7 @@ else
   exit 1
 fi
 
+ps aux
 kubectl get pods --all-namespaces
 HEALTHCHECK_URL="${EKS_OPERATOR_URL}/ops/healthcheck"
 
