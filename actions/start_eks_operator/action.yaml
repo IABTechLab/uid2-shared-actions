@@ -29,12 +29,6 @@ inputs:
   eks_test_cluster_region:
     description: The EKS Test Cluster Region
     required: true
-  github_username:
-    description: github username
-    required: true
-  github_pat:
-    description: github pat
-    required: true
   
 outputs:
   uid2_e2e_pipeline_operator_url:
@@ -67,8 +61,6 @@ runs:
         OPERATOR_KEY: ${{ inputs.operator_key }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
-        GITHUB_USERNAME: ${{ inputs.github_username }}
-        GITHUB_PAT: ${{ inputs.github_pat }}
       run: |
         bash uid2-shared-actions/scripts/eks/create_secret_in_k8.sh
 
