@@ -337,3 +337,4 @@ jobs:
         with:
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
+          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}

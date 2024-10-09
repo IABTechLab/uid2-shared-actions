@@ -7,6 +7,9 @@ inputs:
   eks_test_cluster_region:
     description: The EKS Test Cluster Region
     required: true
+  identity_scope:
+    description: The identity scope [UID2, EUID]
+    required: true
 
 runs:
   using: "composite"
@@ -30,5 +33,7 @@ runs:
     - name: Stop EKS operator
       id: stop_eks
       shell: bash
+      env:
+        IDENTITY_SCOPE: ${{ inputs.identity_scope }}
       run: |
         bash uid2-shared-actions/scripts/eks/stop_eks_enclave.sh
