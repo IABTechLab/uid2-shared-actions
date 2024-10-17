@@ -1,11 +1,6 @@
 name: Create Deployment Pull Request
 on:
   workflow_call:
-permissions:
-  contents: write
-  pull-requests: write
-  id-token: write
-  packages: read
 env:
   GH_TOKEN: ${{secrets.TOKEN_GITHUB}}
 jobs:
