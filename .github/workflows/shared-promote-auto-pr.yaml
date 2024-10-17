@@ -1,14 +1,12 @@
 name: Create Deployment Pull Request
 on:
   workflow_call:
-env:
-  GH_TOKEN: ${{secrets.TOKEN_GITHUB}}
 jobs:
   create_pr:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create Pull Request
         run: |
           echo "branch ${{ github.ref }} was pushed to"
