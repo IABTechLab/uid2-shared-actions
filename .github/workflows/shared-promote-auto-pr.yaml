@@ -26,7 +26,7 @@ jobs:
 
           if [ -z "$existing_pr" ]; then
             echo "No existing PR found. Creating a new PR."
-            gh pr create --base ian-UID2-4254-automatic-pull-requests --head main --title "PR from main to ${base}" --body "Automated PR from main to ${base} branch"
+            gh pr create --base ${base} --head main --title "PR from main to ${base}" --body "Automated PR from main to ${base} branch"
           else
             echo "PR already exists: #$existing_pr"
           fi
