@@ -17,7 +17,7 @@ jobs:
           elif [ ${{ github.ref }} == "refs/heads/integ" ]; then
             base="prod"
           else
-            base="unknown"
+            exit 0
           fi
           echo "promotion is to ${base}"
           
