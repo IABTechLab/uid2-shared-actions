@@ -15,7 +15,7 @@ inputs:
   base_branch:
     description: The base branch we want to merge into
     type: string
-    default: ${{ github.ref_name }}
+    default: ''
 outputs:
   git_tag_or_hash: 
     description: The git tag (or hash if no tag provided) of the merge commit
@@ -48,7 +48,7 @@ runs:
             repo: context.repo.repo,
             title: '[CI Pipeline] ${{ inputs.message }}',
             head: 'ci-${{ github.sha }}',
-            base: '${{ inputs.base_branch }}',
+            base: '${{ inputs.base_branch == '' && github.ref_name || inputs.base_branch }}',
             body: '[CI Pipeline] Automated update'
           })).data;
           core.setOutput('pull-request-url', newPr.html_url);
