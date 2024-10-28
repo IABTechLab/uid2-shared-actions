@@ -9,9 +9,14 @@ inputs:
   tag:
     description: If provided, this tag is applied to the commit
     required: false
+    default: ''
   add:
     description: Comma- or newline-separated list of paths to add
     required: true
+  base_branch:
+    description: The base branch we want to merge into
+    type: string
+    default: ''
 outputs:
   git_tag_or_hash: 
     description: The git tag (or hash if no tag provided) of the merge commit
@@ -24,8 +29,17 @@ runs:
   using: "composite"
 
   steps:
+    - name: Check for changes
+      id: changes
+      shell: bash
+      run: |
+        if [[ -n $(git status --porcelain) ]]; then
+          echo "changes_exist=true" >> $GITHUB_OUTPUT
+        fi
+
     - name: Commit to new branch
       uses: EndBug/add-and-commit@v9
+      if: steps.changes.outputs.changes_exist == 'true'
       id: create-branch-and-commit
       with:
         message: '[CI Pipeline] ${{ inputs.message }}'
@@ -36,6 +50,7 @@ runs:
         
     - name: Create PR
       uses: actions/github-script@v7
+      if: steps.changes.outputs.changes_exist == 'true'
       id: create-pr
       with:
         script: |
@@ -44,7 +59,7 @@ runs:
             repo: context.repo.repo,
             title: '[CI Pipeline] ${{ inputs.message }}',
             head: 'ci-${{ github.sha }}',
-            base: '${{ github.ref_name }}',
+            base: '${{ inputs.base_branch == '' && github.ref_name || inputs.base_branch }}',
             body: '[CI Pipeline] Automated update'
           })).data;
           core.setOutput('pull-request-url', newPr.html_url);
@@ -52,6 +67,7 @@ runs:
 
     - name: Merge PR
       run: gh pr merge $PR_URL --delete-branch $MERGE_PR_STRATEGY
+      if: steps.changes.outputs.changes_exist == 'true'
       shell: bash
       env:
         GITHUB_TOKEN: ${{ github.token }}
@@ -61,7 +77,7 @@ runs:
     - name: Tag commit
       uses: actions/github-script@v7
       id: tag-commit
-      if: ${{ inputs.tag }}
+      if: github.event.inputs.tag != '' && steps.changes.outputs.changes_exist == 'true'
       with:
         script: |
           const pr = (await github.rest.pulls.get({
@@ -81,6 +97,7 @@ runs:
     - name: Get commit SHA
       uses: actions/github-script@v7
       id: get-commit-sha
+      if: steps.changes.outputs.changes_exist == 'true'
       with:
         script: |
           const pr = (await github.rest.pulls.get({
@@ -93,7 +110,7 @@ runs:
 
     - name: Print outputs
       uses: actions/github-script@v7
-      if: ${{ inputs.tag }}
+      if: github.event.inputs.tag != '' && steps.changes.outputs.changes_exist == 'true'
       with:
         script: |
           console.log('Result', '${{ steps.tag-commit.outcome }}');
