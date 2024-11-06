@@ -191,7 +191,9 @@ jobs:
           severity: 'CRITICAL,HIGH'
           output: 'trivy-results.sarif'
           hide-progress: true
-          cache: 'false'
+        env:
+          TRIVY_SKIP_DB_UPDATE: true
+          TRIVY_SKIP_JAVA_DB_UPDATE: true
 
       - name: Upload Trivy scan report to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
@@ -208,7 +210,9 @@ jobs:
           ignore-unfixed: true
           severity: ${{ inputs.vulnerability_severity }}
           hide-progress: true
-          cache: 'false'
+        env:
+          TRIVY_SKIP_DB_UPDATE: true
+          TRIVY_SKIP_JAVA_DB_UPDATE: true
 
       - name: Push to Docker
         uses: docker/build-push-action@v5
