@@ -206,7 +206,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: ${{ inputs.vulnerability_severity }}
-          hide-progress: true
+          hide-progress: false
 
       - name: Push to Docker
         uses: docker/build-push-action@v5
