@@ -54,7 +54,7 @@ jobs:
           path: ${{ inputs.working_dir }}/target/site/jacoco/*
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v2
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@ian-update-trivy
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_severity }}
