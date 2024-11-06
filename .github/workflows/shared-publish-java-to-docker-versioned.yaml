@@ -236,7 +236,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: ${{ inputs.vulnerability_severity }}
-          hide-progress: true
+          hide-progress: false
         env:
           TRIVY_SKIP_DB_UPDATE: true
           TRIVY_SKIP_JAVA_DB_UPDATE: true
