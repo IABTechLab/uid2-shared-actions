@@ -181,7 +181,7 @@ jobs:
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@ian-update-trivy
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v2
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_severity }}
