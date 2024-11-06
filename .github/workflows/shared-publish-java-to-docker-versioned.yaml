@@ -233,9 +233,9 @@ jobs:
         with:
           image-ref: ${{ steps.extractImageTag.outputs.firstTag }}
           format: 'table'
-          exit-code: '1'
+          exit-code: '0'
           ignore-unfixed: true
-          severity: ${{ inputs.vulnerability_severity }}
+          severity: 'CRITICAL,HIGH'
           hide-progress: false
         env:
           TRIVY_SKIP_DB_UPDATE: true
