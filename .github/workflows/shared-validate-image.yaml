@@ -103,4 +103,4 @@ jobs:
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           image_ref: ${{ steps.meta.outputs.tags }}
           scan_type: image
-          full_report: true
+          full_report: 'true'
