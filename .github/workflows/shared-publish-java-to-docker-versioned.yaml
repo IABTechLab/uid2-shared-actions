@@ -77,7 +77,7 @@ jobs:
             IS_RELEASE: ${{ steps.checkRelease.outputs.is_release }}
 
       - name: Manual Trivy Setup
-        uses: aquasecurity/setup-trivy@v0.2.0
+        uses: aquasecurity/setup-trivy@v0.2.2
         with:
           cache: true
           version: v0.56.1
