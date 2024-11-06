@@ -188,7 +188,6 @@ jobs:
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
           scan_type: image
-          full_report: 'true'
 
       - name: Push to Docker
         uses: docker/build-push-action@v5
