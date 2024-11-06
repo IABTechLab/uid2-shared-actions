@@ -75,6 +75,12 @@ jobs:
         env: 
             GITHUB_CONTEXT: ${{ toJson(github) }}
             IS_RELEASE: ${{ steps.checkRelease.outputs.is_release }}
+
+      - name: Manual Trivy Setup
+        uses: aquasecurity/setup-trivy@v0.2.0
+        with:
+          cache: true
+          version: v0.56.1
   
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -191,9 +197,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
           output: 'trivy-results.sarif'
           hide-progress: true
-        env:
-          TRIVY_SKIP_DB_UPDATE: true
-          TRIVY_SKIP_JAVA_DB_UPDATE: true
+          skip-setup-trivy: true
 
       - name: Upload Trivy scan report to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
@@ -210,9 +214,7 @@ jobs:
           ignore-unfixed: true
           severity: ${{ inputs.vulnerability_severity }}
           hide-progress: true
-        env:
-          TRIVY_SKIP_DB_UPDATE: true
-          TRIVY_SKIP_JAVA_DB_UPDATE: true
+          skip-setup-trivy: true
 
       - name: Push to Docker
         uses: docker/build-push-action@v5
