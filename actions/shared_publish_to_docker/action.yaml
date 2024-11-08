@@ -81,7 +81,7 @@ runs:
           IMAGE_VERSION=${{ inputs.new_version }}
 
     - name: Vulnerability scan
-      uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v2
+      uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
       with:
         publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
         failure_severity: CRITICAL
