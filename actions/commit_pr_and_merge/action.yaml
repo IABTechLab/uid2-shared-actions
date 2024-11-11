@@ -22,6 +22,11 @@ inputs:
     type: boolean
     required: false
     default: false
+  github_token:
+    description: The github token used to merge PR
+    type: string
+    required: false
+    default: ''
 outputs:
   git_tag_or_hash: 
     description: The git tag (or hash if no tag provided) of the merge commit
@@ -75,7 +80,7 @@ runs:
       if: steps.changes.outputs.changes_exist == 'true'
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_TOKEN: ${{ inputs.github_token == '' && github.token || inputs.github_token }}
         PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
         MERGE_PR_STRATEGY: ${{ github.ref_protected == 'true' && '--merge' || '--rebase' }}
         ADMIN_ACCESS: ${{ inputs.admin_access == 'true' && '--admin' || '' }}
