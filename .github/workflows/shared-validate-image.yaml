@@ -99,7 +99,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@ian-test-fix-trivy-issue
         with:
           scan_severity: HIGH,CRITICAL
-          failure_severity: ${{ inputs.vulnerability_severity }}
+          failure_severity: ${{ inputs.failure_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           image_ref: ${{ steps.meta.outputs.tags }}
           scan_type: image
