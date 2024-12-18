@@ -295,7 +295,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@abu-UID2-4668-update-to-use-values-from-sm
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
