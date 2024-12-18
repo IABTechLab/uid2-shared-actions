@@ -17,6 +17,7 @@ def get_port(url):
     return url.split(":")[1]
 
 def create_cloudformation_stack(client, stack_name, cft_content, api_token, core_base_url, optout_base_url, dc_cfg, ip_address):
+    print("ABU TESTING - IF USING THIS")
     result = client.create_stack(
         StackName=stack_name,
         TemplateBody=cft_content,
