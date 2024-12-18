@@ -16,15 +16,16 @@ def create_egress(url, description):
 def get_port(url):
     return url.split(":")[1]
 
-def create_cloudformation_stack(client, stack_name, cft_content, api_token, core_base_url, dc_cfg, ip_address):
+def create_cloudformation_stack(client, stack_name, cft_content, api_token, core_base_url, optout_base_url, dc_cfg, ip_address):
     result = client.create_stack(
         StackName=stack_name,
         TemplateBody=cft_content,
         Capabilities=['CAPABILITY_IAM'],
         Parameters=[
             { 'ParameterKey': 'APIToken', 'ParameterValue': api_token },
-            { 'ParameterKey': 'CoreBaseURL', 'ParameterValue': core_base_url },
             { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' }, 
+            { 'ParameterKey': 'OptoutBaseURL', 'ParameterValue': optout_base_url },
+            { 'ParameterKey': 'OptoutBaseURL', 'ParameterValue': core_base_url },
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
@@ -40,6 +41,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--stack_fp', dest='stack_fp', action='store', required='true', help='The filepath to the AWS stacks')
 parser.add_argument('--cftemplate_fp', dest='cftemplate_fp', action='store', required='true', help='The filepath to the CloudFormation template')
 parser.add_argument('--core_url', dest='core_url', action='store', required='true', help='The core URL')
+parser.add_argument('--optout_url', dest='optout_url', action='store', required='true', help='The optout URL')
 parser.add_argument('--localstack_url', dest='localstack_url', action='store', required='true', help='The localstack URL')
 parser.add_argument('--region', choices=['us-east-1', 'us-west-1', 'ca-central-1', 'eu-central-1'], dest='region', action='store', required='true', help='The AWS target region')
 parser.add_argument('--ami', dest='ami', action='store', required='true', help='The AMI ID')
@@ -58,6 +60,7 @@ cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
 
 egress = cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress']
 egress.append(create_egress(args.core_url, 'E2E - Core'))
+egress.append(create_egress(args.optout_url, 'E2E - Optout'))
 egress.append(create_egress(args.localstack_url, 'E2E - Localstack'))
 cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
 
@@ -76,5 +79,6 @@ create_cloudformation_stack(
     cft_content=dump_yaml(cft),
     api_token=args.operator_key,
     core_base_url = args.core_url,
+    optout_base_url = args.optout_url,
     dc_cfg=dc_cfg, 
     ip_address=ip)
