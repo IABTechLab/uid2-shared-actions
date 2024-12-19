@@ -26,7 +26,7 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, core
             { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' }, 
             { 'ParameterKey': 'OptoutBaseURL', 'ParameterValue': optout_base_url },
             { 'ParameterKey': 'CoreBaseURL', 'ParameterValue': core_base_url },
-            { 'ParameterKey': 'SkipValidations', 'ParameterValue': True },
+            { 'ParameterKey': 'SkipValidations', 'ParameterValue': 'true' },
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
