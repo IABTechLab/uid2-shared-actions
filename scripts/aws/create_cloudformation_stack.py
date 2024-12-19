@@ -17,7 +17,6 @@ def get_port(url):
     return url.split(":")[1]
 
 def create_cloudformation_stack(client, stack_name, cft_content, api_token, core_base_url, optout_base_url, dc_cfg, ip_address):
-    print("ABU TESTING - IF USING THIS")
     result = client.create_stack(
         StackName=stack_name,
         TemplateBody=cft_content,
@@ -27,6 +26,7 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, core
             { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' }, 
             { 'ParameterKey': 'OptoutBaseURL', 'ParameterValue': optout_base_url },
             { 'ParameterKey': 'CoreBaseURL', 'ParameterValue': core_base_url },
+            { 'ParameterKey': 'SkipValidations', 'ParameterValue': True },
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
