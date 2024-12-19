@@ -16,14 +16,17 @@ def create_egress(url, description):
 def get_port(url):
     return url.split(":")[1]
 
-def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_cfg, ip_address):
+def create_cloudformation_stack(client, stack_name, cft_content, api_token, core_base_url, optout_base_url, dc_cfg, ip_address):
     result = client.create_stack(
         StackName=stack_name,
         TemplateBody=cft_content,
         Capabilities=['CAPABILITY_IAM'],
         Parameters=[
             { 'ParameterKey': 'APIToken', 'ParameterValue': api_token },
-            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' },
+            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' }, 
+            { 'ParameterKey': 'OptoutBaseURL', 'ParameterValue': optout_base_url },
+            { 'ParameterKey': 'CoreBaseURL', 'ParameterValue': core_base_url },
+            { 'ParameterKey': 'SkipValidations', 'ParameterValue': 'true' },
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
@@ -64,9 +67,7 @@ cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
 
 user_data = cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub']
 first_line = user_data.find('\n')
-user_data = user_data[:first_line] + '''
-export CORE_BASE_URL="http://{}"
-export OPTOUT_BASE_URL="http://{}"'''.format(args.core_url, args.optout_url) + user_data[first_line:]
+user_data = user_data[:first_line] + user_data[first_line:]
 cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub'] = user_data
 
 print(dump_yaml(cft))
@@ -78,5 +79,7 @@ create_cloudformation_stack(
     stack_name=args.stack,
     cft_content=dump_yaml(cft),
     api_token=args.operator_key,
+    core_base_url = args.core_url,
+    optout_base_url = args.optout_url,
     dc_cfg=dc_cfg, 
     ip_address=ip)
