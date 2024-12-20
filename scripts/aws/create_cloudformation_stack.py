@@ -79,7 +79,7 @@ create_cloudformation_stack(
     stack_name=args.stack,
     cft_content=dump_yaml(cft),
     api_token=args.operator_key,
-    core_base_url = args.core_url,
-    optout_base_url = args.optout_url,
+    core_base_url = f"http://{args.core_url}",
+    optout_base_url = f"http://{args.optout_url}",
     dc_cfg=dc_cfg, 
     ip_address=ip)
