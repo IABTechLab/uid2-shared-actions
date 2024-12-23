@@ -113,25 +113,11 @@ jobs:
 
       - name: Compile
         if: ${{ inputs.publish_to_maven != true }}
+        env:
+          EXTRA_FLAGS: "-s settings.xml -Dgpg.passphrase=\"${{ secrets.GPG_PASSPHRASE }}\""
         run: | 
           cd ./${{ inputs.working_dir }}
-          mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile test | tee build.log
-
-          tests_run=$(cat build.log  | grep "Tests run:" | tail -n 1 | sed 's/.*Tests run: \([0-9]*\).*/\1/')
-
-          echo "DEBUG: tests_run = $tests_run"
-
-          if [ -z "$tests_run" ]; then
-            echo "WARNING: Could not determine the number of tests run."
-            tests_run=0
-          fi
-
-          if [ "$tests_run" -eq 0 ]; then
-            echo "ERROR: No tests were run!"
-            exit 1
-          fi
-
-          echo "INFO: $tests_run tests were run!"
+          bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
 
       - name: Commit pom.xml and version.json
         if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 
