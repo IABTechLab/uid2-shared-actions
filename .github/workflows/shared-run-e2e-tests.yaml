@@ -249,10 +249,10 @@ jobs:
           output_parameters_file: ${{ steps.prepare_azure_metadata.outputs.output_parameters_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Start AWS private operator - ABU TESTING OVERRIDE
+      - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@abu-UID2-4668-update-to-use-values-from-sm
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -295,7 +295,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@abu-UID2-4668-update-to-use-values-from-sm
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
