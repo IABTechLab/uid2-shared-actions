@@ -59,6 +59,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Checkout uid2-shared-actions repo
+        uses: actions/checkout@v4
+        with:
+          ref: kcc-UID2-3858-verify-no-of-tests-run
+          repository: IABTechLab/uid2-shared-actions
+          path: uid2-shared-actions
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
