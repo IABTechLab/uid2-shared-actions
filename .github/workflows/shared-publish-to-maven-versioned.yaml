@@ -59,6 +59,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Checkout uid2-shared-actions repo
+        uses: actions/checkout@v4
+        with:
+          ref: v3
+          repository: IABTechLab/uid2-shared-actions
+          path: uid2-shared-actions
+
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
@@ -113,9 +120,11 @@ jobs:
 
       - name: Compile
         if: ${{ inputs.publish_to_maven != true }}
+        env:
+          EXTRA_FLAGS: "-s settings.xml -Dgpg.passphrase=\"${{ secrets.GPG_PASSPHRASE }}\""
         run: | 
           cd ./${{ inputs.working_dir }}
-          mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile test
+          bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh -s settings.xml -D gpg.passphrase="${{ secrets.GPG_PASSPHRASE }}"
 
       - name: Commit pom.xml and version.json
         if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 

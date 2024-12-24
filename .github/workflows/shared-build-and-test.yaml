@@ -28,6 +28,13 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      
+      - name: Checkout uid2-shared-actions repo
+        uses: actions/checkout@v4
+        with:
+          ref: v3
+          repository: IABTechLab/uid2-shared-actions
+          path: uid2-shared-actions
 
       - name: Set up JDK
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
@@ -38,8 +45,9 @@ jobs:
 
       - name: Build and run unit tests
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
-        run: mvn -B clean compile test
         working-directory: ${{ inputs.working_dir }}
+        run: |
+          bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
 
       - name: Generate code coverage
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
