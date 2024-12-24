@@ -124,7 +124,7 @@ jobs:
           EXTRA_FLAGS: "-s settings.xml -Dgpg.passphrase=\"${{ secrets.GPG_PASSPHRASE }}\""
         run: | 
           cd ./${{ inputs.working_dir }}
-          bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
+          bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh -s settings.xml -D gpg.passphrase="${{ secrets.GPG_PASSPHRASE }}"
 
       - name: Commit pom.xml and version.json
         if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 
