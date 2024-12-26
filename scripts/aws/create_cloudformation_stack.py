@@ -23,7 +23,7 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_c
         Capabilities=['CAPABILITY_IAM'],
         Parameters=[
             { 'ParameterKey': 'APIToken', 'ParameterValue': api_token },
-            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' },
+            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' }, 
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
@@ -62,12 +62,14 @@ egress.append(create_egress(args.optout_url, 'E2E - Optout'))
 egress.append(create_egress(args.localstack_url, 'E2E - Localstack'))
 cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
 
-user_data = cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub']
-first_line = user_data.find('\n')
-user_data = user_data[:first_line] + '''
-export CORE_BASE_URL="http://{}"
-export OPTOUT_BASE_URL="http://{}"'''.format(args.core_url, args.optout_url) + user_data[first_line:]
-cft['Resources']['LaunchTemplate']['Properties']['LaunchTemplateData']['UserData']['Fn::Base64']['Fn::Sub'] = user_data
+# Now, we overwrite core, optout URL's with bore addresses.
+secrets = cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1]
+core_index = secrets.index('"core_base_url": ')
+secrets = secrets[:core_index] + secrets[core_index+2:]
+optout_index = secrets.index(', "optout_base_url": ')
+secrets = secrets[:optout_index] + secrets[optout_index+2:]
+secrets = secrets[:1] + [f'"core_base_url": "http://{args.core_url}"',f', "optout_base_url":  "http://{args.optout_url}"', ', "skip_validations": "true"',   ', "debug_mode": "true"'] + secrets[1:]
+cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1] = secrets
 
 print(dump_yaml(cft))
 
