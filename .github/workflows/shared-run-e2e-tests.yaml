@@ -171,7 +171,7 @@ jobs:
         id: bore
         if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks'}}
         env:
-          BORE_URL: ${{ secrets.BORE_URL} }}
+          BORE_URL: ${{ secrets.BORE_URL }}
           BORE_SECRET: ${{ secrets.BORE_SECRET }}
         run: |
           bash uid2-shared-actions/scripts/setup_bore.sh
