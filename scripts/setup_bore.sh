@@ -3,9 +3,9 @@ set -ex
 
 ROOT="."
 
-docker run --init --rm --network e2e_default ekzhang/bore local --local-host localstack --to bore.pub 5001  > ${ROOT}/bore_localstack.out &
-docker run --init --rm --network e2e_default ekzhang/bore local --local-host core --to bore.pub 8088  > ${ROOT}/bore_core.out &
-docker run --init --rm --network e2e_default ekzhang/bore local --local-host optout --to bore.pub 8081  > ${ROOT}/bore_optout.out &
+docker run --init --rm --network e2e_default ekzhang/bore local --local-host localstack --to ${BORE_URL} --secret ${BORE_SECRET} 5001  > ${ROOT}/bore_localstack.out &
+docker run --init --rm --network e2e_default ekzhang/bore local --local-host core --to ${BORE_URL} --secret ${BORE_SECRET} 8088  > ${ROOT}/bore_core.out &
+docker run --init --rm --network e2e_default ekzhang/bore local --local-host optout --to ${BORE_URL} --secret ${BORE_SECRET} 8081  > ${ROOT}/bore_optout.out &
 
 until [ -f ${ROOT}/bore_localstack.out ] && [ -f ${ROOT}/bore_core.out ] && [ -f ${ROOT}/bore_optout.out ]
 do
