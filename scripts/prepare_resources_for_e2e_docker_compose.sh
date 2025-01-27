@@ -108,6 +108,6 @@ mkdir -p "${OPTOUT_MOUNT}" && chmod 777 "${OPTOUT_MOUNT}"
 chmod 777 "${CORE_RESOURCE_FILE_DIR}/init-aws.sh"
 chmod 777 "${OPTOUT_RESOURCE_FILE_DIR}/init-aws.sh"
 
-docker compose --profile "${OPERATOR_TYPE}" -f "${DOCKER_COMPOSE_FILE}" up -d --wait
+docker compose --profile "${OPERATOR_TYPE}" -f "${DOCKER_COMPOSE_FILE}" up --wait
 docker ps -a
 docker network ls
