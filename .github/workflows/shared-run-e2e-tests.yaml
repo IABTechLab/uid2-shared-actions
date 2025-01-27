@@ -161,6 +161,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: IABTechLab/uid2-e2e
+          ref: cbc-UID2-4761-setup-bore
           path: uid2-e2e
 
       - name: Create Docker network
