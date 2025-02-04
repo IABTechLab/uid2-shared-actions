@@ -41,9 +41,10 @@ if [ ${OPERATOR_TYPE} == "public" ]; then
   cp "${OPERATOR_ROOT}/conf/local-e2e-docker-${OPERATOR_TYPE}-config.json" "${OPERATOR_CONFIG_FILE_DIR}/local-e2e-docker-config.json"
 fi
 
-mkdir -p "${CORE_CONFIG_FILE_DIR}"
+mkdir -p "${CORE_CONFIG_FILE_DIR}/operator"
 cp "${CORE_ROOT}/conf/default-config.json" "${CORE_CONFIG_FILE_DIR}"
 cp "${CORE_ROOT}/conf/local-e2e-docker-config.json" "${CORE_CONFIG_FILE_DIR}"
+cp "${CORE_ROOT}/conf/operator/operator-config.json" "${CORE_CONFIG_FILE_DIR}/operator"
 cp -r "${ADMIN_ROOT}/src/main/resources/localstack" "${CORE_RESOURCE_FILE_DIR}"
 
 mkdir -p "${OPTOUT_CONFIG_FILE_DIR}"
