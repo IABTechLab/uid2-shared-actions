@@ -110,5 +110,16 @@ chmod 777 "${CORE_RESOURCE_FILE_DIR}/init-aws.sh"
 chmod 777 "${OPTOUT_RESOURCE_FILE_DIR}/init-aws.sh"
 
 docker compose --profile "${OPERATOR_TYPE}" -f "${DOCKER_COMPOSE_FILE}" up -d --wait
+
+containers=$(docker compose ps -q)
+
+for container in $containers; do
+  status=$(docker inspect --format='{{.State.ExitCode}}' $container)
+  if [ "$status" -ne 0 ]; then
+    echo "Container $container exited with status $status. Logs:"
+    docker logs "$container"
+  fi
+done
+
 docker ps -a
 docker network ls
