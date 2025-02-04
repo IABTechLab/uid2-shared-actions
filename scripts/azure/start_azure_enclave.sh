@@ -56,6 +56,7 @@ jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.location.value "${LOCATION
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.identity.value "${IDENTITY}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.vaultName.value "${VAULT_NAME}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.operatorKeySecretName.value "${OPERATOR_KEY_NAME}"
+jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.skipValidations.value "true"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.deploymentEnvironment.value "${DEPLOYMENT_ENV}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.coreBaseUrl.value "http://${BORE_URL_CORE}"
 jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.optoutBaseUrl.value "http://${BORE_URL_OPTOUT}"
