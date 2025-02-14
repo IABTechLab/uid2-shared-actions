@@ -75,8 +75,13 @@ runs:
           core.setOutput('pull-request-url', newPr.html_url);
           core.setOutput('pull-request-number', newPr.number);
 
+    - name: Kat Sophia test
+      shell: bash
+      run: |
+        echo ${{ inputs.github_token == '' && "no github token" || inputs.github_token }}
+    
     - name: Merge PR
-      run: gh pr merge $PR_URL --delete-branch $MERGE_PR_STRATEGY $ADMIN_ACCESS
+      run: gh pr merge $PR_URL $MERGE_PR_STRATEGY $ADMIN_ACCESS
       if: steps.changes.outputs.changes_exist == 'true'
       shell: bash
       env:
