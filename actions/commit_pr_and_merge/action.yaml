@@ -79,7 +79,7 @@ runs:
       shell: bash
       run: |
         echo "${{ inputs.github_token == '' && github.token || inputs.github_token }}" | gh auth login --with-token # Correct way
-        gh auth status
+        gh pr merge --delete-branch ${{ steps.create-pr.outputs.pull-request-url }} --rebase --admin
 
     - name: Merge PR
       run: gh pr merge --delete-branch $PR_URL $MERGE_PR_STRATEGY $ADMIN_ACCESS
