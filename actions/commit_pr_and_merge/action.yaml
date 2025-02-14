@@ -78,7 +78,7 @@ runs:
     - name: Kat Sophia test
       shell: bash
       run: |
-        echo ${{ inputs.github_token == '' && "no github token" || inputs.github_token }}
+        echo ${{ inputs.github_token == '' && 'no github token' || inputs.github_token }}
     
     - name: Merge PR
       run: gh pr merge $PR_URL $MERGE_PR_STRATEGY $ADMIN_ACCESS
