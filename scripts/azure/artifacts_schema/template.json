@@ -130,6 +130,10 @@
                 {
                   "name": "OPTOUT_BASE_URL",
                   "value": "[parameters('optoutBaseUrl')]"
+                },
+                {
+                  "name": "SKIP_VALIDATIONS",
+                  "value": "[parameters('skipValidations')]"
                 }
               ]
             }
