@@ -49,6 +49,12 @@
       "metadata": {
         "description": "UID2 optout base URL override"
       }
+    },
+    "skipValidations": {
+      "type": "string",
+      "metadata": {
+        "description": "Skip validations override"
+      }
     }
   },
   "resources": [
