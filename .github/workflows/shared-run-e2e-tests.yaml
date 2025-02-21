@@ -189,7 +189,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v2
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v3
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -244,7 +244,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v2
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
