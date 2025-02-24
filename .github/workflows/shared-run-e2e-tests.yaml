@@ -153,7 +153,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: cbc-UID2-4962-fix-euid-e2e
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
