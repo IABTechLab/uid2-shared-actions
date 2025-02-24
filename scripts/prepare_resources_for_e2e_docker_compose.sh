@@ -97,6 +97,8 @@ if [ ${OPERATOR_TYPE} != "public" ]; then
   jq_string_update ${OPTOUT_CONFIG_FILE} optout_url "http://${BORE_URL_OPTOUT}"
 fi
 
+jq_string_update ${OPERATOR_CONFIG_FILE} identity_scope ${IDENTITY_SCOPE}
+
 cat ${CORE_CONFIG_FILE}
 cat ${OPTOUT_CONFIG_FILE}
 
