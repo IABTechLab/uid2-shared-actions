@@ -64,9 +64,9 @@ cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
 
 # Now, we overwrite core, optout URL's with bore addresses.
 secrets = cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1]
-core_index = secrets.index('"core_base_url": ')
+core_index = secrets.index('"core_base_url": "')
 secrets = secrets[:core_index] + secrets[core_index+2:]
-optout_index = secrets.index(', "optout_base_url": ')
+optout_index = secrets.index('", "optout_base_url": "')
 secrets = secrets[:optout_index] + secrets[optout_index+2:]
 secrets = secrets[:1] + [f'"core_base_url": "http://{args.core_url}"',f', "optout_base_url":  "http://{args.optout_url}"', ', "skip_validations": "true"',   ', "debug_mode": "true"'] + secrets[1:]
 cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1] = secrets
