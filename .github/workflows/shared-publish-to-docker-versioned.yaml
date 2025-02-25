@@ -42,6 +42,11 @@ on:
         description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
         type: string
         default: 'true'
+      slack_webhook:
+        description: 'The Slack webhook URL for sending messages via incoming webhooks, configured for #dev-uid2-alarms channel'
+        required: true
+        type: string
+
 jobs:
   buildImage:
     name: Build Image
@@ -62,7 +67,7 @@ jobs:
 
       - name: Publish to Docker
         id: publishToDocker
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@v3
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@@ccm-UID2-4528-report-faillures-on-scheduled-vulnerability-detection-runs
         with:
           new_version: ${{ inputs.new_version }}
           image_tag: ${{ inputs.image_tag }}
@@ -74,6 +79,7 @@ jobs:
           docker_context: ${{ inputs.docker_context }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           scan_type: image
+          slack_webhook: ${{ inputs.SLACK_WEBHOOK }}
 
       - name: Create Release
         id: github_release
