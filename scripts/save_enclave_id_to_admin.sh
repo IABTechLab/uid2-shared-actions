@@ -22,7 +22,13 @@ OPERATOR_FILE="${METADATA_ROOT}/operators/operators.json"
 ENCLAVE_FILE="${METADATA_ROOT}/enclaves/enclaves.json"
 
 # Fetch operator key
-OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .key' ${OPERATOR_FILE})
+if [ "${ENCLAVE_PROTOCOL}" == "aws-nitro" ]; then
+  OPERATOR_KEY=${E2E_UID2_PROD_AWS_OPERATOR_API_KEY}
+elif [ "${ENCLAVE_PROTOCOL}" == "gcp-oidc" ]; then
+  OPERATOR_KEY=${E2E_UID2_PROD_GCP_OPERATOR_API_KEY}
+else
+  OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .key' ${OPERATOR_FILE})
+fi
 
 # Update enclave ID
 cat <<< $(jq '(.[] | select((.protocol=="'${ENCLAVE_PROTOCOL}'") and (.name | test(".*Debug.*") | not)) | .identifier) |="'${ENCLAVE_ID}'"' ${ENCLAVE_FILE}) > ${ENCLAVE_FILE}

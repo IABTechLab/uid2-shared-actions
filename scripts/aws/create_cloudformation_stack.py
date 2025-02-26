@@ -23,7 +23,7 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_c
         Capabilities=['CAPABILITY_IAM'],
         Parameters=[
             { 'ParameterKey': 'APIToken', 'ParameterValue': api_token },
-            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' }, 
+            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'prod' }, 
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
@@ -56,11 +56,11 @@ with open('{}/{}_CloudFormation.template.yml'.format(args.cftemplate_fp, args.sc
 
 cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
 
-egress = cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress']
-egress.append(create_egress(args.core_url, 'E2E - Core'))
-egress.append(create_egress(args.optout_url, 'E2E - Optout'))
-egress.append(create_egress(args.localstack_url, 'E2E - Localstack'))
-cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
+# egress = cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress']
+# egress.append(create_egress(args.core_url, 'E2E - Core'))
+# egress.append(create_egress(args.optout_url, 'E2E - Optout'))
+# egress.append(create_egress(args.localstack_url, 'E2E - Localstack'))
+# cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
 
 # Now, we overwrite core, optout URL's with bore addresses.
 secrets = cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1]
@@ -68,9 +68,9 @@ core_index = secrets.index('"core_base_url": "')
 secrets = secrets[:core_index] + secrets[core_index+2:]
 optout_index = secrets.index('", "optout_base_url": "')
 secrets = secrets[:optout_index] + secrets[optout_index+2:]
-secrets = secrets[:1] + [f'"core_base_url": "http://{args.core_url}"',f', "optout_base_url":  "http://{args.optout_url}'] + secrets[1:]
+secrets = secrets[:1] + [f'"core_base_url": "https://{args.core_url}"',f', "optout_base_url":  "https://{args.optout_url}'] + secrets[1:]
 secrets.pop()
-secrets.extend([', "skip_validations": true', ', "debug_mode": true', '}'])
+secrets.extend([', "skip_validations": true', ', "debug_mode": false', '}'])
 cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1] = secrets
 
 print(dump_yaml(cft))
