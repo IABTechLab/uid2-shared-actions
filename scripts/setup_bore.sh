@@ -17,8 +17,11 @@ cat ${ROOT}/bore_core.out
 cat ${ROOT}/bore_optout.out
 
 BORE_URL_LOCALSTACK=$(cat ${ROOT}/bore_localstack.out | grep at | cut -d ' ' -f7)
-BORE_URL_CORE=$(cat ${ROOT}/bore_core.out | grep at | cut -d ' ' -f7)
-BORE_URL_OPTOUT=$(cat ${ROOT}/bore_optout.out | grep at | cut -d ' ' -f7)
+# BORE_URL_CORE=$(cat ${ROOT}/bore_core.out | grep at | cut -d ' ' -f7)
+# BORE_URL_OPTOUT=$(cat ${ROOT}/bore_optout.out | grep at | cut -d ' ' -f7)
+
+BORE_URL_CORE=core-prod-secondary.uidapi.com
+BORE_URL_OPTOUT=optout-prod.uidapi.com
 
 # export to Github output
 echo "BORE_URL_LOCALSTACK=${BORE_URL_LOCALSTACK}"
