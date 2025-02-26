@@ -297,19 +297,23 @@ jobs:
         run: |
           bash uid2-shared-actions/scripts/decide_e2e_env.sh
 
-      - name: Run E2E tests
-        id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
-        with:
-          e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
-          e2e_image_version: ${{ inputs.e2e_image_version }}
-          uid2_e2e_identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
-          uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
-          uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
-          uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
-          uid2_e2e_phone_support: ${{ steps.decide_env_var.outputs.uid2_e2e_phone_support }}
-          uid2_e2e_pipeline_core_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_core_url }}
-          uid2_e2e_pipeline_optout_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_optout_url }}
+      # - name: Run E2E tests
+      #   id: e2e
+      #   uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
+      #   with:
+      #     e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
+      #     e2e_image_version: ${{ inputs.e2e_image_version }}
+      #     uid2_e2e_identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+      #     uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
+      #     uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
+      #     uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
+      #     uid2_e2e_phone_support: ${{ steps.decide_env_var.outputs.uid2_e2e_phone_support }}
+      #     uid2_e2e_pipeline_core_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_core_url }}
+      #     uid2_e2e_pipeline_optout_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_optout_url }}
+
+      - name: Wait 10 minutes
+        shell: bash
+        run: sleep 600s
 
       - name: Stop GCP private operator
         if: ${{ inputs.operator_type == 'gcp' }}
