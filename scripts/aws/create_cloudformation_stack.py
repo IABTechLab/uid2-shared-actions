@@ -69,7 +69,8 @@ secrets = secrets[:core_index] + secrets[core_index+2:]
 optout_index = secrets.index('", "optout_base_url": "')
 secrets = secrets[:optout_index] + secrets[optout_index+2:]
 secrets = secrets[:1] + [f'"core_base_url": "http://{args.core_url}"',f', "optout_base_url":  "http://{args.optout_url}'] + secrets[1:]
-secrets = secrets.rstrip("}") + ', "skip_validations": true, "debug_mode": true }'
+secrets.pop()
+secrets.extend([', "skip_validations": true,', ', "debug_mode": true', '}'])
 cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1] = secrets
 
 print(dump_yaml(cft))
