@@ -42,7 +42,7 @@ outputs:
     value: ${{ steps.meta.outputs.tags }}
 
 runs:
-  using: "composite" 
+  using: "composite"
 
   steps:
     - name: Set up Docker Buildx
@@ -91,7 +91,7 @@ runs:
         scan_severity: CRITICAL,HIGH
         image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
         scan_type: ${{ inputs.scan_type }}
-        slack_webhook: ${{ inputs.SLACK_WEBHOOK }}
+        slack_webhook: ${{ inputs.slack_webhook }}
 
     - name: Push to Docker
       uses: docker/build-push-action@v5
