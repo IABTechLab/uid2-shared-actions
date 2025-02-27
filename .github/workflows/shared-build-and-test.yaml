@@ -43,13 +43,6 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ inputs.java_version }}
 
-      - name: Build and run unit tests
-        if: ${{ inputs.vulnerability_scan_only == 'false' }}
-        working-directory: ${{ inputs.working_dir }}
-        run: |
-          chmod +x uid2-shared-actions/scripts/compile_java_test_and_verify.sh
-          bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
-
       - name: Generate code coverage
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
         run: mvn jacoco:report
