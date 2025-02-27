@@ -98,10 +98,9 @@ on:
         description: The EKS Test Cluster Region
         type: string
 
-      
-
 env:
   REGISTRY: ghcr.io
+  UID2_PROD_OPERATOR_API_KEY: ${{ secrets.UID2_PROD_OPERATOR_API_KEY }}
 
 jobs:
   e2e-test:
