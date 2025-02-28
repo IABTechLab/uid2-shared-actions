@@ -23,7 +23,7 @@ on:
       slack_webhook:
         description: 'The Slack webhook URL for sending messages via incoming webhooks, configured for #dev-uid2-alarms channel'
         type: string
-        default: ''
+        required: true
 
 jobs:
   build:
