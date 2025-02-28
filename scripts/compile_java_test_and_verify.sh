@@ -53,9 +53,12 @@ mvn_command+=" clean compile test"
 echo "DEBUG: Executing Maven command: ${mvn_command}"
 ${mvn_command} | tee build.log
 
-tests_run=$(cat build.log  | grep "Tests run:" | tail -n 1 | sed 's/.*Tests run: \([0-9]*\).*/\1/')
+TEST_RESULTS=$(cat build.log  | grep "Tests run:" | tail -n 1)
+tests_run=$(echo $TEST_RESULTS | sed 's/.*Tests run: \([0-9]*\).*/\1/')
+tests_failed=$(echo $TEST_RESULTS | sed 's/.*Failures: \([0-9]*\).*/\1/')
+tests_errors=$(echo $TEST_RESULTS | sed 's/.*Errors: \([0-9]*\).*/\1/')
 
-echo "DEBUG: tests_run = $tests_run"
+echo "DEBUG: tests_run = $tests_run tests_failed = $tests_failed tests_errors = $tests_errors"
 
 if [ -z "$tests_run" ]; then
     echo "WARNING: Could not determine the number of tests run."
@@ -68,3 +71,13 @@ if [ "$tests_run" -eq 0 ]; then
 fi
 
 echo "INFO: $tests_run tests were run!"
+
+if [ "$tests_failed" -neq 0 ]; then
+    echo "ERROR: $tests_failed Tests Failed!"
+    exit 1
+fi
+
+if [ "$tests_errors" -neq 0 ]; then
+    echo "ERROR: $tests_errors Tests had errors!"
+    exit 1
+fi
