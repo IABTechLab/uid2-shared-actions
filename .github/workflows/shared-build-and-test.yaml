@@ -20,10 +20,6 @@ on:
         description: The path to the pom.xml file.
         type: string
         default: '.'
-      slack_webhook:
-        description: 'The Slack webhook URL for sending messages via incoming webhooks, configured for #dev-uid2-alarms channel'
-        type: string
-        required: true
 
 jobs:
   build:
