@@ -178,7 +178,7 @@ jobs:
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@gdm-UID2-4506-core-v2-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
