@@ -71,6 +71,10 @@ runs:
       run: |
         bash uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_id.sh
 
+    - name: Manually upload GCP enclave ID to admin (2 mins)
+      shell: bash
+      run: sleep 120s
+
     - name: Prepare GCP enclave metadata
       id: enclave_metadata
       shell: bash
