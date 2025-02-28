@@ -20,6 +20,9 @@ on:
         description: The path to the pom.xml file.
         type: string
         default: '.'
+    secrets:
+      slack_webhook:
+        required: true
 
 jobs:
   build:
