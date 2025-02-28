@@ -20,9 +20,6 @@ on:
         description: The path to the pom.xml file.
         type: string
         default: '.'
-    secrets:
-      slack_webhook:
-        required: true
 
 jobs:
   build:
@@ -64,4 +61,4 @@ jobs:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
-          slack_webhook: ${{ secrets.SLACK_WEBHOOK }}
+          slack_webhook: ${{ inputs.SLACK_WEBHOOK }}
