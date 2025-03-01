@@ -68,4 +68,4 @@ jobs:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
-          slack_webhook: ${{ inputs.SLACK_WEBHOOK }}
+          slack_webhook: ${{ secrets.SLACK_WEBHOOK }}
