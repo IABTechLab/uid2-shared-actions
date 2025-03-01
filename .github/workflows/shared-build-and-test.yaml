@@ -22,7 +22,7 @@ on:
         default: '.'
     secrets:
       SLACK_WEBHOOK:
-        required: true
+        required: false
 
 jobs:
   build:
