@@ -50,8 +50,6 @@ jobs:
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
         working-directory: ${{ inputs.working_dir }}
         run: |
-          cd ..
-          ls
           bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
 
       - name: Generate code coverage
