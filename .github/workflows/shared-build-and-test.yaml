@@ -52,6 +52,8 @@ jobs:
         run: |
           ls
           pwd
+          cd ..
+          ls
           bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
 
       - name: Generate code coverage
