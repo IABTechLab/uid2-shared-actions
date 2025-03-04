@@ -32,9 +32,6 @@ inputs:
   scan_type:
     description: The scan-type for aquasecurity/trivy-action action. Default to a fs scan.
     default: fs
-  slack_webhook:
-    description: 'The Slack webhook URL for sending messages via incoming webhooks, configured for #dev-uid2-alarms channel'
-    required: true
 
 outputs:
   tags:
@@ -42,7 +39,7 @@ outputs:
     value: ${{ steps.meta.outputs.tags }}
 
 runs:
-  using: "composite"
+  using: "composite" 
 
   steps:
     - name: Set up Docker Buildx
@@ -84,14 +81,13 @@ runs:
           IMAGE_VERSION=${{ inputs.new_version }}
 
     - name: Vulnerability scan
-      uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@ccm-UID2-4528-report-faillures-on-scheduled-vulnerability-detection-runs
+      uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
       with:
         publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
         failure_severity: CRITICAL
         scan_severity: CRITICAL,HIGH
         image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
         scan_type: ${{ inputs.scan_type }}
-        slack_webhook: ${{ inputs.slack_webhook }}
 
     - name: Push to Docker
       uses: docker/build-push-action@v5

@@ -20,9 +20,6 @@ on:
         description: The path to the pom.xml file.
         type: string
         default: '.'
-    secrets:
-      SLACK_WEBHOOK:
-        required: false
 
 jobs:
   build:
@@ -65,9 +62,8 @@ jobs:
           path: ${{ inputs.working_dir }}/target/site/jacoco/*
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@ccm-UID2-4528-report-faillures-on-scheduled-vulnerability-detection-runs
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v3
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
-          slack_webhook: ${{ secrets.SLACK_WEBHOOK }}
