@@ -72,12 +72,12 @@ fi
 
 echo "INFO: $tests_run tests were run!"
 
-if [ "$tests_failed" -neq 0 ]; then
+if [ "$tests_failed" -ne 0 ]; then
     echo "ERROR: $tests_failed Tests Failed!"
     exit 1
 fi
 
-if [ "$tests_errors" -neq 0 ]; then
+if [ "$tests_errors" -ne 0 ]; then
     echo "ERROR: $tests_errors Tests had errors!"
     exit 1
 fi
