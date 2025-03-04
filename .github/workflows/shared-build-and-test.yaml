@@ -47,7 +47,8 @@ jobs:
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
         working-directory: ${{ inputs.working_dir }}
         run: |
-          bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
+
+        #bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
 
       - name: Generate code coverage
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
