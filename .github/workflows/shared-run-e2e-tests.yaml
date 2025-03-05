@@ -100,7 +100,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  UID2_PROD_OPERATOR_API_KEY: ${{ secrets.UID2_PROD_OPERATOR_API_KEY }}
+  UID2_PROD_E2E_GCP_OPERATOR_API_KEY: ${{ secrets.UID2_PROD_GCP_OPERATOR_API_KEY }}
+  UID2_PROD_E2E_AWS_OPERATOR_API_KEY: ${{ secrets.UID2_PROD_E2E_AWS_OPERATOR_API_KEY }}
 
 jobs:
   e2e-test:
@@ -188,7 +189,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@gdm-UID2-4506-core-v2-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -196,7 +197,7 @@ jobs:
       - name: Prepare AWS metadata
         id: prepare_aws_metadata
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-4506-core-v2-e2e
         with:
           admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
@@ -204,7 +205,7 @@ jobs:
       - name: Prepare EKS metadata
         id: prepare_eks_metadata
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@gdm-UID2-4506-core-v2-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -232,7 +233,7 @@ jobs:
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@gdm-UID2-4506-core-v2-e2e
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -244,7 +245,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@gdm-UID2-4506-core-v2-e2e
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -255,7 +256,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-4506-core-v2-e2e
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -268,7 +269,7 @@ jobs:
       - name: Start EKS operator
         id: start_EKS_operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@gdm-UID2-4506-core-v2-e2e
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -319,25 +320,25 @@ jobs:
       #   run: |
       #     bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
-      - name: Stop Azure private operator
-        if: ${{ inputs.operator_type == 'azure' }}
-        env:
-          AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
-        run: |
-          bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+      # - name: Stop Azure private operator
+      #   if: ${{ inputs.operator_type == 'azure' }}
+      #   env:
+      #     AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
+      #   run: |
+      #     bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 
-      - name: Stop AWS private operator
-        if: ${{ inputs.operator_type == 'aws' }}
-        env:
-          AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
-          AWS_REGION: ${{ inputs.aws_region }}
-        run: |
-          bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+      # - name: Stop AWS private operator
+      #   if: ${{ inputs.operator_type == 'aws' }}
+      #   env:
+      #     AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
+      #     AWS_REGION: ${{ inputs.aws_region }}
+      #   run: |
+      #     bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
 
-      - name: Stop EKS operator
-        if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@v3
-        with:
-          eks_test_cluster: ${{ inputs.eks_test_cluster }}
-          eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+      # - name: Stop EKS operator
+      #   if: ${{ inputs.operator_type == 'eks' }}
+      #   uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@v3
+      #   with:
+      #     eks_test_cluster: ${{ inputs.eks_test_cluster }}
+      #     eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
+      #     identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
