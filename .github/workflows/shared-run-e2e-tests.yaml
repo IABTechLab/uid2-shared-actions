@@ -211,24 +211,24 @@ jobs:
           admin_root: ${{ inputs.admin_root }}
           eks_pcr0: ${{ inputs.eks_pcr0 }}
 
-      - name: Bring up Docker Compose
-        id: docker-compose
-        env:
-          OPERATOR_ROOT: ${{ inputs.operator_root }}
-          CORE_ROOT: ${{ inputs.core_root }}
-          OPTOUT_ROOT: ${{ inputs.optout_root }}
-          ADMIN_ROOT: ${{ inputs.admin_root }}
-          OPERATOR_VERSION: ${{ inputs.operator_image_version }}
-          CORE_VERSION: ${{ inputs.core_image_version }}
-          OPTOUT_VERSION: ${{ inputs.optout_image_version }}
-          E2E_VERSION: ${{ inputs.e2e_image_version }}
-          IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
-          OPERATOR_TYPE: ${{ inputs.operator_type }}
-          BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
-        run: |
-          bash uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
+      # - name: Bring up Docker Compose
+      #   id: docker-compose
+      #   env:
+      #     OPERATOR_ROOT: ${{ inputs.operator_root }}
+      #     CORE_ROOT: ${{ inputs.core_root }}
+      #     OPTOUT_ROOT: ${{ inputs.optout_root }}
+      #     ADMIN_ROOT: ${{ inputs.admin_root }}
+      #     OPERATOR_VERSION: ${{ inputs.operator_image_version }}
+      #     CORE_VERSION: ${{ inputs.core_image_version }}
+      #     OPTOUT_VERSION: ${{ inputs.optout_image_version }}
+      #     E2E_VERSION: ${{ inputs.e2e_image_version }}
+      #     IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
+      #     OPERATOR_TYPE: ${{ inputs.operator_type }}
+      #     BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
+      #     BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+      #     BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+      #   run: |
+      #     bash uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
       
       - name: Start GCP private operator
         id: start_gcp_private_operator
