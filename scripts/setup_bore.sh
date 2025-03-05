@@ -20,7 +20,7 @@ ROOT="."
 # BORE_URL_CORE=$(cat ${ROOT}/bore_core.out | grep at | cut -d ' ' -f7)
 # BORE_URL_OPTOUT=$(cat ${ROOT}/bore_optout.out | grep at | cut -d ' ' -f7)
 
-BORE_URL_LOCALSTACK=""
+BORE_URL_LOCALSTACK="NOT_REQUIRED"
 BORE_URL_CORE="core-secondary.integ.euid.eu"
 BORE_URL_OPTOUT="optout.integ.euid.eu"
 
