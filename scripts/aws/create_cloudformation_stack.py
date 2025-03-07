@@ -23,7 +23,7 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_c
         Capabilities=['CAPABILITY_IAM'],
         Parameters=[
             { 'ParameterKey': 'APIToken', 'ParameterValue': api_token },
-            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'prod' }, 
+            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': 'integ' }, 
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
@@ -70,7 +70,7 @@ optout_index = secrets.index('", "optout_base_url": "')
 secrets = secrets[:optout_index] + secrets[optout_index+2:]
 secrets = secrets[:1] + [f'"core_base_url": "https://{args.core_url}"',f', "optout_base_url":  "https://{args.optout_url}'] + secrets[1:]
 secrets.pop()
-secrets.extend([', "skip_validations": true', ', "debug_mode": false', '}'])
+secrets.extend([', "skip_validations": true', ', "debug_mode": true', '}'])
 cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1] = secrets
 
 print(dump_yaml(cft))
