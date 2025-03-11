@@ -23,9 +23,9 @@ ENCLAVE_FILE="${METADATA_ROOT}/enclaves/enclaves.json"
 
 # Fetch operator key
 if [ "${ENCLAVE_PROTOCOL}" == "aws-nitro" ]; then
-  OPERATOR_KEY=${E2E_UID2_INTEG_AWS_OPERATOR_API_KEY}
+  OPERATOR_KEY=${E2E_UID2_PROD_AWS_OPERATOR_API_KEY}
 elif [ "${ENCLAVE_PROTOCOL}" == "gcp-oidc" ]; then
-  OPERATOR_KEY=${E2E_UID2_INTEG_GCP_OPERATOR_API_KEY}
+  OPERATOR_KEY=${E2E_UID2_PROD_GCP_OPERATOR_API_KEY}
 else
   OPERATOR_KEY=$(jq -r '.[] | select(.protocol=="'${ENCLAVE_PROTOCOL}'") | .key' ${OPERATOR_FILE})
 fi
