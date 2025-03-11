@@ -211,8 +211,8 @@ jobs:
           admin_root: ${{ inputs.admin_root }}
           eks_pcr0: ${{ inputs.eks_pcr0 }}
 
-      - name: Prepare Azure metadata
-        id: prepare_azure_metadata
+      - name: Prepare AKS metadata
+        id: prepare_aks_metadata
         if: ${{ inputs.operator_type == 'aks' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@kcc-UID2-5092-aks-e2e
         with:
