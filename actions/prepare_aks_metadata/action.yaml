@@ -1,0 +1,56 @@
+name: Prepare AKS Metadata
+description: Prepares the AKS CC artifacts and enclave metadata
+
+inputs:
+  operator_image_version:
+    description: The uid2-operator image version
+    default: latest
+  admin_root:
+    description: The root path for uid2-admin folder
+    default: uid2-admin
+  operator_root:
+    description: The root path for uid2-operator folder
+    default: uid2-operator
+outputs:
+  output_template_file:
+    description: The output template file
+    value: ${{ steps.enclave_artifacts.outputs.OUTPUT_TEMPLATE_FILE }}
+  output_parameters_file:
+    description: The output parameters file
+    value: ${{ steps.enclave_artifacts.outputs.OUTPUT_PARAMETERS_FILE }}
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: check azure-cli version
+      shell: bash
+      run: |
+        az --version
+    
+    - name: Generate AKS enclave deployment artifacts
+      id: enclave_artifacts
+      shell: bash
+      env:
+        IMAGE_VERSION: ${{ inputs.operator_image_version }}
+        OPERATOR_ROOT: ${{ inputs.operator_root }}
+      run: |
+        bash uid2-shared-actions/scripts/aks/prepare_aks_artifacts.sh
+
+    - name: Prepare AKS enclave ID
+      id: enclave_id
+      shell: bash
+      env:
+        OUTPUT_POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
+      run: |
+        bash uid2-shared-actions/scripts/aks/prepare_aks_enclave_id.sh
+
+    - name: Prepare AKS enclave metadata
+      id: enclave_metadata
+      shell: bash
+      env:
+        ADMIN_ROOT: ${{ inputs.admin_root }}
+        ENCLAVE_ID: ${{ steps.enclave_id.outputs.ENCLAVE_ID }}
+        ENCLAVE_PROTOCOL: azure-cc
+      run: |
+        bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh

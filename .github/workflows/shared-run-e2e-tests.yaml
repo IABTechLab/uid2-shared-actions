@@ -54,7 +54,7 @@ on:
         default: main
 
       operator_type:
-        description: The operator type [public, gcp, azure, aws]
+        description: The operator type [public, gcp, azure, aws, aks]
         type: string
         default: public
       uid2_e2e_identity_scope:
@@ -153,7 +153,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: kcc-UID2-5092-aks-e2e
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -169,7 +169,7 @@ jobs:
 
       - name: Bring up bore
         id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks'}}
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks' || inputs.operator_type == 'aks'}}
         env:
           BORE_URL: ${{ secrets.BORE_URL }}
           BORE_SECRET: ${{ secrets.BORE_SECRET }}
@@ -210,6 +210,14 @@ jobs:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
           eks_pcr0: ${{ inputs.eks_pcr0 }}
+
+      - name: Prepare Azure metadata
+        id: prepare_azure_metadata
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@kcc-UID2-5092-aks-e2e
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
 
       - name: Bring up Docker Compose
         id: docker-compose
