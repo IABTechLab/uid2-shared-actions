@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
+# below resources should be prepared ahead
 export RESOURCE_GROUP="pipeline-vn-aks"
 export LOCATION="eastus"
 export VNET_NAME="pipeline-vnet"
