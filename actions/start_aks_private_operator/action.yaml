@@ -14,6 +14,9 @@ inputs:
   azure_credentials:
     description: The Azure credentials
     required: true
+  aks_operator_key:
+    description: The AKS operator key
+    required: true
 
 outputs:
   aks_container_group_name:
@@ -40,5 +43,6 @@ runs:
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
         OUTPUT_TEMPLATE_FILE: ${{ inputs.output_template_file }}
+        AKS_OPERATOR_KEY: ${{ inputs.aks_operator_key }}
       run: |
         bash uid2-shared-actions/scripts/aks/start_aks_enclave.sh

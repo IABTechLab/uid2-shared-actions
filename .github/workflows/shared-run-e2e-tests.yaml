@@ -298,6 +298,7 @@ jobs:
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
           output_template_file: ${{ steps.prepare_aks_metadata.outputs.output_template_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          aks_operator_key: ${{ secrets.AKS_OPERATOR_KEY }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var

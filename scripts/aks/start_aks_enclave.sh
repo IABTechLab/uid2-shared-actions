@@ -3,15 +3,15 @@ set -ex
 
 ROOT="uid2-shared-actions/scripts"
 
-export RESOURCE_GROUP="kat-vn-aks"
+export RESOURCE_GROUP="pipeline-vn-aks"
 export LOCATION="eastus"
-export VNET_NAME="kat-vnet"
-export PUBLIC_IP_ADDRESS_NAME="kat-public-ip"
-export NAT_GATEWAY_NAME="kat-nat-gateway"
-export AKS_CLUSTER_NAME="katvncluster"
-export KEYVAULT_NAME="kat-vn-aks-vault"
-export KEYVAULT_SECRET_NAME="kat-vn-aks-opr-key-name"
-export MANAGED_IDENTITY="kat-vn-aks-opr-id"
+export VNET_NAME="pipeline-vnet"
+export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
+export NAT_GATEWAY_NAME="pipeline-nat-gateway"
+export AKS_CLUSTER_NAME="pipelinevncluster"
+export KEYVAULT_NAME="pipeline-vn-aks-vault"
+export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
+export MANAGED_IDENTITY="pipeline-vn-aks-opr-id"
 export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
 export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 export DEPLOYMENT_ENV="integ"
@@ -123,10 +123,15 @@ kubectl get nodes
 # --- Finished setting up AKS Cluster ---
 
 # --- Create Key Vault & Managed Identity ---
+if [ -z "${AKS_OPERATOR_KEY}" ]; then
+  echo "AKS_OPERATOR_KEY can not be empty"
+  exit 1
+fi
+
 az identity create --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}"
 az keyvault create --name "${KEYVAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --enable-purge-protection --enable-rbac-authorization
 export KEYVAULT_RESOURCE_ID="$(az keyvault show --resource-group "${RESOURCE_GROUP}" --name "${KEYVAULT_NAME}" --query id --output tsv)"
-az keyvault secret set --vault-name "${KEYVAULT_NAME}" --name "${KEYVAULT_SECRET_NAME}" --value "<some value>"
+az keyvault secret set --vault-name "${KEYVAULT_NAME}" --name "${KEYVAULT_SECRET_NAME}" --value "${AKS_OPERATOR_KEY}"
 export IDENTITY_PRINCIPAL_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query principalId --output tsv)"
 az role assignment create --assignee-object-id "${IDENTITY_PRINCIPAL_ID}" --role "Key Vault Secrets User" --scope "${KEYVAULT_RESOURCE_ID}" --assignee-principal-type ServicePrincipal
 # --- Finished setting up Key Vault & Managed Identity ---
