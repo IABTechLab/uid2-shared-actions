@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="uid2-shared-actions/scripts"
-
 export RESOURCE_GROUP="pipeline-vn-aks"
 export LOCATION="eastus"
 export VNET_NAME="pipeline-vnet"
@@ -68,9 +66,9 @@ else
   sed -i "s#DEPLOYMENT_ENVIRONMENT_PLACEHOLDER#integ#g" "${OUTPUT_TEMPLATE_FILE}"
   cat ${OUTPUT_TEMPLATE_FILE}
 
-  python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE
-  python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator OPTOUT_BASE_URL http://$BORE_URL_OPTOUT
-  python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator SKIP_VALIDATIONS true
+  python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE
+  python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator OPTOUT_BASE_URL http://$BORE_URL_OPTOUT
+  python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator SKIP_VALIDATIONS true
   cat ${OUTPUT_TEMPLATE_FILE}
   # --- Finished updating yaml file with resources ---
   if [[ $? -ne 0 ]]; then
