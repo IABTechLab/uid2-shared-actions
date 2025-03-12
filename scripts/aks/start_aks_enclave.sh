@@ -19,16 +19,6 @@ export DEPLOYMENT_ENV="integ"
 
 source "${ROOT}/healthcheck.sh"
 
-if [ -z "${BORE_URL_CORE}" ]; then
-  echo "BORE_URL_CORE can not be empty"
-  exit 1
-fi
-
-if [ -z "${BORE_URL_OPTOUT}" ]; then
-  echo "BORE_URL_OPTOUT can not be empty"
-  exit 1
-fi
-
 if [[ ! -f ${OUTPUT_TEMPLATE_FILE} ]]; then
   echo "OUTPUT_TEMPLATE_FILE does not exist"
   exit 1

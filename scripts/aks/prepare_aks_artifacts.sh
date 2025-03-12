@@ -26,6 +26,16 @@ if [ -z "${OPERATOR_ROOT}" ]; then
   exit 1
 fi
 
+if [ -z "${BORE_URL_CORE}" ]; then
+  echo "BORE_URL_CORE can not be empty"
+  exit 1
+fi
+
+if [ -z "${BORE_URL_OPTOUT}" ]; then
+  echo "BORE_URL_OPTOUT can not be empty"
+  exit 1
+fi
+
 ROOT="uid2-shared-actions/scripts/aks"
 OUTPUT_DIR="${ROOT}/azure-aks-artifacts"
 

@@ -218,6 +218,8 @@ jobs:
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
 
       - name: Bring up Docker Compose
         id: docker-compose
@@ -294,8 +296,6 @@ jobs:
         if: ${{ inputs.operator_type == 'aks' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@kcc-UID2-5092-aks-e2e
         with:
-          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
           output_template_file: ${{ steps.prepare_aks_metadata.outputs.output_template_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 

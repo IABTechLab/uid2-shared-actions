@@ -11,6 +11,12 @@ inputs:
   operator_root:
     description: The root path for uid2-operator folder
     default: uid2-operator
+  bore_url_core:
+    description: The bore URL for core service
+    required: true
+  bore_url_optout:
+    description: The bore URL for optout service
+    required: true
 outputs:
   output_template_file:
     description: The output template file
@@ -34,6 +40,8 @@ runs:
       env:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
         OPERATOR_ROOT: ${{ inputs.operator_root }}
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
       run: |
         bash uid2-shared-actions/scripts/aks/prepare_aks_artifacts.sh
 

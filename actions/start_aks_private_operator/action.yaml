@@ -2,12 +2,6 @@ name: Start AKS Private Operator
 description: Spins up an AKS private operator
 
 inputs:
-  bore_url_core:
-    description: The bore URL for core service
-    required: true
-  bore_url_optout:
-    description: The bore URL for optout service
-    required: true
   output_template_file:
     description: The output template file
     required: true
@@ -37,8 +31,6 @@ runs:
       id: start_aks
       shell: bash
       env:
-        BORE_URL_CORE: ${{ inputs.bore_url_core }}
-        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
         OUTPUT_TEMPLATE_FILE: ${{ inputs.output_template_file }}
       run: |
         bash uid2-shared-actions/scripts/aks/start_aks_enclave.sh
