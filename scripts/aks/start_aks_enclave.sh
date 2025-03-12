@@ -160,11 +160,9 @@ export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/
 sed -i "s#IDENTITY_PLACEHOLDER#$MANAGED_IDENTITY_ID#g" "${OUTPUT_TEMPLATE_FILE}"
 cat ${OUTPUT_TEMPLATE_FILE}
 
-sudo apt-get update
-sudo apt-get install yq
-yq -iy '.spec.template.spec.containers[] | select(.name == "uid2-operator").env += [{"name": "CORE_BASE_URL", "value": "http://BORE_URL_CORE_PLACEHOLDER"}, {"name": "OPTOUT_BASE_URL", "value": "http://BORE_URL_OPTOUT_PLACEHOLDER"}, {"name": "SKIP_VALIDATIONS", "value": "true"}]' "${OUTPUT_TEMPLATE_FILE}"
-sed -i "s#BORE_URL_CORE_PLACEHOLDER#$BORE_URL_CORE#g" "${OUTPUT_TEMPLATE_FILE}"
-sed -i "s#BORE_URL_OPTOUT_PLACEHOLDER#$BORE_URL_OPTOUT#g" "${OUTPUT_TEMPLATE_FILE}"
+python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE
+python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator OPTOUT_BASE_URL http://$BORE_URL_OPTOUT
+python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator SKIP_VALIDATIONS true
 cat ${OUTPUT_TEMPLATE_FILE}
 # --- Finished updating yaml file with resources ---
 
