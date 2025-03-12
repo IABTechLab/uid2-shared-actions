@@ -34,7 +34,7 @@ if [ -z "${GITHUB_OUTPUT}" ]; then
 fi
 
 # Wait for the service to be ready
-kubectl wait --for=condition=Ready service/operator-svc --timeout=300s
+kubectl wait --for=condition=Ready deployment/operator-deployment --timeout=300s
 
 # Get public IP, need to trim quotes
 IP=$(az network public-ip list --resource-group ${AKS_NODE_RESOURCE_GROUP} --query "[?starts_with(name, 'kubernetes')].ipAddress" --output tsv)
