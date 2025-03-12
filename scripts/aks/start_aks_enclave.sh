@@ -156,6 +156,7 @@ fi
 
 # Replace virtualnode identity with the managed identity created above
 export MANAGED_IDENTITY_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query id --output tsv)"
+echo $MANAGED_IDENTITY_ID
 sed -i "s#IDENTITY_PLACEHOLDER#$MANAGED_IDENTITY_ID#g" "${OUTPUT_TEMPLATE_FILE}"
 cat ${OUTPUT_TEMPLATE_FILE}
 
