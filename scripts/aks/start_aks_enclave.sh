@@ -158,6 +158,9 @@ fi
 # export MANAGED_IDENTITY_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query id --output tsv)"
 export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/resourcegroups/pipeline-vn-aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pipeline-vn-aks-opr-id"
 sed -i "s#IDENTITY_PLACEHOLDER#$MANAGED_IDENTITY_ID#g" "${OUTPUT_TEMPLATE_FILE}"
+sed -i "s#VAULT_NAME_PLACEHOLDER#$KEYVAULT_NAME#g" "${OUTPUT_TEMPLATE_FILE}"
+sed -i "s#OPERATOR_KEY_SECRET_NAME_PLACEHOLDER#$KEYVAULT_SECRET_NAME#g" "${OUTPUT_TEMPLATE_FILE}"
+sed -i "s#DEPLOYMENT_ENVIRONMENT_PLACEHOLDER#$integ#g" "${OUTPUT_TEMPLATE_FILE}"
 cat ${OUTPUT_TEMPLATE_FILE}
 
 python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE
