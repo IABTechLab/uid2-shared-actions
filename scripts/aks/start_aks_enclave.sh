@@ -157,10 +157,11 @@ fi
 # Replace virtualnode identity with the managed identity created above
 export MANAGED_IDENTITY_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query id --output tsv)"
 sed -i "s#IDENTITY_PLACEHOLDER#$MANAGED_IDENTITY_ID#g" "${OUTPUT_TEMPLATE_FILE}"
+cat ${OUTPUT_TEMPLATE_FILE}
 
 sudo apt-get update
 sudo apt-get install yq
-yq -i '.spec.template.spec.containers[] | select(.name == "uid2-operator").env += [{"name": "CORE_BASE_URL", "value": "http://BORE_URL_CORE_PLACEHOLDER"}, {"name": "OPTOUT_BASE_URL", "value": "http://BORE_URL_OPTOUT_PLACEHOLDER"}, {"name": "SKIP_VALIDATIONS", "value": "true"}]' "${OUTPUT_TEMPLATE_FILE}"
+yq -iy '.spec.template.spec.containers[] | select(.name == "uid2-operator").env += [{"name": "CORE_BASE_URL", "value": "http://BORE_URL_CORE_PLACEHOLDER"}, {"name": "OPTOUT_BASE_URL", "value": "http://BORE_URL_OPTOUT_PLACEHOLDER"}, {"name": "SKIP_VALIDATIONS", "value": "true"}]' "${OUTPUT_TEMPLATE_FILE}"
 sed -i "s#BORE_URL_CORE_PLACEHOLDER#$BORE_URL_CORE#g" "${OUTPUT_TEMPLATE_FILE}"
 sed -i "s#BORE_URL_OPTOUT_PLACEHOLDER#$BORE_URL_OPTOUT#g" "${OUTPUT_TEMPLATE_FILE}"
 cat ${OUTPUT_TEMPLATE_FILE}
