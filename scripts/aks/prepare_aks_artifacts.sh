@@ -52,11 +52,12 @@ else
   fi
 
   # Generate policy using debug mode as we will need to override environment variables
-  az confcom acipolicygen --virtual-node-yaml ${OUTPUT_TEMPLATE_FILE} --debug-mode > ${OUTPUT_POLICY_DIGEST_FILE}
+  yes | az confcom acipolicygen --virtual-node-yaml ${OUTPUT_TEMPLATE_FILE} --debug-mode > ${OUTPUT_POLICY_DIGEST_FILE}
   if [[ $? -ne 0 ]]; then
     echo "Failed to generate template file"
     exit 1
   fi
+  sed -i 's/.*(y\/n) //g' "${OUTPUT_POLICY_DIGEST_FILE}"
 fi
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
