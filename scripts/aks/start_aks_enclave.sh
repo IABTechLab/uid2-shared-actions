@@ -16,125 +16,125 @@ export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCAT
 export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 export DEPLOYMENT_ENV="integ"
 
-# --- Setup AKS & Node Pool ---
-# Create Resource Group
-az group create --name "${RESOURCE_GROUP}" --location "${LOCATION}"
+# # --- Setup AKS & Node Pool ---
+# # Create Resource Group
+# az group create --name "${RESOURCE_GROUP}" --location "${LOCATION}"
 
-# Create Virtual Network
-az network vnet create \
-    --resource-group ${RESOURCE_GROUP} \
-    --name ${VNET_NAME} \
-    --location ${LOCATION} \
-    --address-prefixes 10.0.0.0/8
+# # Create Virtual Network
+# az network vnet create \
+#     --resource-group ${RESOURCE_GROUP} \
+#     --name ${VNET_NAME} \
+#     --location ${LOCATION} \
+#     --address-prefixes 10.0.0.0/8
 
-# Create Subnets
-# Default Subnet (10.0.0.0/24)
-az network vnet subnet create \
-    --resource-group ${RESOURCE_GROUP} \
-    --vnet-name ${VNET_NAME} \
-    --name default \
-    --address-prefixes 10.0.0.0/24
+# # Create Subnets
+# # Default Subnet (10.0.0.0/24)
+# az network vnet subnet create \
+#     --resource-group ${RESOURCE_GROUP} \
+#     --vnet-name ${VNET_NAME} \
+#     --name default \
+#     --address-prefixes 10.0.0.0/24
 
-# AKS Subnet (CIDR /16)
-az network vnet subnet create \
-    --resource-group ${RESOURCE_GROUP} \
-    --vnet-name ${VNET_NAME} \
-    --name aks \
-    --address-prefixes 10.1.0.0/16
+# # AKS Subnet (CIDR /16)
+# az network vnet subnet create \
+#     --resource-group ${RESOURCE_GROUP} \
+#     --vnet-name ${VNET_NAME} \
+#     --name aks \
+#     --address-prefixes 10.1.0.0/16
 
-# Container Groups Subnet (CIDR /16) with Delegation
-az network vnet subnet create \
-    --resource-group ${RESOURCE_GROUP} \
-    --vnet-name ${VNET_NAME} \
-    --name cg \
-    --address-prefixes 10.2.0.0/16 \
-    --delegations Microsoft.ContainerInstance/containerGroups
+# # Container Groups Subnet (CIDR /16) with Delegation
+# az network vnet subnet create \
+#     --resource-group ${RESOURCE_GROUP} \
+#     --vnet-name ${VNET_NAME} \
+#     --name cg \
+#     --address-prefixes 10.2.0.0/16 \
+#     --delegations Microsoft.ContainerInstance/containerGroups
 
-# Create Public IP Address
-az network public-ip create --name ${PUBLIC_IP_ADDRESS_NAME} --resource-group ${RESOURCE_GROUP} --sku standard --allocation static
+# # Create Public IP Address
+# az network public-ip create --name ${PUBLIC_IP_ADDRESS_NAME} --resource-group ${RESOURCE_GROUP} --sku standard --allocation static
 
-# Create NAT Gateway
-az network nat gateway create \
-    --resource-group ${RESOURCE_GROUP} \
-    --name ${NAT_GATEWAY_NAME} \
-    --public-ip-addresses ${PUBLIC_IP_ADDRESS_NAME} \
-    --idle-timeout 4
+# # Create NAT Gateway
+# az network nat gateway create \
+#     --resource-group ${RESOURCE_GROUP} \
+#     --name ${NAT_GATEWAY_NAME} \
+#     --public-ip-addresses ${PUBLIC_IP_ADDRESS_NAME} \
+#     --idle-timeout 4
 
-# Configure NAT service for source subnet
-az network vnet subnet update \
-    --resource-group ${RESOURCE_GROUP} \
-    --vnet-name ${VNET_NAME} \
-    --name cg \
-    --nat-gateway ${NAT_GATEWAY_NAME}
+# # Configure NAT service for source subnet
+# az network vnet subnet update \
+#     --resource-group ${RESOURCE_GROUP} \
+#     --vnet-name ${VNET_NAME} \
+#     --name cg \
+#     --nat-gateway ${NAT_GATEWAY_NAME}
 
-# Get the AKS Subnet ID
-export AKS_SUBNET_ID=$(az network vnet subnet show \
-    --resource-group ${RESOURCE_GROUP} \
-    --vnet-name ${VNET_NAME} \
-    --name aks \
-    --query id \
-    --output tsv)
+# # Get the AKS Subnet ID
+# export AKS_SUBNET_ID=$(az network vnet subnet show \
+#     --resource-group ${RESOURCE_GROUP} \
+#     --vnet-name ${VNET_NAME} \
+#     --name aks \
+#     --query id \
+#     --output tsv)
 
-# Create an AKS Service
-# Create the AKS cluster
-az aks create \
-    --resource-group ${RESOURCE_GROUP} \
-    --name ${AKS_CLUSTER_NAME} \
-    --location ${LOCATION} \
-    --kubernetes-version 1.29.13 \
-    --network-plugin azure \
-    --network-policy calico \
-    --vnet-subnet-id ${AKS_SUBNET_ID} \
-    --service-cidr 10.4.0.0/16 \
-    --dns-service-ip 10.4.0.10 \
-    --node-vm-size Standard_D4d_v5 \
-    --node-count 2 \
-    --enable-cluster-autoscaler \
-    --min-count 2 \
-    --max-count 5 \
-    --auto-upgrade-channel patch \
-    --enable-managed-identity \
-    --nodepool-name oprnodepool \
-    --os-sku Ubuntu
+# # Create an AKS Service
+# # Create the AKS cluster
+# az aks create \
+#     --resource-group ${RESOURCE_GROUP} \
+#     --name ${AKS_CLUSTER_NAME} \
+#     --location ${LOCATION} \
+#     --kubernetes-version 1.29.13 \
+#     --network-plugin azure \
+#     --network-policy calico \
+#     --vnet-subnet-id ${AKS_SUBNET_ID} \
+#     --service-cidr 10.4.0.0/16 \
+#     --dns-service-ip 10.4.0.10 \
+#     --node-vm-size Standard_D4d_v5 \
+#     --node-count 2 \
+#     --enable-cluster-autoscaler \
+#     --min-count 2 \
+#     --max-count 5 \
+#     --auto-upgrade-channel patch \
+#     --enable-managed-identity \
+#     --nodepool-name oprnodepool \
+#     --os-sku Ubuntu
 
-# Get Managed Identity Principle ID
-export MANAGED_IDENTITY_PRINCIPAL_ID="$(az aks show --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER_NAME} --query "identityProfile.kubeletidentity.clientId" --output tsv)"
+# # Get Managed Identity Principle ID
+# export MANAGED_IDENTITY_PRINCIPAL_ID="$(az aks show --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER_NAME} --query "identityProfile.kubeletidentity.clientId" --output tsv)"
 
-# Create contributor role for the two resource groups
-az role assignment create \
-  --assignee ${MANAGED_IDENTITY_PRINCIPAL_ID} \
-  --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${AKS_NODE_RESOURCE_GROUP} \
-  --role Contributor
+# # Create contributor role for the two resource groups
+# az role assignment create \
+#   --assignee ${MANAGED_IDENTITY_PRINCIPAL_ID} \
+#   --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${AKS_NODE_RESOURCE_GROUP} \
+#   --role Contributor
 
-az role assignment create \
-  --assignee ${MANAGED_IDENTITY_PRINCIPAL_ID} \
-  --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP} \
-  --role Contributor
-# --- Finished setting up AKS & Node Pool ---
+# az role assignment create \
+#   --assignee ${MANAGED_IDENTITY_PRINCIPAL_ID} \
+#   --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP} \
+#   --role Contributor
+# # --- Finished setting up AKS & Node Pool ---
 
-# --- Setup AKS Cluster ---
-az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
-az provider register -n Microsoft.ContainerInstance
-git clone git@github.com:microsoft/virtualnodesOnAzureContainerInstances.git
-helm install virtualnode virtualnodesOnAzureContainerInstances/Helm/virtualnode
-# Wait for ~1 minute for virtualnode-0 to appear.
-sleep 60
-kubectl get nodes
-# --- Finished setting up AKS Cluster ---
+# # --- Setup AKS Cluster ---
+# az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
+# az provider register -n Microsoft.ContainerInstance
+# git clone git@github.com:microsoft/virtualnodesOnAzureContainerInstances.git
+# helm install virtualnode virtualnodesOnAzureContainerInstances/Helm/virtualnode
+# # Wait for ~1 minute for virtualnode-0 to appear.
+# sleep 60
+# kubectl get nodes
+# # --- Finished setting up AKS Cluster ---
 
-# --- Create Key Vault & Managed Identity ---
-if [ -z "${AKS_OPERATOR_KEY}" ]; then
-  echo "AKS_OPERATOR_KEY can not be empty"
-  exit 1
-fi
+# # --- Create Key Vault & Managed Identity ---
+# if [ -z "${AKS_OPERATOR_KEY}" ]; then
+#   echo "AKS_OPERATOR_KEY can not be empty"
+#   exit 1
+# fi
 
-az identity create --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}"
-az keyvault create --name "${KEYVAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --enable-purge-protection --enable-rbac-authorization
-export KEYVAULT_RESOURCE_ID="$(az keyvault show --resource-group "${RESOURCE_GROUP}" --name "${KEYVAULT_NAME}" --query id --output tsv)"
-az keyvault secret set --vault-name "${KEYVAULT_NAME}" --name "${KEYVAULT_SECRET_NAME}" --value "${AKS_OPERATOR_KEY}"
-export IDENTITY_PRINCIPAL_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query principalId --output tsv)"
-az role assignment create --assignee-object-id "${IDENTITY_PRINCIPAL_ID}" --role "Key Vault Secrets User" --scope "${KEYVAULT_RESOURCE_ID}" --assignee-principal-type ServicePrincipal
-# --- Finished setting up Key Vault & Managed Identity ---
+# az identity create --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}"
+# az keyvault create --name "${KEYVAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --enable-purge-protection --enable-rbac-authorization
+# export KEYVAULT_RESOURCE_ID="$(az keyvault show --resource-group "${RESOURCE_GROUP}" --name "${KEYVAULT_NAME}" --query id --output tsv)"
+# az keyvault secret set --vault-name "${KEYVAULT_NAME}" --name "${KEYVAULT_SECRET_NAME}" --value "${AKS_OPERATOR_KEY}"
+# export IDENTITY_PRINCIPAL_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query principalId --output tsv)"
+# az role assignment create --assignee-object-id "${IDENTITY_PRINCIPAL_ID}" --role "Key Vault Secrets User" --scope "${KEYVAULT_RESOURCE_ID}" --assignee-principal-type ServicePrincipal
+# # --- Finished setting up Key Vault & Managed Identity ---
 
 # --- Update yaml file with resources ---
 source "${ROOT}/healthcheck.sh"
