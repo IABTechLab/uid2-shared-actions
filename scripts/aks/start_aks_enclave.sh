@@ -155,8 +155,8 @@ if [[ ! -f ${OUTPUT_TEMPLATE_FILE} ]]; then
 fi
 
 # Replace virtualnode identity with the managed identity created above
-export MANAGED_IDENTITY_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query id --output tsv)"
-echo $MANAGED_IDENTITY_ID
+# export MANAGED_IDENTITY_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query id --output tsv)"
+export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/resourcegroups/pipeline-vn-aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pipeline-vn-aks-opr-id"
 sed -i "s#IDENTITY_PLACEHOLDER#$MANAGED_IDENTITY_ID#g" "${OUTPUT_TEMPLATE_FILE}"
 cat ${OUTPUT_TEMPLATE_FILE}
 
