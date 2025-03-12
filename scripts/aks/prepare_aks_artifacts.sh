@@ -1,6 +1,22 @@
 #!/usr/bin/env bash
 set -ex
 
+ROOT="uid2-shared-actions/scripts"
+
+export RESOURCE_GROUP="pipeline-vn-aks"
+export LOCATION="eastus"
+export VNET_NAME="pipeline-vnet"
+export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
+export NAT_GATEWAY_NAME="pipeline-nat-gateway"
+export AKS_CLUSTER_NAME="pipelinevncluster"
+export KEYVAULT_NAME="pipeline-vn-aks-vault"
+export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
+export MANAGED_IDENTITY="pipeline-vn-aks-opr-id"
+export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
+export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
+export DEPLOYMENT_ENV="integ"
+export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/resourcegroups/pipeline-vn-aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pipeline-vn-aks-opr-id"
+
 if [ -z "${IMAGE_VERSION}" ]; then
   echo "IMAGE_VERSION can not be empty"
   exit 1
@@ -46,6 +62,17 @@ else
   # Generate deployment template
   cp ${INPUT_TEMPLATE_FILE} ${OUTPUT_TEMPLATE_FILE}
   sed -i "s#IMAGE_PLACEHOLDER#${IMAGE}#g" ${OUTPUT_TEMPLATE_FILE}
+  sed -i "s#IDENTITY_PLACEHOLDER#$MANAGED_IDENTITY_ID#g" "${OUTPUT_TEMPLATE_FILE}"
+  sed -i "s#VAULT_NAME_PLACEHOLDER#$KEYVAULT_NAME#g" "${OUTPUT_TEMPLATE_FILE}"
+  sed -i "s#OPERATOR_KEY_SECRET_NAME_PLACEHOLDER#$KEYVAULT_SECRET_NAME#g" "${OUTPUT_TEMPLATE_FILE}"
+  sed -i "s#DEPLOYMENT_ENVIRONMENT_PLACEHOLDER#integ#g" "${OUTPUT_TEMPLATE_FILE}"
+  cat ${OUTPUT_TEMPLATE_FILE}
+
+  python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE
+  python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator OPTOUT_BASE_URL http://$BORE_URL_OPTOUT
+  python3 ${ROOT}/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator SKIP_VALIDATIONS true
+  cat ${OUTPUT_TEMPLATE_FILE}
+  # --- Finished updating yaml file with resources ---
   if [[ $? -ne 0 ]]; then
     echo "Failed to pre-process template file"
     exit 1
