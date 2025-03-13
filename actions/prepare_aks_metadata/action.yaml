@@ -21,9 +21,6 @@ outputs:
   output_template_file:
     description: The output template file
     value: ${{ steps.enclave_artifacts.outputs.OUTPUT_TEMPLATE_FILE }}
-  output_parameters_file:
-    description: The output parameters file
-    value: ${{ steps.enclave_artifacts.outputs.OUTPUT_PARAMETERS_FILE }}
 
 runs:
   using: "composite"
