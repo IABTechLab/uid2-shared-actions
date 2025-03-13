@@ -35,9 +35,9 @@ def add_env_variables(yaml_file, container_name, env_vars):
             print(f"Container '{container_name}' not found in any Deployment document.")
 
     except FileNotFoundError:
-        print(f"Error: File '{yaml_file}' not found.")
+        raise FileNotFoundError(f"Error: File '{yaml_file}' not found.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        raise RuntimeError(f"An error occurred: {e}") from e #Reraise with context.
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Add multiple environment variables to a Kubernetes YAML file.")
