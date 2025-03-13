@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -ex
 
-# below resources should be prepared ahead
+# Below resources should be prepared ahead of running the E2E test.
+# See https://github.com/UnifiedID2/aks-demo/tree/master/vn-aks#setup-aks--node-pool
 export RESOURCE_GROUP="pipeline-vn-aks"
 export LOCATION="eastus"
 export VNET_NAME="pipeline-vnet"
