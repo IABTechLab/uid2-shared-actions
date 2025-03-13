@@ -45,7 +45,7 @@ if [ -d "${OUTPUT_DIR}" ]; then
   echo "${OUTPUT_DIR} exists"
 fi
 
-INPUT_TEMPLATE_FILE="${OPERATOR_ROOT}/scripts/azure-vn/deployment/operator.yaml"
+INPUT_TEMPLATE_FILE="${OPERATOR_ROOT}/scripts/azure-aks/deployment/operator.yaml"
 OUTPUT_TEMPLATE_FILE="${OUTPUT_DIR}/operator.yaml"
 OUTPUT_POLICY_DIGEST_FILE="${OUTPUT_DIR}/aks-digest.txt"
 
