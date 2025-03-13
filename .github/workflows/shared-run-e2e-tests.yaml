@@ -331,28 +331,34 @@ jobs:
           uid2_e2e_pipeline_optout_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_optout_url }}
 
       - name: Stop GCP private operator
-        if: ${{ inputs.operator_type == 'gcp' }}
+        if: always()
         env:
           GCP_PROJECT: ${{ inputs.gcp_project }}
           SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
-          bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+          if [[ ${{ inputs.operator_type }} == 'gcp' ]]; then
+            bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+          fi
 
       - name: Stop Azure private operator
-        if: ${{ inputs.operator_type == 'azure' }}
+        if: always()
         env:
           AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
-          bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+          if [[ ${{ inputs.operator_type }} == 'azure' ]]; then
+            bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+          fi
 
       - name: Stop AWS private operator
-        if: ${{ inputs.operator_type == 'aws' }}
+        if: always()
         env:
           AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
-          bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+          if [[ ${{ inputs.operator_type }} == 'aws' ]]; then
+            bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+          fi
 
       - name: Stop EKS operator
         if: ${{ inputs.operator_type == 'eks' }}
