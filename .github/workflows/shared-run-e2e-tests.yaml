@@ -153,7 +153,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: kcc-UID2-5092-aks-e2e
+          ref: v3
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -214,7 +214,7 @@ jobs:
       - name: Prepare AKS metadata
         id: prepare_aks_metadata
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@kcc-UID2-5092-aks-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@v3
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -294,7 +294,7 @@ jobs:
       - name: Start AKS private operator
         id: start_aks_private_operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@kcc-UID2-5092-aks-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@v3
         with:
           output_template_file: ${{ steps.prepare_aks_metadata.outputs.output_template_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
