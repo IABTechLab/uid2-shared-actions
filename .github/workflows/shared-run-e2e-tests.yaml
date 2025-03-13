@@ -361,3 +361,8 @@ jobs:
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+
+      - name: Stop AKS operator
+        if: always()
+        run: |
+          bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
