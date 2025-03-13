@@ -39,6 +39,9 @@ else
     elif [ "${OPERATOR_TYPE}" == "eks" ]; then
         echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
         echo "uid2_e2e_pipeline_operator_url=${EKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
+    elif [ "${OPERATOR_TYPE}" == "aks" ]; then
+        echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> ${GITHUB_OUTPUT}
+        echo "uid2_e2e_pipeline_operator_url=${AKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
     fi
     echo "uid2_e2e_pipeline_core_url=http://${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}
     echo "uid2_e2e_pipeline_optout_url=http://${BORE_URL_OPTOUT}" >> ${GITHUB_OUTPUT}

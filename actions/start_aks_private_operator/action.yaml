@@ -1,0 +1,33 @@
+name: Start AKS Private Operator
+description: Spins up an AKS private operator
+
+inputs:
+  output_template_file:
+    description: The output template file
+    required: true
+  azure_credentials:
+    description: The Azure credentials
+    required: true
+
+outputs:
+  uid2_e2e_pipeline_operator_url:
+    description: The AKS operator URL
+    value: ${{ steps.start_aks.outputs.uid2_e2e_pipeline_operator_url }}
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v2
+      with:
+        creds: ${{ inputs.azure_credentials }}
+        enable-AzPSSession: true
+
+    - name: Start AKS private operator
+      id: start_aks
+      shell: bash
+      env:
+        OUTPUT_TEMPLATE_FILE: ${{ inputs.output_template_file }}
+      run: |
+        bash uid2-shared-actions/scripts/aks/start_aks_enclave.sh
