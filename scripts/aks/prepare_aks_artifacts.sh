@@ -92,6 +92,7 @@ else
     echo "Failed to generate template file"
     exit 1
   fi
+  # The previous pipe will be stored in ${OUTPUT_POLICY_DIGEST_FILE} as well. The below command is to remove the prompt and only extract the enclave id.
   sed -i 's/.*(y\/n) //g' "${OUTPUT_POLICY_DIGEST_FILE}"
 fi
 
