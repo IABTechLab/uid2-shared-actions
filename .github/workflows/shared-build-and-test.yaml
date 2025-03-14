@@ -20,6 +20,10 @@ on:
         description: The path to the pom.xml file.
         type: string
         default: '.'
+      skip_tests:
+        description: If true, will skip tests when building and running unit tests. Defaults to false. Set to true for test-only repos.
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -44,10 +48,16 @@ jobs:
           java-version: ${{ inputs.java_version }}
 
       - name: Build and run unit tests
-        if: ${{ inputs.vulnerability_scan_only == 'false' }}
+        if: ${{ inputs.vulnerability_scan_only == 'false' && inputs.skip_tests == 'false' }}
         working-directory: ${{ inputs.working_dir }}
         run: |
           bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
+
+      - name: Build without unit tests
+        if: ${{ inputs.vulnerability_scan_only == 'false'  && inputs.skip_tests == 'true' }}
+        working-directory: ${{ inputs.working_dir }}
+        run: |
+          mvn -B clean compile -DskipTests
 
       - name: Generate code coverage
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
