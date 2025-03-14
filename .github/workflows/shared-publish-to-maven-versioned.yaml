@@ -26,7 +26,7 @@ on:
         type: string
         default: 'CRITICAL,HIGH'
       skip_tests:
-        description: If true, will skip tests when compiling. Defaults to false. Set to true for test-only repos.
+        description: If true, will skip tests when compiling. Defaults to false. Set to true for repos without tests.
         type: boolean
         default: false
  
