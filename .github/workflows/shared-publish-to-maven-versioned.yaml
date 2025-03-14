@@ -25,6 +25,10 @@ on:
         description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
         type: string
         default: 'CRITICAL,HIGH'
+      skip_tests:
+        description: If true, will skip tests when compiling. Defaults to false. Set to true for test-only repos.
+        type: boolean
+        default: false
  
 env:
   IS_RELEASE: ${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name ) }}
@@ -119,12 +123,18 @@ jobs:
           mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
 
       - name: Compile
-        if: ${{ inputs.publish_to_maven != true }}
+        if: ${{ inputs.publish_to_maven != true && inputs.skip_tests == false }}
         env:
           EXTRA_FLAGS: "-s settings.xml -Dgpg.passphrase=\"${{ secrets.GPG_PASSPHRASE }}\""
         run: | 
           cd ./${{ inputs.working_dir }}
           bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh -s settings.xml -D gpg.passphrase="${{ secrets.GPG_PASSPHRASE }}"
+
+      - name: Compile with no tests
+        if: ${{ inputs.publish_to_maven != true && inputs.skip_tests == true }}
+        run: |
+          cd ./${{ inputs.working_dir }}
+          mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile -DskipTests
 
       - name: Commit pom.xml and version.json
         if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 
