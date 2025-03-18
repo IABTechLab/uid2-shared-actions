@@ -10,7 +10,7 @@ ROOT="."
 OPERATOR_ROOT="${ROOT}/uid2-operator"
 SHARED_ACTIONS_ROOT="${ROOT}/uid2-shared-actions"
 
-source "${SHARED_ACTIONS_ROOT}/healthcheck.sh"
+source "${SHARED_ACTIONS_ROOT}/scripts/healthcheck.sh"
 
 cat "${OPERATOR_ROOT}/scripts/aws/eks/deployment_files/test-deployment.yaml"
 
