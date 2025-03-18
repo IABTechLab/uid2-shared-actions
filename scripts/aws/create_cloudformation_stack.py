@@ -87,4 +87,5 @@ create_cloudformation_stack(
     cft_content=dump_yaml(cft),
     api_token=args.operator_key,
     dc_cfg=dc_cfg, 
-    ip_address=ip)
+    ip_address=ip,
+    env=args.env)
