@@ -40,6 +40,6 @@ runs:
       env:
           IDENTITY_SCOPE: ${{ inputs.identity_scope }}
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
-          ENCLAVE_PROTOCOL: eks
+          ENCLAVE_PROTOCOL: aws-nitro
       run: |
         bash uid2-shared-actions/scripts/get_operator_key.sh
