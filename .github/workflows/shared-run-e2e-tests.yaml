@@ -2,23 +2,6 @@ name: Run Operator E2E Tests
 on:
   workflow_call:
     inputs:
-      operator_root:
-        description: The root path for uid2-operator folder
-        type: string
-        default: uid2-operator
-      core_root:
-        description: The root path for uid2-core folder
-        type: string
-        default: uid2-core
-      optout_root:
-        description: The root path for uid2-optout folder
-        type: string
-        default: uid2-optout
-      admin_root:
-        description: The root path for uid2-admin folder
-        type: string
-        default: uid2-admin
-
       operator_image_version:
         description: 'Image: Operator image version'
         type: string
@@ -40,15 +23,15 @@ on:
         description: 'Config: Operator branch for config'
         type: string
         default: main
-      branch_core:
+      core_branch:
         description: 'Config: Core branch for config'
         type: string
         default: main
-      branch_optout:
+      optout_branch:
         description: 'Config: Optout branch for config'
         type: string
         default: main
-      branch_admin:
+      admin_branch:
         description: 'Config: Admin branch for config'
         type: string
         default: main
@@ -57,12 +40,12 @@ on:
         description: The operator type [public, gcp, azure, aws]
         type: string
         default: public
-      uid2_e2e_identity_scope:
+      identity_scope:
         description: Environment variable to run the E2E test for identity scope [UID2, EUID]
         required: false
         type: string
         default: UID2
-      uid2_e2e_phone_support:
+      phone_support:
         description: Environment variable to run the E2E test for phone support [true, false]
         required: false
         type: string
@@ -141,28 +124,28 @@ jobs:
       - name: Checkout uid2-core repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch_core }}
+          ref: ${{ inputs.core_branch }}
           repository: IABTechLab/uid2-core
           path: uid2-core
 
       - name: Checkout uid2-optout repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch_optout }}
+          ref: ${{ inputs.optout_branch }}
           repository: IABTechLab/uid2-optout
           path: uid2-optout
 
       - name: Checkout uid2-admin repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch_admin }}
+          ref: ${{ inputs.admin_branch }}
           repository: IABTechLab/uid2-admin
           path: uid2-admin
 
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: gdm-UID2-4506-core-v2-e2e
+          ref: gdm-UID2-5050-e2e
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -178,7 +161,7 @@ jobs:
 
       - name: Bring up bore
         id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks'}}
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks' }}
         env:
           BORE_URL: ${{ secrets.BORE_URL }}
           BORE_SECRET: ${{ secrets.BORE_SECRET }}
@@ -188,64 +171,56 @@ jobs:
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@gdm-UID2-4506-core-v2-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@gdm-UID2-5050-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
-          admin_root: ${{ inputs.admin_root }}
           gcp_service_account: ${{ inputs.gcp_service_account }}
           gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
 
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@gdm-UID2-4506-core-v2-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@gdm-UID2-5050-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
-          admin_root: ${{ inputs.admin_root }}
 
       - name: Prepare AWS metadata
         id: prepare_aws_metadata
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-4506-core-v2-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-5050-e2e
         with:
-          admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
       - name: Prepare EKS metadata
         id: prepare_eks_metadata
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@gdm-UID2-4506-core-v2-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@gdm-UID2-5050-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
-          admin_root: ${{ inputs.admin_root }}
           eks_pcr0: ${{ inputs.eks_pcr0 }}
 
       # - name: Bring up Docker Compose
       #   id: docker-compose
       #   env:
-      #     OPERATOR_ROOT: ${{ inputs.operator_root }}
-      #     CORE_ROOT: ${{ inputs.core_root }}
-      #     OPTOUT_ROOT: ${{ inputs.optout_root }}
-      #     ADMIN_ROOT: ${{ inputs.admin_root }}
       #     OPERATOR_VERSION: ${{ inputs.operator_image_version }}
       #     CORE_VERSION: ${{ inputs.core_image_version }}
       #     OPTOUT_VERSION: ${{ inputs.optout_image_version }}
       #     E2E_VERSION: ${{ inputs.e2e_image_version }}
-      #     IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
+      #     IDENTITY_SCOPE: ${{ inputs.identity_scope }}
       #     OPERATOR_TYPE: ${{ inputs.operator_type }}
-      #     BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
-      #     BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-      #     BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+      #     BORE_URL_CORE: ${{ steps.bore.outputs.bore_url_core }}
+      #     BORE_URL_OPTOUT: ${{ steps.bore.outputs.bore_url_optout }}
+      #     BORE_URL_LOCALSTACK: ${{ steps.bore.outputs.bore_url_localstack }}
       #   run: |
       #     bash uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
-      
+
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@gdm-UID2-4506-core-v2-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@gdm-UID2-5050-e2e
         with:
-          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
+          bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
           gcp_project: ${{ inputs.gcp_project }}
           gcp_service_account: ${{ inputs.gcp_service_account }}
           image_hash: ${{ steps.prepare_gcp_metadata.outputs.image_hash }}
@@ -254,38 +229,37 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@gdm-UID2-4506-core-v2-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@gdm-UID2-5050-e2e
         with:
-          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          output_template_file: ${{ steps.prepare_azure_metadata.outputs.output_template_file }}
-          output_parameters_file: ${{ steps.prepare_azure_metadata.outputs.output_parameters_file }}
+          bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
+          bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
+          template_file: ${{ steps.prepare_azure_metadata.outputs.template_file }}
+          parameters_file: ${{ steps.prepare_azure_metadata.outputs.parameters_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-4506-core-v2-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-5050-e2e
         with:
-          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
+          bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
+          bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
+          bore_url_localstack: ${{ steps.bore.outputs.bore_url_localstack }}
           aws_region: ${{ inputs.aws_region }}
           aws_ami: ${{ inputs.aws_ami }}
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          identity_scope: ${{ inputs.identity_scope }}
           operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
 
       - name: Start EKS operator
         id: start_EKS_operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@gdm-UID2-4506-core-v2-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@gdm-UID2-5050-e2e
         with:
-          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
-          bore_url_localstack: ${{ steps.bore.outputs.BORE_URL_LOCALSTACK }}
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
+          bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
+          bore_url_localstack: ${{ steps.bore.outputs.bore_url_localstack }}
+          identity_scope: ${{ inputs.identity_scope }}
           operator_image_version: ${{ inputs.operator_image_version }}
-          operator_root: ${{ inputs.operator_root }}
           operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
@@ -296,9 +270,9 @@ jobs:
         env:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
           OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
-          BORE_URL_CORE: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          BORE_URL_OPTOUT: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          IDENTITY_SCOPE: ${{ inputs.identity_scope }}
+          BORE_URL_CORE: ${{ steps.bore.outputs.bore_url_core }}
+          BORE_URL_OPTOUT: ${{ steps.bore.outputs.bore_url_optout }}
           GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}

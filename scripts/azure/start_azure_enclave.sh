@@ -2,11 +2,12 @@
 set -ex
 
 ROOT="uid2-shared-actions/scripts"
-# below resources should be prepared ahead
-RESOURCE_GROUP=uid-enclave-ci-cd
-IDENTITY=uid-operator
-VAULT_NAME=uid-operator
-OPERATOR_KEY_NAME=operator-key-ci
+
+# Below resources should be prepared ahead
+RESOURCE_GROUP="uid-enclave-ci-cd"
+IDENTITY="uid-operator"
+VAULT_NAME="uid-operator"
+OPERATOR_KEY_NAME="operator-key-ci"
 
 LOCATION="East US"
 DEPLOYMENT_ENV="integ"
@@ -41,33 +42,33 @@ if [ -z "${BORE_URL_OPTOUT}" ]; then
   exit 1
 fi
 
-if [[ ! -f ${OUTPUT_TEMPLATE_FILE} ]]; then
-  echo "OUTPUT_TEMPLATE_FILE does not exist"
+if [[ ! -f ${TEMPLATE_FILE} ]]; then
+  echo "TEMPLATE_FILE does not exist"
   exit 1
 fi
 
-if [[ ! -f ${OUTPUT_PARAMETERS_FILE} ]]; then
-  echo "OUTPUT_PARAMETERS_FILE does not exist"
+if [[ ! -f ${PARAMETERS_FILE} ]]; then
+  echo "PARAMETERS_FILE does not exist"
   exit 1
 fi
 
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.containerGroupName.value "${AZURE_CONTAINER_GROUP_NAME}"
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.location.value "${LOCATION}"
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.identity.value "${IDENTITY}"
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.vaultName.value "${VAULT_NAME}"
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.operatorKeySecretName.value "${OPERATOR_KEY_NAME}"
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.skipValidations.value "true"
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.deploymentEnvironment.value "${DEPLOYMENT_ENV}"
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.coreBaseUrl.value "http://${BORE_URL_CORE}"
-jq_string_update ${OUTPUT_PARAMETERS_FILE} parameters.optoutBaseUrl.value "http://${BORE_URL_OPTOUT}"
+jq_string_update ${PARAMETERS_FILE} parameters.containerGroupName.value "${AZURE_CONTAINER_GROUP_NAME}"
+jq_string_update ${PARAMETERS_FILE} parameters.location.value "${LOCATION}"
+jq_string_update ${PARAMETERS_FILE} parameters.identity.value "${IDENTITY}"
+jq_string_update ${PARAMETERS_FILE} parameters.vaultName.value "${VAULT_NAME}"
+jq_string_update ${PARAMETERS_FILE} parameters.operatorKeySecretName.value "${OPERATOR_KEY_NAME}"
+jq_string_update ${PARAMETERS_FILE} parameters.skipValidations.value "true"
+jq_string_update ${PARAMETERS_FILE} parameters.deploymentEnvironment.value "${DEPLOYMENT_ENV}"
+jq_string_update ${PARAMETERS_FILE} parameters.coreBaseUrl.value "http://${BORE_URL_CORE}"
+jq_string_update ${PARAMETERS_FILE} parameters.optoutBaseUrl.value "http://${BORE_URL_OPTOUT}"
 
-cat ${OUTPUT_PARAMETERS_FILE}
+cat ${PARAMETERS_FILE}
 
 az deployment group create \
     -g ${RESOURCE_GROUP} \
     -n ${DEPLOYMENT_NAME} \
-    --template-file "${OUTPUT_TEMPLATE_FILE}"  \
-    --parameters "${OUTPUT_PARAMETERS_FILE}"
+    --template-file "${TEMPLATE_FILE}"  \
+    --parameters "${PARAMETERS_FILE}"
 
 # Export to GitHub output
 echo "AZURE_CONTAINER_GROUP_NAME=${AZURE_CONTAINER_GROUP_NAME}"

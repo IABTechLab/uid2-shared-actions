@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ex
 
-RESOURCE_GROUP=uid-enclave-ci-cd
+RESOURCE_GROUP="uid-enclave-ci-cd"
 
 if [ -z "${AZURE_CONTAINER_GROUP_NAME}" ]; then
   echo "AZURE_CONTAINER_GROUP_NAME can not be empty"

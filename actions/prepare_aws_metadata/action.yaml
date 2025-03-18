@@ -2,9 +2,6 @@ name: Prepare AWS Metadata
 description: Prepares the AWS Nitro enclave metadata
 
 inputs:
-  admin_root:
-    description: The root path for uid2-admin folder
-    default: uid2-admin
   aws_pcr0:
     description: The AWS PCR0
     required: true
@@ -12,7 +9,7 @@ inputs:
 outputs:
   operator_key:
     description: The operator key
-    value: ${{ steps.enclave_metadata.outputs.OPERATOR_KEY }}
+    value: ${{ steps.enclave_metadata.outputs.operator_key }}
 
 runs:
   using: "composite"
@@ -22,7 +19,6 @@ runs:
       id: enclave_metadata
       shell: bash
       env:
-        ADMIN_ROOT: ${{ inputs.admin_root }}
         ENCLAVE_ID: ${{ inputs.aws_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |

@@ -8,11 +8,11 @@ inputs:
   bore_url_optout:
     description: The bore URL for optout service
     required: true
-  output_template_file:
-    description: The output template file
+  template_file:
+    description: The template file
     required: true
-  output_parameters_file:
-    description: The output parameters file
+  parameters_file:
+    description: The parameters file
     required: true
   azure_credentials:
     description: The Azure credentials
@@ -21,7 +21,7 @@ inputs:
 outputs:
   azure_container_group_name:
     description: The Azure instance name
-    value: ${{ steps.start_azure.outputs.AZURE_CONTAINER_GROUP_NAME }}
+    value: ${{ steps.start_azure.outputs.azure_container_group_name }}
   uid2_e2e_pipeline_operator_url:
     description: The Azure operator URL
     value: ${{ steps.start_azure.outputs.uid2_e2e_pipeline_operator_url }}
@@ -42,7 +42,7 @@ runs:
       env:
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
-        OUTPUT_TEMPLATE_FILE: ${{ inputs.output_template_file }}
-        OUTPUT_PARAMETERS_FILE: ${{ inputs.output_parameters_file }}
+        TEMPLATE_FILE: ${{ inputs.template_file }}
+        PARAMETERS_FILE: ${{ inputs.parameters_file }}
       run: |
         bash uid2-shared-actions/scripts/azure/start_azure_enclave.sh

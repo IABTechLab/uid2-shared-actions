@@ -1,13 +1,10 @@
-name: Prepare AWS Metadata
-description: Prepares the AWS Nitro enclave metadata
+name: Prepare EKS Metadata
+description: Prepares the EKS Nitro enclave metadata
 
 inputs:
   operator_image_version:
     description: The uid2-operator image version
     default: latest
-  admin_root:
-    description: The root path for uid2-admin folder
-    default: uid2-admin
   eks_pcr0:
     description: The EKS PCR0
     required: true
@@ -25,7 +22,6 @@ runs:
       id: enclave_metadata
       shell: bash
       env:
-        ADMIN_ROOT: ${{ inputs.admin_root }}
         ENCLAVE_ID: ${{ inputs.eks_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |

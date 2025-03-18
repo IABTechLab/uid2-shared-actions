@@ -1,22 +1,8 @@
 #!/usr/bin/env bash
 set -ex
 
-if [ -z "${ADMIN_ROOT}" ]; then
-  echo "ADMIN_ROOT can not be empty"
-  exit 1
-fi
-
-if [ -z "${ENCLAVE_ID}" ]; then
-  echo "ENCLAVE_ID can not be empty"
-  exit 1
-fi
-
-if [ -z "${ENCLAVE_PROTOCOL}" ]; then
-  echo "ENCLAVE_PROTOCOL can not be empty"
-  exit 1
-fi
-
 ROOT="."
+ADMIN_ROOT="${ROOT}/uid2-admin"
 METADATA_ROOT="${ADMIN_ROOT}/src/main/resources/localstack/s3/core"
 OPERATOR_FILE="${METADATA_ROOT}/operators/operators.json"
 ENCLAVE_FILE="${METADATA_ROOT}/enclaves/enclaves.json"
