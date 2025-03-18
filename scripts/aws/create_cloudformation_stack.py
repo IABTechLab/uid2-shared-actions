@@ -74,7 +74,7 @@ if args.env == "mock":
 else:
     secrets = secrets[:1] + [f'"core_base_url": "https://{args.core_url}"',f', "optout_base_url":  "https://{args.optout_url}'] + secrets[1:]
 secrets.pop()
-secrets.extend([', "skip_validations": true', f', "debug_mode": {args.env != "prod"}', '}'])
+secrets.extend([', "skip_validations": true', f', "debug_mode": {str(args.env != "prod").lower()}', '}'])
 cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1] = secrets
 
 print(dump_yaml(cft))
