@@ -16,6 +16,11 @@ if [ -z "${IDENTITY_SCOPE}" ]; then
   exit 1
 fi
 
+if [ -z "${TARGET_ENVIRONMENT}" ]; then
+  echo "TARGET_ENVIRONMENT can not be empty"
+  exit 1
+fi
+
 if [ -z "${OPERATOR_KEY}" ]; then
   echo "OPERATOR_KEY can not be empty"
   exit 1
