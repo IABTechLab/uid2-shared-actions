@@ -48,13 +48,13 @@ jobs:
           java-version: ${{ inputs.java_version }}
 
       - name: Build and run unit tests
-        if: ${{ inputs.vulnerability_scan_only == 'false' && inputs.skip_tests == 'false' }}
+        if: ${{ inputs.vulnerability_scan_only == 'false' && inputs.skip_tests == false }}
         working-directory: ${{ inputs.working_dir }}
         run: |
           bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh
 
       - name: Build without unit tests
-        if: ${{ inputs.vulnerability_scan_only == 'false'  && inputs.skip_tests == 'true' }}
+        if: ${{ inputs.vulnerability_scan_only == 'false'  && inputs.skip_tests == true }}
         working-directory: ${{ inputs.working_dir }}
         run: |
           mvn -B clean compile -DskipTests
