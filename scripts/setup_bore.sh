@@ -36,6 +36,9 @@ elif [ "${IDENTITY_SCOPE}" == "EUID" && "${TARGET_ENVIRONMENT}" == "prod" ]; the
   BORE_URL_LOCALSTACK="NOT_REQUIRED"
   BORE_URL_CORE="core.prod.euid.eu"
   BORE_URL_OPTOUT="optout.prod.euid.eu"
+else
+  echo "Arguments not supported: IDENTITY_SCOPE=${IDENTITY_SCOPE}, TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
+  exit 1
 fi
 
 # Export to Github output
