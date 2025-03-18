@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="uid2-shared-actions/scripts"
-source "${ROOT}/healthcheck.sh"
-
-if [ -z "${OPERATOR_ROOT}" ]; then
-  echo "OPERATOR_ROOT can not be empty"
-  exit 1
-fi
-
 if [ -z "${IDENTITY_SCOPE}" ]; then
   echo "IDENTITY_SCOPE can not be empty"
   exit 1
 fi
+
+ROOT="."
+OPERATOR_ROOT="${ROOT}/uid2-operator"
+SHARED_ACTIONS_ROOT="${ROOT}/uid2-shared-actions"
+
+source "${SHARED_ACTIONS_ROOT}/healthcheck.sh"
 
 cat "${OPERATOR_ROOT}/scripts/aws/eks/deployment_files/test-deployment.yaml"
 

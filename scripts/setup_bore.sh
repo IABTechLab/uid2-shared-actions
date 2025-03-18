@@ -1,9 +1,24 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="."
+if [ -z "${BORE_URL}" ]; then
+  echo "BORE_URL can not be empty"
+  exit 1
+fi
+
+if [ -z "${BORE_SECRET}" ]; then
+  echo "BORE_SECRET can not be empty"
+  exit 1
+fi
+
+if [ -z "${TARGET_ENVIRONMENT}" ]; then
+  echo "TARGET_ENVIRONMENT can not be empty"
+  exit 1
+fi
 
 if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
+  ROOT="."
+
   docker run --init --rm --network e2e_default ekzhang/bore local --local-host localstack --to ${BORE_URL} --secret ${BORE_SECRET} 5001  > ${ROOT}/bore_localstack.out &
   docker run --init --rm --network e2e_default ekzhang/bore local --local-host core --to ${BORE_URL} --secret ${BORE_SECRET} 8088  > ${ROOT}/bore_core.out &
   docker run --init --rm --network e2e_default ekzhang/bore local --local-host optout --to ${BORE_URL} --secret ${BORE_SECRET} 8081  > ${ROOT}/bore_optout.out &

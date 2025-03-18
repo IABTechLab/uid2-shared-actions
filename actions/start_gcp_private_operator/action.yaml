@@ -17,6 +17,9 @@ inputs:
   image_hash:
     description: The operator image hash of the operator image version
     required: true
+  target_environment:
+    description: The target environment [mock, integ, prod]
+    required: true
   operator_key:
     description: The operator key
     required: true
@@ -37,10 +40,11 @@ runs:
       id: start_gcp
       shell: bash
       env:
-        GCP_PROJECT: ${{ inputs.gcp_project }}
-        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        GCP_PROJECT: ${{ inputs.gcp_project }}
+        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
+        TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
         IMAGE_HASH: ${{ inputs.image_hash }}
       run: |

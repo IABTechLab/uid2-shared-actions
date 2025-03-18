@@ -11,23 +11,23 @@ inputs:
   bore_url_localstack:
     description: The bore URL for localstack service
     required: true
-  identity_scope:
-    description: The identity scope [UID2, EUID]
-    required: true
-  operator_image_version:
-    description: The uid2-operator image version
-    default: latest
-  operator_root:
-    description: The root path for uid2-operator folder
-    default: uid2-operator
-  operator_key:
-    description: The operator key
-    required: true
   eks_test_cluster:
     description: The EKS Test Cluster Name
     required: true
   eks_test_cluster_region:
     description: The EKS Test Cluster Region
+    required: true
+  operator_image_version:
+    description: The uid2-operator image version
+    default: latest
+  identity_scope:
+    description: The identity scope [UID2, EUID]
+    required: true
+  target_environment:
+    description: The target environment [mock, integ, prod]
+    required: true
+  operator_key:
+    description: The operator key
     required: true
   
 outputs:
@@ -65,10 +65,11 @@ runs:
       id: create_secrets
       shell: bash
       env:
-        OPERATOR_KEY: ${{ inputs.operator_key }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
         IDENTITY_SCOPE: ${{ inputs.identity_scope }}
+        TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+        OPERATOR_KEY: ${{ inputs.operator_key }}
       run: |
         bash uid2-shared-actions/scripts/eks/create_secret_in_k8.sh
 
@@ -77,7 +78,6 @@ runs:
       shell: bash
       env:
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
-        OPERATOR_ROOT: ${{ inputs.operator_root }}
         IDENTITY_SCOPE: ${{ inputs.identity_scope }}
       run: |
         bash uid2-shared-actions/scripts/eks/prepare_eks_deployment_files.sh
@@ -86,8 +86,6 @@ runs:
       id: start_eks
       shell: bash
       env:
-        OPERATOR_ROOT: ${{ inputs.operator_root }}
         IDENTITY_SCOPE: ${{ inputs.identity_scope }}
       run: |
         bash uid2-shared-actions/scripts/eks/start_eks_enclave.sh
-

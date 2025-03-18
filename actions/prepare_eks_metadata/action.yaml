@@ -5,6 +5,12 @@ inputs:
   operator_image_version:
     description: The uid2-operator image version
     default: latest
+  identity_scope:
+    description: The identity scope [UID2, EUID]
+    required: true
+  target_environment:
+    description: The target environment [mock, integ, prod]
+    required: true
   eks_pcr0:
     description: The EKS PCR0
     required: true
@@ -12,7 +18,7 @@ inputs:
 outputs:
   operator_key:
     description: The operator key
-    value: ${{ steps.enclave_metadata.outputs.OPERATOR_KEY }}
+    value: ${{ steps.operator_key.outputs.operator_key }}
 
 runs:
   using: "composite"
@@ -20,9 +26,20 @@ runs:
   steps:
     - name: Prepare EKS enclave metadata
       id: enclave_metadata
+      if: ${{ inputs.target_environment == 'mock' }}
       shell: bash
       env:
         ENCLAVE_ID: ${{ inputs.eks_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |
         bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh
+
+    - name: Get operator key
+      id: operator_key
+      shell: bash
+      env:
+          IDENTITY_SCOPE: ${{ inputs.identity_scope }}
+          TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+          ENCLAVE_PROTOCOL: eks
+      run: |
+        bash uid2-shared-actions/scripts/get_operator_key.sh

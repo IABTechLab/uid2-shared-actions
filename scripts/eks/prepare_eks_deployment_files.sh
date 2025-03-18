@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-if [ -z "${OPERATOR_ROOT}" ]; then
-  echo "${OPERATOR_ROOT} can not be empty"
-  exit 1
-fi
-
 if [ -z "${IMAGE_VERSION}" ]; then
   echo "IMAGE_VERSION can not be empty"
   exit 1
@@ -16,9 +11,8 @@ if [ -z "${IDENTITY_SCOPE}" ]; then
   exit 1
 fi
 
-ROOT="."
-DEPLOYMENT_FILES_ROOT="${OPERATOR_ROOT}/scripts/aws/eks/deployment_files"
-DEPLOYMENT_FILE="${DEPLOYMENT_FILES_ROOT}/test-deployment.yaml"
+ROOT="./uid2-operator/scripts/aws/eks/deployment_files"
+DEPLOYMENT_FILE="${ROOT}/test-deployment.yaml"
 
 ls -al
 

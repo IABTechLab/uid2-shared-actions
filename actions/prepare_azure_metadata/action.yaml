@@ -40,6 +40,7 @@ runs:
 
     - name: Prepare Azure enclave metadata
       id: enclave_metadata
+      if: ${{ inputs.target_environment == 'mock' }}
       shell: bash
       env:
         ENCLAVE_ID: ${{ steps.enclave_id.outputs.enclave_id }}

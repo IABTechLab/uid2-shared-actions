@@ -16,12 +16,12 @@ if [ -z "${OPTOUT_VERSION}" ]; then
   exit 1
 fi
 
-# Prepare conf files
 ROOT="."
 OPERATOR_ROOT="${ROOT}/uid2-operator"
 CORE_ROOT="${ROOT}/uid2-core"
 OPTOUT_ROOT="${ROOT}/uid2-optout"
 ADMIN_ROOT="${ROOT}/uid2-admin"
+E2E_ROOT="${ROOT}/uid2-e2e"
 SHARED_ACTIONS_ROOT="${ROOT}/uid2-shared-actions"
 DOCKER_ROOT="${ROOT}/docker"
 
@@ -35,13 +35,14 @@ DOCKER_OPTOUT_RESOURCE_FILE_DIR="${DOCKER_ROOT}/uid2-optout/src"
 source "${SHARED_ACTIONS_ROOT}/scripts/jq_helper.sh"
 source "${SHARED_ACTIONS_ROOT}/scripts/healthcheck.sh"
 
+# Prepare conf files
 mkdir -p "${DOCKER_OPERATOR_CONFIG_FILE_DIR}"
 cp "${OPERATOR_ROOT}/conf/default-config.json" "${DOCKER_OPERATOR_CONFIG_FILE_DIR}"
 if [ ${OPERATOR_TYPE} == "public" ]; then
   cp "${OPERATOR_ROOT}/conf/local-e2e-docker-${OPERATOR_TYPE}-config.json" "${DOCKER_OPERATOR_CONFIG_FILE_DIR}/local-e2e-docker-config.json"
 fi
 
-mkdir -p "${CORE_CONFIG_FILE_DIR}/operator"
+mkdir -p "${DOCKER_CORE_CONFIG_FILE_DIR}/operator"
 cp "${CORE_ROOT}/conf/default-config.json" "${DOCKER_CORE_CONFIG_FILE_DIR}"
 cp "${CORE_ROOT}/conf/local-e2e-docker-config.json" "${DOCKER_CORE_CONFIG_FILE_DIR}"
 cp "${CORE_ROOT}/conf/operator/operator-config.json" "${DOCKER_CORE_CONFIG_FILE_DIR}/operator"
@@ -53,7 +54,7 @@ cp "${OPTOUT_ROOT}/conf/local-e2e-docker-config.json" "${DOCKER_OPTOUT_CONFIG_FI
 cp "${OPTOUT_ROOT}/run_tool_local_e2e.sh" "${DOCKER_OPTOUT_CONFIG_FILE_DIR}"
 cp -r "${OPTOUT_ROOT}/src/main/resources/localstack" "${DOCKER_OPTOUT_RESOURCE_FILE_DIR}"
 
-cp "uid2-e2e/docker-compose.yml" "${ROOT}"
+cp "${E2E_ROOT}/docker-compose.yml" "${ROOT}"
 
 DOCKER_COMPOSE_FILE="${ROOT}/docker-compose.yml"
 DOCKER_OPERATOR_CONFIG_FILE="${DOCKER_OPERATOR_CONFIG_FILE_DIR}/local-e2e-docker-config.json"

@@ -2,6 +2,19 @@ name: Run Operator E2E Tests
 on:
   workflow_call:
     inputs:
+      operator_type:
+        description: The operator type [public, gcp, azure, aws]
+        type: string
+        default: public
+      uid2_e2e_identity_scope:
+        description: Environment variable to run the E2E test for identity scope [UID2, EUID]
+        type: string
+        default: UID2
+      target_environment:
+        description: The target environment [mock, integ, prod]
+        type: string
+        default: mock
+
       operator_image_version:
         description: 'Image: Operator image version'
         type: string
@@ -35,24 +48,6 @@ on:
         description: 'Config: Admin branch for config'
         type: string
         default: main
-
-      operator_type:
-        description: The operator type [public, gcp, azure, aws]
-        type: string
-        default: public
-      target_environment:
-        description: The target environment [mock, integ, prod]
-        type: string
-        default: mock
-
-      uid2_e2e_identity_scope:
-        description: Environment variable to run the E2E test for identity scope [UID2, EUID]
-        type: string
-        default: UID2
-      uid2_e2e_phone_support:
-        description: Environment variable to run the E2E test for phone support [true, false]
-        type: string
-        default: 'true'
 
       gcp_project:
         description: The name of the GCP project
@@ -88,11 +83,9 @@ env:
   REGISTRY: ghcr.io
 
   E2E_UID2_INTEG_GCP_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_INTEG_GCP_OPERATOR_API_KEY }}
-  E2E_UID2_INTEG_AZURE_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_INTEG_AZURE_OPERATOR_API_KEY }}
   E2E_UID2_INTEG_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_INTEG_AWS_OPERATOR_API_KEY }}
 
   E2E_UID2_PROD_GCP_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_PROD_GCP_OPERATOR_API_KEY }}
-  E2E_UID2_PROD_AZURE_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_PROD_AZURE_OPERATOR_API_KEY }}
   E2E_UID2_PROD_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_PROD_AWS_OPERATOR_API_KEY }}
 
   E2E_EUID_INTEG_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_EUID_INTEG_AWS_OPERATOR_API_KEY }}
@@ -159,6 +152,7 @@ jobs:
           path: uid2-e2e
 
       - name: Create Docker network
+        if: ${{ inputs.target_environment == 'mock' }}
         run: |
           docker network create e2e_default
 
@@ -179,6 +173,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@gdm-UID2-5050-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
+          target_environment: ${{ inputs.target_environment }}
           gcp_service_account: ${{ inputs.gcp_service_account }}
           gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
 
@@ -194,6 +189,8 @@ jobs:
         if: ${{ inputs.operator_type == 'aws' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-5050-e2e
         with:
+          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          target_environment: ${{ inputs.target_environment }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
       - name: Prepare EKS metadata
@@ -202,6 +199,8 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@gdm-UID2-5050-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
+          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          target_environment: ${{ inputs.target_environment }}
           eks_pcr0: ${{ inputs.eks_pcr0 }}
 
       - name: Bring up Docker Compose
@@ -230,6 +229,7 @@ jobs:
           gcp_project: ${{ inputs.gcp_project }}
           gcp_service_account: ${{ inputs.gcp_service_account }}
           image_hash: ${{ steps.prepare_gcp_metadata.outputs.image_hash }}
+          target_environment: ${{ inputs.target_environment }}
           operator_key: ${{ steps.prepare_gcp_metadata.outputs.operator_key }}
 
       - name: Start Azure private operator
@@ -242,6 +242,7 @@ jobs:
           template_file: ${{ steps.prepare_azure_metadata.outputs.template_file }}
           parameters_file: ${{ steps.prepare_azure_metadata.outputs.parameters_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          target_environment: ${{ inputs.target_environment }}
 
       - name: Start AWS private operator
         id: start_aws_private_operator
@@ -254,6 +255,7 @@ jobs:
           aws_region: ${{ inputs.aws_region }}
           aws_ami: ${{ inputs.aws_ami }}
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          target_environment: ${{ inputs.target_environment }}
           operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
 
       - name: Start EKS operator
@@ -264,11 +266,12 @@ jobs:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
           bore_url_localstack: ${{ steps.bore.outputs.bore_url_localstack }}
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
-          operator_image_version: ${{ inputs.operator_image_version }}
-          operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
+          operator_image_version: ${{ inputs.operator_image_version }}
+          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          target_environment: ${{ inputs.target_environment }}
+          operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
@@ -277,6 +280,7 @@ jobs:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
           OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
+          TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
           BORE_URL_CORE: ${{ steps.bore.outputs.bore_url_core }}
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.bore_url_optout }}
           GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}

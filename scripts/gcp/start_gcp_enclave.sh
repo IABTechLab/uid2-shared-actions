@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="uid2-shared-actions/scripts"
-GCP_INSTANCE_NAME="ci-test-${RANDOM}"
-OPERATOR_KEY_SECRET_NAME=${GCP_INSTANCE_NAME}
+if [ -z "${BORE_URL_CORE}" ]; then
+  echo "BORE_URL_CORE can not be empty"
+  exit 1
+fi
 
-source "${ROOT}/healthcheck.sh"
+if [ -z "${BORE_URL_OPTOUT}" ]; then
+  echo "BORE_URL_OPTOUT can not be empty"
+  exit 1
+fi
 
 if [ -z "${GCP_PROJECT}" ]; then
   echo "GCP_PROJECT can not be empty"
@@ -27,15 +31,11 @@ if [ -z "${IMAGE_HASH}" ]; then
   exit 1
 fi
 
-if [ -z "${BORE_URL_CORE}" ]; then
-  echo "BORE_URL_CORE can not be empty"
-  exit 1
-fi
+ROOT="./uid2-shared-actions/scripts"
+GCP_INSTANCE_NAME="ci-test-${RANDOM}"
+OPERATOR_KEY_SECRET_NAME=${GCP_INSTANCE_NAME}
 
-if [ -z "${BORE_URL_OPTOUT}" ]; then
-  echo "BORE_URL_OPTOUT can not be empty"
-  exit 1
-fi
+source "${ROOT}/healthcheck.sh"
 
 gcloud config set project ${GCP_PROJECT}
 
@@ -48,6 +48,14 @@ echo -n "${OPERATOR_KEY}" | gcloud secrets create ${OPERATOR_KEY_SECRET_NAME} \
 
 OPERATOR_KEY_SECRET_VERSION=$(gcloud secrets versions describe latest --secret ${OPERATOR_KEY_SECRET_NAME} --format 'value(name)')
 
+if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
+  CORE_BASE_URL="http://${BORE_URL_CORE}"
+  OPTOUT_BASE_URL="http://${BORE_URL_OPTOUT}"
+else
+  CORE_BASE_URL="https://${BORE_URL_CORE}"
+  OPTOUT_BASE_URL="https://${BORE_URL_OPTOUT}"
+fi
+
 gcloud compute instances create ${GCP_INSTANCE_NAME} \
     --confidential-compute \
     --shielded-secure-boot \
@@ -56,7 +64,7 @@ gcloud compute instances create ${GCP_INSTANCE_NAME} \
     --image-project confidential-space-images \
     --image-family confidential-space-debug \
     --service-account $SERVICE_ACCOUNT \
-    --metadata ^~^tee-image-reference=us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator@${IMAGE_HASH}~tee-restart-policy=Never~tee-container-log-redirect=true~tee-env-SKIP_VALIDATIONS=true~tee-env-DEPLOYMENT_ENVIRONMENT=integ~tee-env-API_TOKEN_SECRET_NAME=${OPERATOR_KEY_SECRET_VERSION}~tee-env-CORE_BASE_URL=https://${BORE_URL_CORE}~tee-env-OPTOUT_BASE_URL=https://${BORE_URL_OPTOUT}
+    --metadata ^~^tee-image-reference=us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator@${IMAGE_HASH}~tee-restart-policy=Never~tee-container-log-redirect=true~tee-env-SKIP_VALIDATIONS=true~tee-env-DEPLOYMENT_ENVIRONMENT=integ~tee-env-API_TOKEN_SECRET_NAME=${OPERATOR_KEY_SECRET_VERSION}~tee-env-CORE_BASE_URL=${CORE_BASE_URL}~tee-env-OPTOUT_BASE_URL=${OPTOUT_BASE_URL}
 
 # Export to GitHub output
 echo "GCP_INSTANCE_NAME=${GCP_INSTANCE_NAME}"
