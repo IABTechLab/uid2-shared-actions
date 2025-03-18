@@ -183,6 +183,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@gdm-UID2-5050-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
+          target_environment: ${{ inputs.target_environment }}
 
       - name: Prepare AWS metadata
         id: prepare_aws_metadata

@@ -5,6 +5,9 @@ inputs:
   operator_image_version:
     description: The uid2-operator image version
     default: latest
+  target_environment:
+    description: The target environment [mock, integ, prod]
+    required: true
 outputs:
   template_file:
     description: The template file
