@@ -20,7 +20,11 @@ if [ -z "${TARGET_ENVIRONMENT}" ]; then
     exit 1
 fi
 
-echo "e2e_network=e2e_default" >> ${GITHUB_OUTPUT}
+if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
+    echo "e2e_network=e2e_default" >> ${GITHUB_OUTPUT}
+else
+    echo "e2e_network=bridge" >> ${GITHUB_OUTPUT}
+fi
 
 if [ "${OPERATOR_TYPE}" == "public" ]; then
     echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> ${GITHUB_OUTPUT}
