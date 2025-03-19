@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       operator_type:
-        description: The operator type [public, gcp, azure, aws]
+        description: The operator type [public, gcp, azure, aws, eks, aks]
         type: string
         default: public
       uid2_e2e_identity_scope:
@@ -158,7 +158,7 @@ jobs:
 
       - name: Set up bore and determine URLs
         id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks' || inputs.operator_type == 'aks' }}
+        if: ${{ inputs.operator_type != 'public' }}
         env:
           BORE_URL: ${{ secrets.BORE_URL }}
           BORE_SECRET: ${{ secrets.BORE_SECRET }}
@@ -207,12 +207,12 @@ jobs:
       - name: Prepare AKS metadata
         id: prepare_aks_metadata
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@gdm-UID2-5050-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
-          admin_root: ${{ inputs.admin_root }}
-          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
-          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
+          target_environment: ${{ inputs.target_environment }}
+          bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
+          bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
 
       - name: Bring up Docker Compose
         id: docker-compose
@@ -287,9 +287,9 @@ jobs:
       - name: Start AKS private operator
         id: start_aks_private_operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@gdm-UID2-5050-e2e
         with:
-          output_template_file: ${{ steps.prepare_aks_metadata.outputs.output_template_file }}
+          template_file: ${{ steps.prepare_aks_metadata.outputs.template_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Decide E2E test environment variables

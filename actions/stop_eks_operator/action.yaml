@@ -1,11 +1,12 @@
 name: Stop EKS Operator
+description: Stops up an EKS private operator
 
 inputs:
   eks_test_cluster:
-    description: The EKS Test Cluster Name
+    description: The EKS test cluster name
     required: true
   eks_test_cluster_region:
-    description: The EKS Test Cluster Region
+    description: The EKS test cluster region
     required: true
   identity_scope:
     description: The identity scope [UID2, EUID]

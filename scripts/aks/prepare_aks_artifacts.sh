@@ -1,6 +1,26 @@
 #!/usr/bin/env bash
 set -ex
 
+if [ -z "${IMAGE_VERSION}" ]; then
+  echo "IMAGE_VERSION can not be empty"
+  exit 1
+fi
+
+if [ -z "${TARGET_ENVIRONMENT}" ]; then
+  echo "TARGET_ENVIRONMENT can not be empty"
+  exit 1
+fi
+
+if [ -z "${BORE_URL_CORE}" ]; then
+  echo "BORE_URL_CORE can not be empty"
+  exit 1
+fi
+
+if [ -z "${BORE_URL_OPTOUT}" ]; then
+  echo "BORE_URL_OPTOUT can not be empty"
+  exit 1
+fi
+
 # Below resources should be prepared ahead of running the E2E test.
 # See https://github.com/UnifiedID2/aks-demo/tree/master/vn-aks#setup-aks--node-pool
 export RESOURCE_GROUP="pipeline-vn-aks"
@@ -17,27 +37,7 @@ export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 export DEPLOYMENT_ENV="integ"
 export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/resourcegroups/pipeline-vn-aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pipeline-vn-aks-opr-id"
 
-if [ -z "${IMAGE_VERSION}" ]; then
-  echo "IMAGE_VERSION can not be empty"
-  exit 1
-fi
-
-if [ -z "${OPERATOR_ROOT}" ]; then
-  echo "OPERATOR_ROOT can not be empty"
-  exit 1
-fi
-
-if [ -z "${BORE_URL_CORE}" ]; then
-  echo "BORE_URL_CORE can not be empty"
-  exit 1
-fi
-
-if [ -z "${BORE_URL_OPTOUT}" ]; then
-  echo "BORE_URL_OPTOUT can not be empty"
-  exit 1
-fi
-
-ROOT="uid2-shared-actions/scripts/aks"
+ROOT="./uid2-shared-actions/scripts/aks"
 OUTPUT_DIR="${ROOT}/azure-aks-artifacts"
 
 IMAGE="ghcr.io/iabtechlab/uid2-operator:${IMAGE_VERSION}"
@@ -78,7 +78,12 @@ else
   sed -i "s#DEPLOYMENT_ENVIRONMENT_PLACEHOLDER#integ#g" "${OUTPUT_TEMPLATE_FILE}"
   cat ${OUTPUT_TEMPLATE_FILE}
 
-  python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE OPTOUT_BASE_URL http://$BORE_URL_OPTOUT SKIP_VALIDATIONS true
+  if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
+    python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE OPTOUT_BASE_URL http://$BORE_URL_OPTOUT SKIP_VALIDATIONS true
+  else
+    python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL https://$BORE_URL_CORE OPTOUT_BASE_URL https://$BORE_URL_OPTOUT SKIP_VALIDATIONS true
+  fi
+
   cat ${OUTPUT_TEMPLATE_FILE}
   # --- Finished updating yaml file with resources ---
   if [[ $? -ne 0 ]]; then
@@ -99,6 +104,6 @@ fi
 if [ -z "${GITHUB_OUTPUT}" ]; then
   echo "Not in GitHub action"
 else
-  echo "OUTPUT_TEMPLATE_FILE=${OUTPUT_TEMPLATE_FILE}" >> ${GITHUB_OUTPUT}
-  echo "OUTPUT_POLICY_DIGEST_FILE=${OUTPUT_POLICY_DIGEST_FILE}" >> ${GITHUB_OUTPUT}
+  echo "TEMPLATE_FILE=${OUTPUT_TEMPLATE_FILE}" >> ${GITHUB_OUTPUT}
+  echo "POLICY_DIGEST_FILE=${OUTPUT_POLICY_DIGEST_FILE}" >> ${GITHUB_OUTPUT}
 fi

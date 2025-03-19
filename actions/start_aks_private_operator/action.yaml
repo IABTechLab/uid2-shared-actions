@@ -2,8 +2,8 @@ name: Start AKS Private Operator
 description: Spins up an AKS private operator
 
 inputs:
-  output_template_file:
-    description: The output template file
+  template_file:
+    description: The template file
     required: true
   azure_credentials:
     description: The Azure credentials
@@ -28,6 +28,6 @@ runs:
       id: start_aks
       shell: bash
       env:
-        OUTPUT_TEMPLATE_FILE: ${{ inputs.output_template_file }}
+        OUTPUT_TEMPLATE_FILE: ${{ inputs.template_file }}
       run: |
         bash uid2-shared-actions/scripts/aks/start_aks_enclave.sh
