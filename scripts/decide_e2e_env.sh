@@ -47,6 +47,9 @@ else
     elif [ "${OPERATOR_TYPE}" == "eks" ]; then
         echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
         echo "uid2_e2e_pipeline_operator_url=${EKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
+    elif [ "${OPERATOR_TYPE}" == "aks" ]; then
+        echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> ${GITHUB_OUTPUT}
+        echo "uid2_e2e_pipeline_operator_url=${AKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
     fi
 
     if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then

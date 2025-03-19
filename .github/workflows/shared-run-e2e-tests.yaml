@@ -158,7 +158,7 @@ jobs:
 
       - name: Set up bore and determine URLs
         id: bore
-        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks' }}
+        if: ${{ inputs.operator_type == 'gcp' || inputs.operator_type == 'azure' || inputs.operator_type == 'aws' || inputs.operator_type == 'eks' || inputs.operator_type == 'aks' }}
         env:
           BORE_URL: ${{ secrets.BORE_URL }}
           BORE_SECRET: ${{ secrets.BORE_SECRET }}
@@ -203,6 +203,16 @@ jobs:
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
           target_environment: ${{ inputs.target_environment }}
           eks_pcr0: ${{ inputs.eks_pcr0 }}
+
+      - name: Prepare AKS metadata
+        id: prepare_aks_metadata
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@v3
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          admin_root: ${{ inputs.admin_root }}
+          bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
+          bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
 
       - name: Bring up Docker Compose
         id: docker-compose
@@ -274,6 +284,14 @@ jobs:
           target_environment: ${{ inputs.target_environment }}
           operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
 
+      - name: Start AKS private operator
+        id: start_aks_private_operator
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@v3
+        with:
+          output_template_file: ${{ steps.prepare_aks_metadata.outputs.output_template_file }}
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: Decide E2E test environment variables
         id: decide_env_var
         shell: bash
@@ -288,6 +306,7 @@ jobs:
           AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           EKS_OPERATOR_URL: ${{ steps.start_eks_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          AKS_OPERATOR_URL: ${{ steps.start_aks_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
         run: |
           bash uid2-shared-actions/scripts/decide_e2e_env.sh
 
@@ -312,14 +331,18 @@ jobs:
           SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
-          bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+          if [[ ${{ inputs.operator_type }} == 'gcp' ]]; then
+            bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+          fi
 
       - name: Stop Azure private operator
         if: ${{ always() && inputs.operator_type == 'azure' }}
         env:
           AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
-          bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+          if [[ ${{ inputs.operator_type }} == 'azure' ]]; then
+            bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+          fi
 
       - name: Stop AWS private operator
         if: ${{ always() && inputs.operator_type == 'aws' }}
@@ -327,7 +350,9 @@ jobs:
           AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
-          bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+          if [[ ${{ inputs.operator_type }} == 'aws' ]]; then
+            bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+          fi
 
       - name: Stop EKS operator
         if: ${{ always() && inputs.operator_type == 'eks' }}
@@ -336,3 +361,10 @@ jobs:
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+
+      - name: Stop AKS operator
+        if: always() 
+        run: |
+          if [[ ${{ inputs.operator_type }} == 'aks' ]]; then
+            bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
+          fi
