@@ -331,18 +331,14 @@ jobs:
           SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
           GCP_INSTANCE_NAME: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
         run: |
-          if [[ ${{ inputs.operator_type }} == 'gcp' ]]; then
-            bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
-          fi
+          bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
       - name: Stop Azure private operator
         if: ${{ always() && inputs.operator_type == 'azure' }}
         env:
           AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
-          if [[ ${{ inputs.operator_type }} == 'azure' ]]; then
-            bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
-          fi
+          bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 
       - name: Stop AWS private operator
         if: ${{ always() && inputs.operator_type == 'aws' }}
@@ -350,9 +346,7 @@ jobs:
           AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
-          if [[ ${{ inputs.operator_type }} == 'aws' ]]; then
             bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
-          fi
 
       - name: Stop EKS operator
         if: ${{ always() && inputs.operator_type == 'eks' }}
@@ -363,8 +357,6 @@ jobs:
           identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
 
       - name: Stop AKS operator
-        if: always() 
+        if: ${{ always() && inputs.operator_type == 'aks' }}
         run: |
-          if [[ ${{ inputs.operator_type }} == 'aks' ]]; then
             bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
-          fi
