@@ -22,8 +22,8 @@ on:
         default: '.'
       skip_tests:
         description: If true, will skip tests when building and running unit tests. Defaults to false. Set to true for repos without tests.
-        type: boolean
-        default: false
+        type: string
+        default: 'false'
 
 jobs:
   build:
