@@ -57,11 +57,12 @@ with open('{}/{}_CloudFormation.template.yml'.format(args.cftemplate_fp, args.sc
 
 cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
 
-egress = cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress']
-egress.append(create_egress(args.core_url, 'E2E - Core'))
-egress.append(create_egress(args.optout_url, 'E2E - Optout'))
-egress.append(create_egress(args.localstack_url, 'E2E - Localstack'))
-cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
+if args.env == "mock":
+    egress = cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress']
+    egress.append(create_egress(args.core_url, 'E2E - Core'))
+    egress.append(create_egress(args.optout_url, 'E2E - Optout'))
+    egress.append(create_egress(args.localstack_url, 'E2E - Localstack'))
+    cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress'] = egress
 
 # Now, we overwrite core, optout URL's with bore addresses.
 secrets = cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1]
