@@ -20,11 +20,7 @@ if [ -z "${TARGET_ENVIRONMENT}" ]; then
     exit 1
 fi
 
-if [ "${OPERATOR_TYPE}" == "eks" ]; then
-    echo "e2e_network=host" >> ${GITHUB_OUTPUT}
-else
-    echo "e2e_network=e2e_default" >> ${GITHUB_OUTPUT}
-fi
+echo "e2e_network=e2e_default" >> ${GITHUB_OUTPUT}
 
 if [ "${OPERATOR_TYPE}" == "public" ]; then
     echo "uid2_e2e_pipeline_operator_type=PUBLIC" >> ${GITHUB_OUTPUT}
@@ -44,9 +40,6 @@ else
     elif [ "${OPERATOR_TYPE}" == "aws" ]; then
         echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
         echo "uid2_e2e_pipeline_operator_url=${AWS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
-    elif [ "${OPERATOR_TYPE}" == "eks" ]; then
-        echo "uid2_e2e_pipeline_operator_cloud_provider=AWS" >> ${GITHUB_OUTPUT}
-        echo "uid2_e2e_pipeline_operator_url=${EKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
     elif [ "${OPERATOR_TYPE}" == "aks" ]; then
         echo "uid2_e2e_pipeline_operator_cloud_provider=AZURE" >> ${GITHUB_OUTPUT}
         echo "uid2_e2e_pipeline_operator_url=${AKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}

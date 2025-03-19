@@ -3,7 +3,7 @@ on:
   workflow_call:
     inputs:
       operator_type:
-        description: The operator type [public, gcp, azure, aws, eks, aks]
+        description: The operator type [public, gcp, azure, aws, aks]
         type: string
         default: public
       uid2_e2e_identity_scope:
@@ -67,16 +67,6 @@ on:
         type: string
       aws_pcr0:
         description: The AWS PCR0
-        type: string
-
-      eks_pcr0:
-        description: The EKS PCR0
-        type: string
-      eks_test_cluster:
-        description: The EKS Test Cluster Name
-        type: string
-      eks_test_cluster_region:
-        description: The EKS Test Cluster Region
         type: string
 
 env:
@@ -194,16 +184,6 @@ jobs:
           target_environment: ${{ inputs.target_environment }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
-      - name: Prepare EKS metadata
-        id: prepare_eks_metadata
-        if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@gdm-UID2-5050-e2e
-        with:
-          operator_image_version: ${{ inputs.operator_image_version }}
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
-          target_environment: ${{ inputs.target_environment }}
-          eks_pcr0: ${{ inputs.eks_pcr0 }}
-
       - name: Prepare AKS metadata
         id: prepare_aks_metadata
         if: ${{ inputs.operator_type == 'aks' }}
@@ -269,21 +249,6 @@ jobs:
           target_environment: ${{ inputs.target_environment }}
           operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
 
-      - name: Start EKS operator
-        id: start_eks_operator
-        if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@gdm-UID2-5050-e2e
-        with:
-          bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
-          bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
-          bore_url_localstack: ${{ steps.bore.outputs.bore_url_localstack }}
-          eks_test_cluster: ${{ inputs.eks_test_cluster }}
-          eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
-          operator_image_version: ${{ inputs.operator_image_version }}
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
-          target_environment: ${{ inputs.target_environment }}
-          operator_key: ${{ steps.prepare_eks_metadata.outputs.operator_key }}
-
       - name: Start AKS private operator
         id: start_aks_private_operator
         if: ${{ inputs.operator_type == 'aks' }}
@@ -305,7 +270,6 @@ jobs:
           GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          EKS_OPERATOR_URL: ${{ steps.start_eks_operator.outputs.uid2_e2e_pipeline_operator_url }}
           AKS_OPERATOR_URL: ${{ steps.start_aks_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
         run: |
           bash uid2-shared-actions/scripts/decide_e2e_env.sh
@@ -347,14 +311,6 @@ jobs:
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
             bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
-
-      - name: Stop EKS operator
-        if: ${{ always() && inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@gdm-UID2-5050-e2e
-        with:
-          eks_test_cluster: ${{ inputs.eks_test_cluster }}
-          eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
 
       - name: Stop AKS operator
         if: ${{ always() && inputs.operator_type == 'aks' }}
