@@ -35,19 +35,19 @@ if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
   BORE_URL_LOCALSTACK=$(cat ${ROOT}/bore_localstack.out | grep at | cut -d ' ' -f7)
   BORE_URL_CORE=$(cat ${ROOT}/bore_core.out | grep at | cut -d ' ' -f7)
   BORE_URL_OPTOUT=$(cat ${ROOT}/bore_optout.out | grep at | cut -d ' ' -f7)
-elif [ "${IDENTITY_SCOPE}" == "UID2" && "${TARGET_ENVIRONMENT}" == "integ" ]; then
+elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ]; then
   BORE_URL_LOCALSTACK="NOT_REQUIRED"
   BORE_URL_CORE="core-integ.uidapi.com"
   BORE_URL_OPTOUT="optout-integ.uidapi.com"
-elif [ "${IDENTITY_SCOPE}" == "UID2" && "${TARGET_ENVIRONMENT}" == "prod" ]; then
+elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ]; then
   BORE_URL_LOCALSTACK="NOT_REQUIRED"
   BORE_URL_CORE="core-prod.uidapi.com"
   BORE_URL_OPTOUT="optout-prod.uidapi.com"
-elif [ "${IDENTITY_SCOPE}" == "EUID" && "${TARGET_ENVIRONMENT}" == "integ" ]; then
+elif [ "${IDENTITY_SCOPE}" == "EUID" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ]; then
   BORE_URL_LOCALSTACK="NOT_REQUIRED"
   BORE_URL_CORE="core.integ.euid.eu"
   BORE_URL_OPTOUT="optout.integ.euid.eu"
-elif [ "${IDENTITY_SCOPE}" == "EUID" && "${TARGET_ENVIRONMENT}" == "prod" ]; then
+elif [ "${IDENTITY_SCOPE}" == "EUID" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ]; then
   BORE_URL_LOCALSTACK="NOT_REQUIRED"
   BORE_URL_CORE="core.prod.euid.eu"
   BORE_URL_OPTOUT="optout.prod.euid.eu"
