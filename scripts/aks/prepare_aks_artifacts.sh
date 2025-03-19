@@ -37,8 +37,9 @@ export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 export DEPLOYMENT_ENV="integ"
 export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/resourcegroups/pipeline-vn-aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pipeline-vn-aks-opr-id"
 
-ROOT="./uid2-shared-actions/scripts/aks"
-OUTPUT_DIR="${ROOT}/azure-aks-artifacts"
+OPERATOR_ROOT="./uid2-operator"
+SHARED_ACTIONS_ROOT="./uid2-shared-actions"
+OUTPUT_DIR="${SHARED_ACTIONS_ROOT}/scripts/aks/azure-aks-artifacts"
 
 IMAGE="ghcr.io/iabtechlab/uid2-operator:${IMAGE_VERSION}"
 
@@ -79,9 +80,9 @@ else
   cat ${OUTPUT_TEMPLATE_FILE}
 
   if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
-    python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE OPTOUT_BASE_URL http://$BORE_URL_OPTOUT SKIP_VALIDATIONS true
+    python3 ${SHARED_ACTIONS_ROOT}/scripts/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE OPTOUT_BASE_URL http://$BORE_URL_OPTOUT SKIP_VALIDATIONS true
   else
-    python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL https://$BORE_URL_CORE OPTOUT_BASE_URL https://$BORE_URL_OPTOUT SKIP_VALIDATIONS true
+    python3 ${SHARED_ACTIONS_ROOT}/scripts/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL https://$BORE_URL_CORE OPTOUT_BASE_URL https://$BORE_URL_OPTOUT SKIP_VALIDATIONS true
   fi
 
   cat ${OUTPUT_TEMPLATE_FILE}

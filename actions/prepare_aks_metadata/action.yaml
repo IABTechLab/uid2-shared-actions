@@ -43,7 +43,7 @@ runs:
       id: enclave_id
       shell: bash
       env:
-        OUTPUT_POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.policy_digest_file }}
+        POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.policy_digest_file }}
       run: |
         bash uid2-shared-actions/scripts/aks/prepare_aks_enclave_id.sh
 

@@ -6,8 +6,8 @@ on:
         description: The operator type [public, gcp, azure, aws, aks]
         type: string
         default: public
-      uid2_e2e_identity_scope:
-        description: Environment variable to run the E2E test for identity scope [UID2, EUID]
+      identity_scope:
+        description: The identity scope [UID2, EUID]
         type: string
         default: UID2
       target_environment:
@@ -152,7 +152,7 @@ jobs:
         env:
           BORE_URL: ${{ secrets.BORE_URL }}
           BORE_SECRET: ${{ secrets.BORE_SECRET }}
-          IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
+          IDENTITY_SCOPE: ${{ inputs.identity_scope }}
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
         run: |
           bash uid2-shared-actions/scripts/setup_bore.sh
@@ -180,7 +180,7 @@ jobs:
         if: ${{ inputs.operator_type == 'aws' }}
         uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-5050-e2e
         with:
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          identity_scope: ${{ inputs.identity_scope }}
           target_environment: ${{ inputs.target_environment }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
@@ -202,7 +202,7 @@ jobs:
           CORE_VERSION: ${{ inputs.core_image_version }}
           OPTOUT_VERSION: ${{ inputs.optout_image_version }}
           E2E_VERSION: ${{ inputs.e2e_image_version }}
-          IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
+          IDENTITY_SCOPE: ${{ inputs.identity_scope }}
           OPERATOR_TYPE: ${{ inputs.operator_type }}
           BORE_URL_CORE: ${{ steps.bore.outputs.bore_url_core }}
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.bore_url_optout }}
@@ -245,7 +245,7 @@ jobs:
           bore_url_localstack: ${{ steps.bore.outputs.bore_url_localstack }}
           aws_region: ${{ inputs.aws_region }}
           aws_ami: ${{ inputs.aws_ami }}
-          identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          identity_scope: ${{ inputs.identity_scope }}
           target_environment: ${{ inputs.target_environment }}
           operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
 
@@ -263,7 +263,7 @@ jobs:
         env:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
           OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          IDENTITY_SCOPE: ${{ inputs.uid2_e2e_identity_scope }}
+          IDENTITY_SCOPE: ${{ inputs.identity_scope }}
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
           BORE_URL_CORE: ${{ steps.bore.outputs.bore_url_core }}
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.bore_url_optout }}
@@ -280,7 +280,7 @@ jobs:
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
-          uid2_e2e_identity_scope: ${{ inputs.uid2_e2e_identity_scope }}
+          uid2_e2e_identity_scope: ${{ inputs.identity_scope }}
           uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
           uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
           uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
