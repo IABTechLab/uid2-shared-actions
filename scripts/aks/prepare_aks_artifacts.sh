@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-if [ -z "${IMAGE_VERSION}" ]; then
-  echo "IMAGE_VERSION can not be empty"
-  exit 1
-fi
-
-if [ -z "${TARGET_ENVIRONMENT}" ]; then
-  echo "TARGET_ENVIRONMENT can not be empty"
-  exit 1
-fi
-
 if [ -z "${BORE_URL_CORE}" ]; then
   echo "BORE_URL_CORE can not be empty"
   exit 1
@@ -18,6 +8,16 @@ fi
 
 if [ -z "${BORE_URL_OPTOUT}" ]; then
   echo "BORE_URL_OPTOUT can not be empty"
+  exit 1
+fi
+
+if [ -z "${IMAGE_VERSION}" ]; then
+  echo "IMAGE_VERSION can not be empty"
+  exit 1
+fi
+
+if [ -z "${TARGET_ENVIRONMENT}" ]; then
+  echo "TARGET_ENVIRONMENT can not be empty"
   exit 1
 fi
 
@@ -30,7 +30,17 @@ export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
 export NAT_GATEWAY_NAME="pipeline-nat-gateway"
 export AKS_CLUSTER_NAME="pipelinevncluster"
 export KEYVAULT_NAME="pipeline-vn-aks-vault"
-export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
+if [ ${TARGET_ENVIRONMENT} == "mock" ];
+  export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
+elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
+  OPERATOR_KEY_NAME="pipeline-vn-aks-opr-key-name-integ"
+elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
+  OPERATOR_KEY_NAME="pipeline-vn-aks-opr-key-name-prod"
+else
+  echo "Arguments not supported: TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
+  exit 1
+fi
+
 export MANAGED_IDENTITY="pipeline-vn-aks-opr-id"
 export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
 export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"

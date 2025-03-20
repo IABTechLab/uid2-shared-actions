@@ -32,10 +32,10 @@ runs:
       id: enclave_artifacts
       shell: bash
       env:
-        IMAGE_VERSION: ${{ inputs.operator_image_version }}
-        TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        IMAGE_VERSION: ${{ inputs.operator_image_version }}
+        TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
       run: |
         bash uid2-shared-actions/scripts/aks/prepare_aks_artifacts.sh
 
