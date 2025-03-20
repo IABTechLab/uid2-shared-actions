@@ -39,7 +39,7 @@ if [ ${TARGET_ENVIRONMENT} == "mock" ]; then
   OPERATOR_KEY_NAME="operator-key-ci"
 elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
   OPERATOR_KEY_NAME="operator-key-ci-integ"
-elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
+elif [ ${TARGET_ENVIRONMENT} == "prod" ]; then
   OPERATOR_KEY_NAME="operator-key-ci-prod"
 else
   echo "Arguments not supported: TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
