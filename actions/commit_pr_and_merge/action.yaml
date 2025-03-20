@@ -61,7 +61,7 @@ runs:
         message: '[CI Pipeline] ${{ inputs.message }}'
         author_name: Release Workflow
         author_email: unifiedid-admin+release@thetradedesk.com
-        new_branch: 'ci-${{ github.sha }}-${{ steps.random-number.num }}'
+        new_branch: 'ci-${{ github.sha }}-${{ steps.random-number.outputs.num }}'
         add: ${{ inputs.add }}
         
     - name: Create PR
