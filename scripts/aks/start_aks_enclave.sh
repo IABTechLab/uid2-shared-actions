@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="uid2-shared-actions/scripts"
+if [[ ! -f ${TEMPLATE_FILE} ]]; then
+  echo "TEMPLATE_FILE does not exist"
+  exit 1
+fi
+
+ROOT="./uid2-shared-actions/scripts"
 
 # below resources should be prepared ahead
 export RESOURCE_GROUP="pipeline-vn-aks"
@@ -19,14 +24,9 @@ export DEPLOYMENT_ENV="integ"
 
 source "${ROOT}/healthcheck.sh"
 
-if [[ ! -f ${OUTPUT_TEMPLATE_FILE} ]]; then
-  echo "OUTPUT_TEMPLATE_FILE does not exist"
-  exit 1
-fi
-
 # --- Deploy operator service and make sure it starts ---
 az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
-kubectl apply -f ${OUTPUT_TEMPLATE_FILE}
+kubectl apply -f ${TEMPLATE_FILE}
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
   echo "Not in GitHub action"

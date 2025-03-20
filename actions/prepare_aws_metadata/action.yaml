@@ -2,9 +2,12 @@ name: Prepare AWS Metadata
 description: Prepares the AWS Nitro enclave metadata
 
 inputs:
-  admin_root:
-    description: The root path for uid2-admin folder
-    default: uid2-admin
+  identity_scope:
+    description: The identity scope [UID2, EUID]
+    required: true
+  target_environment:
+    description: The target environment [mock, integ, prod]
+    required: true
   aws_pcr0:
     description: The AWS PCR0
     required: true
@@ -12,7 +15,7 @@ inputs:
 outputs:
   operator_key:
     description: The operator key
-    value: ${{ steps.enclave_metadata.outputs.OPERATOR_KEY }}
+    value: ${{ steps.operator_key.outputs.operator_key }}
 
 runs:
   using: "composite"
@@ -20,10 +23,20 @@ runs:
   steps:
     - name: Prepare AWS enclave metadata
       id: enclave_metadata
+      if: ${{ inputs.target_environment == 'mock' }}
       shell: bash
       env:
-        ADMIN_ROOT: ${{ inputs.admin_root }}
         ENCLAVE_ID: ${{ inputs.aws_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |
         bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh
+
+    - name: Get operator key
+      id: operator_key
+      shell: bash
+      env:
+          IDENTITY_SCOPE: ${{ inputs.identity_scope }}
+          TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+          ENCLAVE_PROTOCOL: aws-nitro
+      run: |
+        bash ./uid2-shared-actions/scripts/get_operator_key.sh

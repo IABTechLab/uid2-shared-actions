@@ -5,12 +5,9 @@ inputs:
   operator_image_version:
     description: The uid2-operator image version
     default: latest
-  admin_root:
-    description: The root path for uid2-admin folder
-    default: uid2-admin
-  operator_root:
-    description: The root path for uid2-operator folder
-    default: uid2-operator
+  target_environment:
+    description: The target environment [mock, integ, prod]
+    required: true
   bore_url_core:
     description: The bore URL for core service
     required: true
@@ -18,9 +15,9 @@ inputs:
     description: The bore URL for optout service
     required: true
 outputs:
-  output_template_file:
-    description: The output template file
-    value: ${{ steps.enclave_artifacts.outputs.OUTPUT_TEMPLATE_FILE }}
+  template_file:
+    description: The template file
+    value: ${{ steps.enclave_artifacts.outputs.template_file }}
 
 runs:
   using: "composite"
@@ -30,15 +27,15 @@ runs:
       shell: bash
       run: |
         az --version
-    
+
     - name: Generate AKS enclave deployment artifacts
       id: enclave_artifacts
       shell: bash
       env:
-        IMAGE_VERSION: ${{ inputs.operator_image_version }}
-        OPERATOR_ROOT: ${{ inputs.operator_root }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        IMAGE_VERSION: ${{ inputs.operator_image_version }}
+        TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
       run: |
         bash uid2-shared-actions/scripts/aks/prepare_aks_artifacts.sh
 
@@ -46,7 +43,7 @@ runs:
       id: enclave_id
       shell: bash
       env:
-        OUTPUT_POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
+        POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.policy_digest_file }}
       run: |
         bash uid2-shared-actions/scripts/aks/prepare_aks_enclave_id.sh
 
@@ -54,8 +51,7 @@ runs:
       id: enclave_metadata
       shell: bash
       env:
-        ADMIN_ROOT: ${{ inputs.admin_root }}
-        ENCLAVE_ID: ${{ steps.enclave_id.outputs.ENCLAVE_ID }}
+        ENCLAVE_ID: ${{ steps.enclave_id.outputs.enclave_id }}
         ENCLAVE_PROTOCOL: azure-cc
       run: |
         bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh

@@ -1,32 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-# Below resources should be prepared ahead of running the E2E test.
-# See https://github.com/UnifiedID2/aks-demo/tree/master/vn-aks#setup-aks--node-pool
-export RESOURCE_GROUP="pipeline-vn-aks"
-export LOCATION="eastus"
-export VNET_NAME="pipeline-vnet"
-export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
-export NAT_GATEWAY_NAME="pipeline-nat-gateway"
-export AKS_CLUSTER_NAME="pipelinevncluster"
-export KEYVAULT_NAME="pipeline-vn-aks-vault"
-export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
-export MANAGED_IDENTITY="pipeline-vn-aks-opr-id"
-export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
-export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
-export DEPLOYMENT_ENV="integ"
-export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/resourcegroups/pipeline-vn-aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pipeline-vn-aks-opr-id"
-
-if [ -z "${IMAGE_VERSION}" ]; then
-  echo "IMAGE_VERSION can not be empty"
-  exit 1
-fi
-
-if [ -z "${OPERATOR_ROOT}" ]; then
-  echo "OPERATOR_ROOT can not be empty"
-  exit 1
-fi
-
 if [ -z "${BORE_URL_CORE}" ]; then
   echo "BORE_URL_CORE can not be empty"
   exit 1
@@ -37,8 +11,45 @@ if [ -z "${BORE_URL_OPTOUT}" ]; then
   exit 1
 fi
 
-ROOT="uid2-shared-actions/scripts/aks"
-OUTPUT_DIR="${ROOT}/azure-aks-artifacts"
+if [ -z "${IMAGE_VERSION}" ]; then
+  echo "IMAGE_VERSION can not be empty"
+  exit 1
+fi
+
+if [ -z "${TARGET_ENVIRONMENT}" ]; then
+  echo "TARGET_ENVIRONMENT can not be empty"
+  exit 1
+fi
+
+# Below resources should be prepared ahead of running the E2E test.
+# See https://github.com/UnifiedID2/aks-demo/tree/master/vn-aks#setup-aks--node-pool
+export RESOURCE_GROUP="pipeline-vn-aks"
+export LOCATION="eastus"
+export VNET_NAME="pipeline-vnet"
+export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
+export NAT_GATEWAY_NAME="pipeline-nat-gateway"
+export AKS_CLUSTER_NAME="pipelinevncluster"
+export KEYVAULT_NAME="pipeline-vn-aks-vault"
+if [ ${TARGET_ENVIRONMENT} == "mock" ]; then
+  export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
+elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
+  OPERATOR_KEY_NAME="pipeline-vn-aks-opr-key-name-integ"
+elif [ ${TARGET_ENVIRONMENT} == "prod" ]; then
+  OPERATOR_KEY_NAME="pipeline-vn-aks-opr-key-name-prod"
+else
+  echo "Arguments not supported: TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
+  exit 1
+fi
+
+export MANAGED_IDENTITY="pipeline-vn-aks-opr-id"
+export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
+export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
+export DEPLOYMENT_ENV="integ"
+export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/resourcegroups/pipeline-vn-aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pipeline-vn-aks-opr-id"
+
+OPERATOR_ROOT="./uid2-operator"
+SHARED_ACTIONS_ROOT="./uid2-shared-actions"
+OUTPUT_DIR="${SHARED_ACTIONS_ROOT}/scripts/aks/azure-aks-artifacts"
 
 IMAGE="ghcr.io/iabtechlab/uid2-operator:${IMAGE_VERSION}"
 
@@ -72,13 +83,14 @@ else
   # Generate deployment template
   cp ${INPUT_TEMPLATE_FILE} ${OUTPUT_TEMPLATE_FILE}
   sed -i "s#IMAGE_PLACEHOLDER#${IMAGE}#g" ${OUTPUT_TEMPLATE_FILE}
-  sed -i "s#IDENTITY_PLACEHOLDER#$MANAGED_IDENTITY_ID#g" "${OUTPUT_TEMPLATE_FILE}"
-  sed -i "s#VAULT_NAME_PLACEHOLDER#$KEYVAULT_NAME#g" "${OUTPUT_TEMPLATE_FILE}"
-  sed -i "s#OPERATOR_KEY_SECRET_NAME_PLACEHOLDER#$KEYVAULT_SECRET_NAME#g" "${OUTPUT_TEMPLATE_FILE}"
+  sed -i "s#IDENTITY_PLACEHOLDER#${MANAGED_IDENTITY_ID}#g" "${OUTPUT_TEMPLATE_FILE}"
+  sed -i "s#VAULT_NAME_PLACEHOLDER#${KEYVAULT_NAME}#g" "${OUTPUT_TEMPLATE_FILE}"
+  sed -i "s#OPERATOR_KEY_SECRET_NAME_PLACEHOLDER#${KEYVAULT_SECRET_NAME}#g" "${OUTPUT_TEMPLATE_FILE}"
   sed -i "s#DEPLOYMENT_ENVIRONMENT_PLACEHOLDER#integ#g" "${OUTPUT_TEMPLATE_FILE}"
   cat ${OUTPUT_TEMPLATE_FILE}
 
-  python3 ${ROOT}/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL http://$BORE_URL_CORE OPTOUT_BASE_URL http://$BORE_URL_OPTOUT SKIP_VALIDATIONS true
+  python3 ${SHARED_ACTIONS_ROOT}/scripts/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL ${BORE_URL_CORE} OPTOUT_BASE_URL ${BORE_URL_OPTOUT} SKIP_VALIDATIONS true
+
   cat ${OUTPUT_TEMPLATE_FILE}
   # --- Finished updating yaml file with resources ---
   if [[ $? -ne 0 ]]; then
@@ -99,6 +111,6 @@ fi
 if [ -z "${GITHUB_OUTPUT}" ]; then
   echo "Not in GitHub action"
 else
-  echo "OUTPUT_TEMPLATE_FILE=${OUTPUT_TEMPLATE_FILE}" >> ${GITHUB_OUTPUT}
-  echo "OUTPUT_POLICY_DIGEST_FILE=${OUTPUT_POLICY_DIGEST_FILE}" >> ${GITHUB_OUTPUT}
+  echo "TEMPLATE_FILE=${OUTPUT_TEMPLATE_FILE}" >> ${GITHUB_OUTPUT}
+  echo "POLICY_DIGEST_FILE=${OUTPUT_POLICY_DIGEST_FILE}" >> ${GITHUB_OUTPUT}
 fi

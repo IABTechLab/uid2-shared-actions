@@ -37,10 +37,10 @@ runs:
       id: start_gcp
       shell: bash
       env:
-        GCP_PROJECT: ${{ inputs.gcp_project }}
-        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
         BORE_URL_CORE: ${{ inputs.bore_url_core }}
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        GCP_PROJECT: ${{ inputs.gcp_project }}
+        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
         IMAGE_HASH: ${{ inputs.image_hash }}
       run: |

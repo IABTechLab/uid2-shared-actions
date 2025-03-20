@@ -5,9 +5,9 @@ inputs:
   operator_image_version:
     description: The uid2-operator image version
     default: latest
-  admin_root:
-    description: The root path for uid2-admin folder
-    default: uid2-admin
+  target_environment:
+    description: The target environment [mock, integ, prod]
+    required: true
   gcp_service_account:
     description: The GCP service account
     required: true
@@ -21,10 +21,10 @@ inputs:
 outputs:
   image_hash:
     description: The operator image hash
-    value: ${{ steps.image_digest.outputs.IMAGE_HASH }}
+    value: ${{ steps.image_digest.outputs.image_hash }}
   operator_key:
     description: The operator key
-    value: ${{ steps.enclave_metadata.outputs.OPERATOR_KEY }}
+    value: ${{ steps.operator_key.outputs.operator_key }}
 
 runs:
   using: "composite"
@@ -73,10 +73,20 @@ runs:
 
     - name: Prepare GCP enclave metadata
       id: enclave_metadata
+      if: ${{ inputs.target_environment == 'mock' }}
       shell: bash
       env:
-        ADMIN_ROOT: ${{ inputs.admin_root }}
-        ENCLAVE_ID: ${{ steps.enclave_id.outputs.ENCLAVE_ID }}
+        ENCLAVE_ID: ${{ steps.enclave_id.outputs.enclave_id }}
         ENCLAVE_PROTOCOL: gcp-oidc
       run: |
         bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh
+
+    - name: Get operator key
+      id: operator_key
+      shell: bash
+      env:
+          IDENTITY_SCOPE: UID2
+          TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+          ENCLAVE_PROTOCOL: gcp-oidc
+      run: |
+        bash ./uid2-shared-actions/scripts/get_operator_key.sh

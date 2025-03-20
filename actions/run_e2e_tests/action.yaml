@@ -4,39 +4,30 @@ description: Pull uid2-e2e Docker image and run E2E test suite
 inputs:
   e2e_network:
     description: The network to use for the E2E test
-    type: string
     default: e2e_default
   e2e_image_version:
     description: The version of E2E image
-    required: false
     default: latest
   uid2_e2e_identity_scope:
     description: Environment variable to run the E2E test
-    required: false
     default: UID2
   uid2_e2e_pipeline_operator_type:
     description: Environment variable to run the E2E test
-    required: false
     default: PUBLIC
   uid2_e2e_pipeline_operator_url:
     description: Environment variable to run the E2E test
-    required: false
     default: http://publicoperator:8080
   uid2_e2e_pipeline_operator_cloud_provider:
     description: Environment variable to run the E2E test
-    required: false
     default: PUBLIC
   uid2_e2e_phone_support:
     description: Environment variable to run the E2E test
-    required: false
     default: 'true'
   uid2_e2e_pipeline_core_url:
-    description: 'Environment variable for the Core service'
-    required: false
+    description: Environment variable for Core service
     default: 'http://core:8088'
   uid2_e2e_pipeline_optout_url:
-    description: 'Environment variable for the OptOut service'
-    required: false
+    description: Environment variable for OptOut service
     default: 'http://optout:8081'
 
 runs:

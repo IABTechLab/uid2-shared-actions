@@ -16,7 +16,7 @@ on:
         default: '.'
       publish_vulnerabilities:
         type: string
-        default: true
+        default: "true"
 
 env:
   REPO: ${{ github.event.repository.name }}
