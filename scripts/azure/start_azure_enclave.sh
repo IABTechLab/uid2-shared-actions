@@ -21,6 +21,11 @@ if [[ ! -f ${PARAMETERS_FILE} ]]; then
   exit 1
 fi
 
+if [ -z "${TARGET_ENVIRONMENT}" ]; then
+  echo "TARGET_ENVIRONMENT can not be empty"
+  exit 1
+fi
+
 # Below resources should be prepared ahead
 ROOT="./uid2-shared-actions/scripts"
 
@@ -30,7 +35,16 @@ source "${ROOT}/healthcheck.sh"
 RESOURCE_GROUP="uid-enclave-ci-cd"
 IDENTITY="uid-operator"
 VAULT_NAME="uid-operator"
-OPERATOR_KEY_NAME="operator-key-ci"
+if [ ${TARGET_ENVIRONMENT} == "mock" ]; then
+  OPERATOR_KEY_NAME="operator-key-ci"
+elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
+  OPERATOR_KEY_NAME="operator-key-ci-integ"
+elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
+  OPERATOR_KEY_NAME="operator-key-ci-prod"
+else
+  echo "Arguments not supported: TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
+  exit 1
+fi
 
 LOCATION="East US"
 DEPLOYMENT_ENV="integ"
