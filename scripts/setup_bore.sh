@@ -55,6 +55,7 @@ else
   else
     echo "Arguments not supported: IDENTITY_SCOPE=${IDENTITY_SCOPE}, TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
     exit 1
+  fi
 fi
 
 # Export to Github output

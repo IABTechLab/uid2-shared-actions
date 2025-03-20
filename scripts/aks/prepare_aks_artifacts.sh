@@ -30,7 +30,7 @@ export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
 export NAT_GATEWAY_NAME="pipeline-nat-gateway"
 export AKS_CLUSTER_NAME="pipelinevncluster"
 export KEYVAULT_NAME="pipeline-vn-aks-vault"
-if [ ${TARGET_ENVIRONMENT} == "mock" ];
+if [ ${TARGET_ENVIRONMENT} == "mock" ]; then
   export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
 elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
   OPERATOR_KEY_NAME="pipeline-vn-aks-opr-key-name-integ"
