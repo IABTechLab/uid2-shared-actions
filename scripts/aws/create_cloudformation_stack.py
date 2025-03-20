@@ -14,7 +14,7 @@ def create_egress(url, description):
     }
 
 def get_port(url):
-    return url.split(":")[1]
+    return url.split(":")[2]
 
 def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_cfg, ip_address, env):
     result = client.create_stack(
