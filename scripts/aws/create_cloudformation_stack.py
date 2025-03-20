@@ -23,7 +23,7 @@ def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_c
         Capabilities=['CAPABILITY_IAM'],
         Parameters=[
             { 'ParameterKey': 'APIToken', 'ParameterValue': api_token },
-            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': "prod" if env == "prod" else "integ" }, 
+            { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': "prod" if env == "prod" else "integ" }, # Mock env also uses integ
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
             { 'ParameterKey': 'VpcSubnet2', 'ParameterValue': dc_cfg['VpcSubnet2'] },
@@ -70,10 +70,7 @@ core_index = secrets.index('"core_base_url": "')
 secrets = secrets[:core_index] + secrets[core_index+2:]
 optout_index = secrets.index('", "optout_base_url": "')
 secrets = secrets[:optout_index] + secrets[optout_index+2:]
-if args.env == "mock":
-    secrets = secrets[:1] + [f'"core_base_url": "http://{args.core_url}"',f', "optout_base_url":  "http://{args.optout_url}'] + secrets[1:]
-else:
-    secrets = secrets[:1] + [f'"core_base_url": "https://{args.core_url}"',f', "optout_base_url":  "https://{args.optout_url}'] + secrets[1:]
+secrets = secrets[:1] + [f'"core_base_url": "{args.core_url}"',f', "optout_base_url":  "{args.optout_url}'] + secrets[1:]
 secrets.pop()
 secrets.extend([', "skip_validations": true', f', "debug_mode": {str(args.env != "prod").lower()}', '}'])
 cft['Resources']['TokenSecret']['Properties']['SecretString']['Fn::Join'][1] = secrets
