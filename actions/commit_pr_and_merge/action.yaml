@@ -74,7 +74,7 @@ runs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             title: '[CI Pipeline] ${{ inputs.message }}',
-            head: 'ci-${{ github.sha }}',
+            head: 'ci-${{ github.sha }}-${{ steps.random-number.outputs.num }}',
             base: '${{ inputs.base_branch == '' && github.ref_name || inputs.base_branch }}',
             body: '[CI Pipeline] Automated update'
           })).data;
