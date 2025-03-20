@@ -135,7 +135,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: gdm-UID2-5050-e2e
+          ref: v3
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -164,7 +164,7 @@ jobs:
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v3
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           target_environment: ${{ inputs.target_environment }}
@@ -174,7 +174,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v3
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           target_environment: ${{ inputs.target_environment }}
@@ -182,7 +182,7 @@ jobs:
       - name: Prepare AWS metadata
         id: prepare_aws_metadata
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@v3
         with:
           identity_scope: ${{ inputs.identity_scope }}
           target_environment: ${{ inputs.target_environment }}
@@ -191,7 +191,7 @@ jobs:
       - name: Prepare AKS metadata
         id: prepare_aks_metadata
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@v3
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           target_environment: ${{ inputs.target_environment }}
@@ -217,7 +217,7 @@ jobs:
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
@@ -229,7 +229,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
@@ -241,7 +241,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
@@ -255,7 +255,7 @@ jobs:
       - name: Start AKS private operator
         id: start_aks_private_operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@v3
         with:
           template_file: ${{ steps.prepare_aks_metadata.outputs.template_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
@@ -279,7 +279,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@gdm-UID2-5050-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
