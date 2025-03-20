@@ -224,7 +224,6 @@ jobs:
           gcp_project: ${{ inputs.gcp_project }}
           gcp_service_account: ${{ inputs.gcp_service_account }}
           image_hash: ${{ steps.prepare_gcp_metadata.outputs.image_hash }}
-          target_environment: ${{ inputs.target_environment }}
           operator_key: ${{ steps.prepare_gcp_metadata.outputs.operator_key }}
 
       - name: Start Azure private operator

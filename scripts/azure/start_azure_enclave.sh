@@ -58,13 +58,8 @@ jq_string_update ${PARAMETERS_FILE} parameters.vaultName.value "${VAULT_NAME}"
 jq_string_update ${PARAMETERS_FILE} parameters.operatorKeySecretName.value "${OPERATOR_KEY_NAME}"
 jq_string_update ${PARAMETERS_FILE} parameters.skipValidations.value "true"
 jq_string_update ${PARAMETERS_FILE} parameters.deploymentEnvironment.value "${DEPLOYMENT_ENV}"
-if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
-  jq_string_update ${PARAMETERS_FILE} parameters.coreBaseUrl.value "http://${BORE_URL_CORE}"
-  jq_string_update ${PARAMETERS_FILE} parameters.optoutBaseUrl.value "http://${BORE_URL_OPTOUT}"
-else
-  jq_string_update ${PARAMETERS_FILE} parameters.coreBaseUrl.value "https://${BORE_URL_CORE}"
-  jq_string_update ${PARAMETERS_FILE} parameters.optoutBaseUrl.value "https://${BORE_URL_OPTOUT}"
-fi
+jq_string_update ${PARAMETERS_FILE} parameters.coreBaseUrl.value "${BORE_URL_CORE}"
+jq_string_update ${PARAMETERS_FILE} parameters.optoutBaseUrl.value "${BORE_URL_OPTOUT}"
 
 cat ${PARAMETERS_FILE}
 

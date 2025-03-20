@@ -49,13 +49,8 @@ else
         echo "uid2_e2e_pipeline_operator_url=${AKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
     fi
 
-    if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
-        echo "uid2_e2e_pipeline_core_url=http://${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}
-        echo "uid2_e2e_pipeline_optout_url=http://${BORE_URL_OPTOUT}" >> ${GITHUB_OUTPUT}
-    else
-        echo "uid2_e2e_pipeline_core_url=https://${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}
-        echo "uid2_e2e_pipeline_optout_url=https://${BORE_URL_OPTOUT}" >> ${GITHUB_OUTPUT}
-    fi
+    echo "uid2_e2e_pipeline_core_url=${BORE_URL_CORE}" >> ${GITHUB_OUTPUT}
+    echo "uid2_e2e_pipeline_optout_url=${BORE_URL_OPTOUT}" >> ${GITHUB_OUTPUT}
 fi
 
 if [ "${IDENTITY_SCOPE}" == "UID2" ]; then
