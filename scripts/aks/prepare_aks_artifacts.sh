@@ -33,9 +33,9 @@ export KEYVAULT_NAME="pipeline-vn-aks-vault"
 if [ ${TARGET_ENVIRONMENT} == "mock" ]; then
   export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
 elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
-  OPERATOR_KEY_NAME="pipeline-vn-aks-opr-key-name-integ"
+  KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name-integ"
 elif [ ${TARGET_ENVIRONMENT} == "prod" ]; then
-  OPERATOR_KEY_NAME="pipeline-vn-aks-opr-key-name-prod"
+  KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name-prod"
 else
   echo "Arguments not supported: TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
   exit 1
