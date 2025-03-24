@@ -292,6 +292,9 @@ jobs:
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
+          e2e_suites: ${{ steps.decide_env_var.outputs.e2e_suites }}
+          e2e_args_json: ${{ steps.decide_env_var.outputs.e2e_args_json }}
+          e2e_env: ${{ steps.decide_env_var.outputs.e2e_env }}
           e2e_identity_scope: ${{ inputs.identity_scope }}
           e2e_phone_support: ${{ steps.decide_env_var.outputs.e2e_phone_support }}
           uid2_core_e2e_core_url: ${{ steps.decide_env_var.outputs.uid2_core_e2e_core_url }}

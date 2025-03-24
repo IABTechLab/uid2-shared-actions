@@ -74,6 +74,9 @@ else
     elif [ "${OPERATOR_TYPE}" == "aks" ]; then
         echo "uid2_pipeline_e2e_operator_url=${AKS_OPERATOR_URL}" >> ${GITHUB_OUTPUT}
         echo "uid2_pipeline_e2e_operator_cloud_provider=AZURE" >> ${GITHUB_OUTPUT}
+    else
+        echo "Arguments not supported: OPERATOR_TYPE=${OPERATOR_TYPE}"
+        exit 1
     fi
 fi
 

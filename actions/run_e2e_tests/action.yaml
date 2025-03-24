@@ -10,13 +10,13 @@ inputs:
     default: latest
   e2e_suites:
     description: Environment variable to run the E2E test
-    default: E2ECoreTestSuite,E2EPrivateOperatorTestSuite
-  e2e_env:
-    description: Environment variable to run the E2E test
-    default: github-test-pipeline-local
+    default: E2ECoreTestSuite,E2EPublicOperatorTestSuite
   e2e_args_json:
     description: Environment variable to run the E2E test
     default: ''
+  e2e_env:
+    description: Environment variable to run the E2E test
+    default: github-test-pipeline-local
   e2e_identity_scope:
     description: Environment variable to run the E2E test
     default: UID2
