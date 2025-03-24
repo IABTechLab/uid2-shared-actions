@@ -10,9 +10,9 @@ inputs:
     required: true
 
 outputs:
-  uid2_e2e_pipeline_operator_url:
+  uid2_pipeline_e2e_operator_url:
     description: The AKS operator URL
-    value: ${{ steps.start_aks.outputs.uid2_e2e_pipeline_operator_url }}
+    value: ${{ steps.start_aks.outputs.uid2_pipeline_e2e_operator_url }}
 
 runs:
   using: "composite"

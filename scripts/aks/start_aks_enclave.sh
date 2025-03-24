@@ -37,7 +37,7 @@ fi
 IP=$(az network public-ip list --resource-group ${AKS_NODE_RESOURCE_GROUP} --query "[?starts_with(name, 'kubernetes')].ipAddress" --output tsv)
 
 echo "Instance IP: ${IP}"
-echo "uid2_e2e_pipeline_operator_url=http://${IP}" >> ${GITHUB_OUTPUT}
+echo "uid2_pipeline_e2e_operator_url=http://${IP}" >> ${GITHUB_OUTPUT}
 
 HEALTHCHECK_URL="http://${IP}/ops/healthcheck"
 

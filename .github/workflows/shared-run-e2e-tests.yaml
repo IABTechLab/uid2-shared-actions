@@ -76,6 +76,9 @@ on:
 env:
   REGISTRY: ghcr.io
 
+  E2E_UID2_INTEG_ARGS_JSON: ${{ secrets.E2E_UID2_INTEG_ARGS_JSON }}
+  E2E_UID2_INTEG_PRIVATE_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_INTEG_PRIVATE_OPERATOR_API_KEY }}
+
   E2E_UID2_INTEG_GCP_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_INTEG_GCP_OPERATOR_API_KEY }}
   E2E_UID2_INTEG_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_INTEG_AWS_OPERATOR_API_KEY }}
 
@@ -265,15 +268,14 @@ jobs:
         shell: bash
         env:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
-          OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           IDENTITY_SCOPE: ${{ inputs.identity_scope }}
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
           BORE_URL_CORE: ${{ steps.bore.outputs.bore_url_core }}
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.bore_url_optout }}
-          GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          AKS_OPERATOR_URL: ${{ steps.start_aks_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_pipeline_e2e_operator_url }}
+          AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_pipeline_e2e_operator_url }}
+          AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_pipeline_e2e_operator_url }}
+          AKS_OPERATOR_URL: ${{ steps.start_aks_private_operator.outputs.uid2_pipeline_e2e_operator_url }}
         run: |
           bash uid2-shared-actions/scripts/decide_e2e_env.sh
 
@@ -283,13 +285,14 @@ jobs:
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
-          uid2_e2e_identity_scope: ${{ inputs.identity_scope }}
-          uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
-          uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
-          uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
-          uid2_e2e_phone_support: ${{ steps.decide_env_var.outputs.uid2_e2e_phone_support }}
-          uid2_e2e_pipeline_core_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_core_url }}
-          uid2_e2e_pipeline_optout_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_optout_url }}
+          e2e_identity_scope: ${{ inputs.identity_scope }}
+          e2e_phone_support: ${{ steps.decide_env_var.outputs.e2e_phone_support }}
+          uid2_core_e2e_core_url: ${{ steps.decide_env_var.outputs.uid2_core_e2e_core_url }}
+          uid2_core_e2e_optout_url: ${{ steps.decide_env_var.outputs.uid2_core_e2e_optout_url }}
+          uid2_pipeline_e2e_core_url: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_core_url }}
+          uid2_pipeline_e2e_operator_url: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_url }}
+          uid2_pipeline_e2e_operator_type: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_type }}
+          uid2_pipeline_e2e_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_cloud_provider }}
 
       - name: Stop GCP private operator
         if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'gcp' }}
