@@ -47,6 +47,19 @@ else
     else
         echo "e2e_suites=E2EPrivateOperatorTestSuite" >> ${GITHUB_OUTPUT}
         echo "e2e_env=github-test-pipeline" >> ${GITHUB_OUTPUT}
+
+        if [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ]; then
+            echo "e2e_args_json=${E2E_UID2_INTEG_ARGS_JSON}" >> ${GITHUB_OUTPUT}
+        elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ]; then
+            echo "e2e_args_json=${E2E_UID2_PROD_ARGS_JSON}" >> ${GITHUB_OUTPUT}
+        elif [ "${IDENTITY_SCOPE}" == "EUID" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ]; then
+            echo "e2e_args_json=${E2E_EUID_INTEG_ARGS_JSON}" >> ${GITHUB_OUTPUT}
+        elif [ "${IDENTITY_SCOPE}" == "EUID" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ]; then
+            echo "e2e_args_json=${E2E_EUID_PROD_ARGS_JSON}" >> ${GITHUB_OUTPUT}
+        else
+            echo "Arguments not supported: IDENTITY_SCOPE=${IDENTITY_SCOPE}, TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
+            exit 1
+        fi
     fi
 
     if [ "${OPERATOR_TYPE}" == "gcp" ]; then
@@ -68,4 +81,7 @@ if [ "${IDENTITY_SCOPE}" == "UID2" ]; then
     echo "e2e_phone_support=true" >> ${GITHUB_OUTPUT}
 elif [ "${IDENTITY_SCOPE}" == "EUID" ]; then
     echo "e2e_phone_support=false" >> ${GITHUB_OUTPUT}
+else
+    echo "Arguments not supported: IDENTITY_SCOPE=${IDENTITY_SCOPE}"
+    exit 1
 fi

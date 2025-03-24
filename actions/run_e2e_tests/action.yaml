@@ -46,54 +46,60 @@ runs:
   using: "composite"
 
   steps:
-    - name: Run E2E tests
+    - name: Pull E2E image
       shell: bash
       run: |
         docker pull ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
         docker images
 
-        if [ "${E2E_ENV}" == "github-test-pipeline-local" ]; then
-          docker run \
-          --env E2E_SUITES=${{ inputs.e2e_suites }} \
-          --env E2E_ENV=${{ inputs.e2e_env }} \
-          --env E2E_IDENTITY_SCOPE='${{ inputs.e2e_identity_scope }}' \
-          --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
-          --env UID2_CORE_E2E_OPERATOR_API_KEY='UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdEE=' \
-          --env UID2_CORE_E2E_OPTOUT_API_KEY='UID2-O-L-127-pDqphU.6FuXzThQMY8YEsCA8crqvAlzyGrjcF8P6XO84=' \
-          --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
-          --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
-          --env UID2_OPERATOR_E2E_CLIENT_SITE_ID='999' \
-          --env UID2_OPERATOR_E2E_CLIENT_API_KEY='UID2-C-L-999-fCXrMM.fsR3mDqAXELtWWMS+xG1s7RdgRTMqdOH2qaAo=' \
-          --env UID2_OPERATOR_E2E_CLIENT_API_SECRET='DzBzbjTJcYL0swDtFs2krRNu+g1Eokm2tBU4dEuD0Wk=' \
-          --env UID2_OPERATOR_E2E_CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF='UID2-C-L-1000-qxpBsF.ibeCDBpD2bq4Zm7inDacGioUk1aaLeNJrabow=' \
-          --env UID2_OPERATOR_E2E_CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF='VT7+t0G/RVueMuVZAL56I2c3JJFSYQfhbu8yo0V/Tds=' \
-          --env UID2_OPERATOR_E2E_CLIENT_API_KEY_SHARING_RECIPIENT='UID2-C-L-1000-qxpBsF.ibeCDBpD2bq4Zm7inDacGioUk1aaLeNJrabow=' \
-          --env UID2_OPERATOR_E2E_CLIENT_API_SECRET_SHARING_RECIPIENT='VT7+t0G/RVueMuVZAL56I2c3JJFSYQfhbu8yo0V/Tds=' \
-          --env UID2_OPERATOR_E2E_CLIENT_API_KEY_SHARING_NON_RECIPIENT='UID2-C-L-123-t32pCM.5NCX1E94UgOd2f8zhsKmxzCoyhXohHYSSWR8U=' \
-          --env UID2_OPERATOR_E2E_CLIENT_API_SECRET_NON_SHARING_RECIPIENT='FsD4bvtjMkeTonx6HvQp6u0EiI1ApGH4pIZzZ5P7UcQ=' \
-          --env UID2_OPERATOR_E2E_CSTG_SUBSCRIPTION_ID='LBk2xJsgrS' \
-          --env UID2_OPERATOR_E2E_CSTG_SERVER_PUBLIC_KEY='UID2-X-L-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWyCP9O/6ppffj8f5PUWsEhAoMNdTBnpnkiOPZBkVnLkxOyTjPsKzf5J3ApPHzutAGNGgKAzFc6TuCfo+BWsZtQ==' \
-          --env UID2_OPERATOR_E2E_CSTG_ORIGIN='https://example.com' \
-          --env UID2_OPERATOR_E2E_CSTG_INVALID_ORIGIN='https://example.org' \
-          --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
-          --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
-          --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
-          --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}' \
-          --network '${{ inputs.e2e_network }}' \
-          ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
-        else
-          docker run \
-          --env E2E_SUITES='${{ inputs.e2e_suites }}' \
-          --env E2E_ARGS_JSON='${{ inputs.e2e_args_json }}' \
-          --env E2E_ENV='${{ inputs.e2e_env }}' \
-          --env E2E_IDENTITY_SCOPE='${{ inputs.e2e_identity_scope }}' \
-          --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
-          --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
-          --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
-          --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
-          --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
-          --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
-          --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}' \
-          --network '${{ inputs.e2e_network }}' \
-          ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
-        fi
+    - name: Run mock E2E tests
+      if: ${{ inputs.e2e_env == 'github-test-pipeline-local' }}
+      shell: bash
+      run: |
+        docker run \
+        --env E2E_SUITES=${{ inputs.e2e_suites }} \
+        --env E2E_ENV=${{ inputs.e2e_env }} \
+        --env E2E_IDENTITY_SCOPE='${{ inputs.e2e_identity_scope }}' \
+        --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
+        --env UID2_CORE_E2E_OPERATOR_API_KEY='UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdEE=' \
+        --env UID2_CORE_E2E_OPTOUT_API_KEY='UID2-O-L-127-pDqphU.6FuXzThQMY8YEsCA8crqvAlzyGrjcF8P6XO84=' \
+        --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
+        --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
+        --env UID2_OPERATOR_E2E_CLIENT_SITE_ID='999' \
+        --env UID2_OPERATOR_E2E_CLIENT_API_KEY='UID2-C-L-999-fCXrMM.fsR3mDqAXELtWWMS+xG1s7RdgRTMqdOH2qaAo=' \
+        --env UID2_OPERATOR_E2E_CLIENT_API_SECRET='DzBzbjTJcYL0swDtFs2krRNu+g1Eokm2tBU4dEuD0Wk=' \
+        --env UID2_OPERATOR_E2E_CLIENT_API_KEY_BEFORE_OPTOUT_CUTOFF='UID2-C-L-1000-qxpBsF.ibeCDBpD2bq4Zm7inDacGioUk1aaLeNJrabow=' \
+        --env UID2_OPERATOR_E2E_CLIENT_API_SECRET_BEFORE_OPTOUT_CUTOFF='VT7+t0G/RVueMuVZAL56I2c3JJFSYQfhbu8yo0V/Tds=' \
+        --env UID2_OPERATOR_E2E_CLIENT_API_KEY_SHARING_RECIPIENT='UID2-C-L-1000-qxpBsF.ibeCDBpD2bq4Zm7inDacGioUk1aaLeNJrabow=' \
+        --env UID2_OPERATOR_E2E_CLIENT_API_SECRET_SHARING_RECIPIENT='VT7+t0G/RVueMuVZAL56I2c3JJFSYQfhbu8yo0V/Tds=' \
+        --env UID2_OPERATOR_E2E_CLIENT_API_KEY_SHARING_NON_RECIPIENT='UID2-C-L-123-t32pCM.5NCX1E94UgOd2f8zhsKmxzCoyhXohHYSSWR8U=' \
+        --env UID2_OPERATOR_E2E_CLIENT_API_SECRET_NON_SHARING_RECIPIENT='FsD4bvtjMkeTonx6HvQp6u0EiI1ApGH4pIZzZ5P7UcQ=' \
+        --env UID2_OPERATOR_E2E_CSTG_SUBSCRIPTION_ID='LBk2xJsgrS' \
+        --env UID2_OPERATOR_E2E_CSTG_SERVER_PUBLIC_KEY='UID2-X-L-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWyCP9O/6ppffj8f5PUWsEhAoMNdTBnpnkiOPZBkVnLkxOyTjPsKzf5J3ApPHzutAGNGgKAzFc6TuCfo+BWsZtQ==' \
+        --env UID2_OPERATOR_E2E_CSTG_ORIGIN='https://example.com' \
+        --env UID2_OPERATOR_E2E_CSTG_INVALID_ORIGIN='https://example.org' \
+        --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
+        --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
+        --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
+        --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}' \
+        --network '${{ inputs.e2e_network }}' \
+        ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
+
+    - name: Run real E2E tests
+      if: ${{ inputs.e2e_env == 'github-test-pipeline' }}
+      shell: bash
+      run: |
+        docker run \
+        --env E2E_SUITES='${{ inputs.e2e_suites }}' \
+        --env E2E_ARGS_JSON='${{ inputs.e2e_args_json }}' \
+        --env E2E_ENV='${{ inputs.e2e_env }}' \
+        --env E2E_IDENTITY_SCOPE='${{ inputs.e2e_identity_scope }}' \
+        --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
+        --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
+        --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
+        --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
+        --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
+        --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
+        --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}' \
+        --network '${{ inputs.e2e_network }}' \
+        ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
