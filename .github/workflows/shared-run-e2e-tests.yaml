@@ -379,5 +379,6 @@ jobs:
 
       - name: Stop AKS operator
         if: ${{ inputs.operator_type == 'aks' }}
-        run: |
-            bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@gdm-UID2-5040-e2e
+        with:
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
