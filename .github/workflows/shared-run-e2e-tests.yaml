@@ -363,10 +363,10 @@ jobs:
 
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
-        env:
-          AZURE_CONTAINER_GROUP_NAME: ${{ needs.e2e-test.outputs.azure_container_group_name }}
-        run: |
-          bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+        uses: IABTechLab/uid2-shared-actions/actions/stop_azure_private_operator@gdm-UID2-5040-e2e
+        with:
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          azure_container_group_name: ${{ needs.e2e-test.outputs.azure_container_group_name }}
 
       - name: Stop AWS private operator
         if: ${{ inputs.operator_type == 'aws' }}

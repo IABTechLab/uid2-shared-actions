@@ -1,5 +1,5 @@
 name: Stop AWS Private Operator
-description: Spins down a AWS private operator
+description: Spins down an AWS private operator
 
 inputs:
   aws_stack_name:
