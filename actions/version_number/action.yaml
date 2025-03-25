@@ -66,7 +66,7 @@ runs:
         REF_PREFIX="refs/heads/"
         BRANCH_NAME=${BRANCH_NAME_WITH_REF#$REF_PREFIX}
         BRANCH_NAME_TRUNC=${BRANCH_NAME#50}
-        DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+        DEFAULT_BRANCH=${{ github.event.repository.default_branch }}
         if [[ "${{ inputs.version_number }}" != "" ]]; then
           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
