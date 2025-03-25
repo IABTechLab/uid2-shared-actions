@@ -340,6 +340,10 @@ jobs:
     needs: [e2e-test]
     runs-on: ubuntu-latest
     environment: 'e2e-test-cleanup'
+    permissions:
+      contents: write
+      packages: read
+      id-token: write
     steps:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
