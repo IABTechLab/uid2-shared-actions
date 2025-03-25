@@ -100,6 +100,10 @@ jobs:
       contents: write
       packages: read
       id-token: write
+    outputs:
+      gcp_instance_name: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
+      azure_container_group_name: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
+      aws_stack_name: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
     steps:
       - name: Log in to the Docker container registry
         uses: docker/login-action@v3
@@ -329,3 +333,39 @@ jobs:
         if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'aks' }}
         run: |
             bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
+
+  e2e-test-cleanup:
+    name: E2E Test Cleanup
+    if: ${{ always() && !inputs.operator_shutdown && inputs.operator_type != 'public' }}
+    needs: [e2e-test]
+    runs-on: ubuntu-latest
+    environment: 'e2e-test-cleanup'
+    steps:
+    - name: Stop GCP private operator
+      if: ${{ inputs.operator_type == 'gcp' }}
+      env:
+        GCP_PROJECT: ${{ inputs.gcp_project }}
+        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
+        GCP_INSTANCE_NAME: ${{ needs.e2e-test.outputs.gcp_instance_name }}
+      run: |
+        bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+
+    - name: Stop Azure private operator
+      if: ${{ inputs.operator_type == 'azure' }}
+      env:
+        AZURE_CONTAINER_GROUP_NAME: ${{ needs.e2e-test.outputs.azure_container_group_name }}
+      run: |
+        bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+
+    - name: Stop AWS private operator
+      if: ${{ inputs.operator_type == 'aws' }}
+      env:
+        AWS_STACK_NAME: ${{ needs.e2e-test.outputs.aws_stack_name }}
+        AWS_REGION: ${{ inputs.aws_region }}
+      run: |
+          bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+
+    - name: Stop AKS operator
+      if: ${{ inputs.operator_type == 'aks' }}
+      run: |
+          bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
