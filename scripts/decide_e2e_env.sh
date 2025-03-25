@@ -50,12 +50,20 @@ else
 
         if [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ] && [ "${OPERATOR_TYPE}" == "gcp" ]; then
             echo "e2e_args_json=${E2E_UID2_INTEG_GCP_ARGS_JSON}" >> ${GITHUB_OUTPUT}
+        elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ] && [ "${OPERATOR_TYPE}" == "azure" ]; then
+            echo "e2e_args_json=${E2E_UID2_INTEG_AZURE_ARGS_JSON}" >> ${GITHUB_OUTPUT}
         elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ] && [ "${OPERATOR_TYPE}" == "aws" ]; then
             echo "e2e_args_json=${E2E_UID2_INTEG_AWS_ARGS_JSON}" >> ${GITHUB_OUTPUT}
+        elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ] && [ "${OPERATOR_TYPE}" == "aks" ]; then
+            echo "e2e_args_json=${E2E_UID2_INTEG_AZURE_ARGS_JSON}" >> ${GITHUB_OUTPUT}
         elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ] && [ "${OPERATOR_TYPE}" == "gcp" ]; then
             echo "e2e_args_json=${E2E_UID2_PROD_GCP_ARGS_JSON}" >> ${GITHUB_OUTPUT}
+        elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ] && [ "${OPERATOR_TYPE}" == "azure" ]; then
+            echo "e2e_args_json=${E2E_UID2_PROD_AZURE_ARGS_JSON}" >> ${GITHUB_OUTPUT}
         elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ] && [ "${OPERATOR_TYPE}" == "aws" ]; then
             echo "e2e_args_json=${E2E_UID2_PROD_AWS_ARGS_JSON}" >> ${GITHUB_OUTPUT}
+        elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ] && [ "${OPERATOR_TYPE}" == "aks" ]; then
+            echo "e2e_args_json=${E2E_UID2_PROD_AZURE_ARGS_JSON}" >> ${GITHUB_OUTPUT}
         elif [ "${IDENTITY_SCOPE}" == "EUID" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ] && [ "${OPERATOR_TYPE}" == "aws" ]; then
             echo "e2e_args_json=${E2E_EUID_INTEG_AWS_ARGS_JSON}" >> ${GITHUB_OUTPUT}
         elif [ "${IDENTITY_SCOPE}" == "EUID" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ] && [ "${OPERATOR_TYPE}" == "aws" ]; then
