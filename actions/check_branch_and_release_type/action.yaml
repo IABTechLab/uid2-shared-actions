@@ -25,7 +25,7 @@ runs:
           FORCE_RELEASE=${{ inputs.force_release == 'yes' }}
           FORCE_NOT_RELEASE=${{ inputs.force_release == 'no' }}
           CHECK_BRANCH_FOR_RELEASE=${{ inputs.force_release == 'branch' }}
-          BRANCH_ALLOWS_RELEASE=${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name) }}
+          BRANCH_ALLOWS_RELEASE=${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name || startsWith(github.ref_name, 'release')) }}
           if $FORCE_RELEASE; then
             ISRELEASE=true
           elif $FORCE_NOT_RELEASE; then
