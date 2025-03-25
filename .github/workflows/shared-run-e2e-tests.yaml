@@ -341,31 +341,38 @@ jobs:
     runs-on: ubuntu-latest
     environment: 'e2e-test-cleanup'
     steps:
-    - name: Stop GCP private operator
-      if: ${{ inputs.operator_type == 'gcp' }}
-      env:
-        GCP_PROJECT: ${{ inputs.gcp_project }}
-        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
-        GCP_INSTANCE_NAME: ${{ needs.e2e-test.outputs.gcp_instance_name }}
-      run: |
-        bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+      - name: Checkout uid2-shared-actions repo
+        uses: actions/checkout@v4
+        with:
+          ref: gdm-UID2-5040-e2e
+          repository: IABTechLab/uid2-shared-actions
+          path: uid2-shared-actions
 
-    - name: Stop Azure private operator
-      if: ${{ inputs.operator_type == 'azure' }}
-      env:
-        AZURE_CONTAINER_GROUP_NAME: ${{ needs.e2e-test.outputs.azure_container_group_name }}
-      run: |
-        bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+      - name: Stop GCP private operator
+        if: ${{ inputs.operator_type == 'gcp' }}
+        env:
+          GCP_PROJECT: ${{ inputs.gcp_project }}
+          SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
+          GCP_INSTANCE_NAME: ${{ needs.e2e-test.outputs.gcp_instance_name }}
+        run: |
+          bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
-    - name: Stop AWS private operator
-      if: ${{ inputs.operator_type == 'aws' }}
-      env:
-        AWS_STACK_NAME: ${{ needs.e2e-test.outputs.aws_stack_name }}
-        AWS_REGION: ${{ inputs.aws_region }}
-      run: |
-          bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+      - name: Stop Azure private operator
+        if: ${{ inputs.operator_type == 'azure' }}
+        env:
+          AZURE_CONTAINER_GROUP_NAME: ${{ needs.e2e-test.outputs.azure_container_group_name }}
+        run: |
+          bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 
-    - name: Stop AKS operator
-      if: ${{ inputs.operator_type == 'aks' }}
-      run: |
-          bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
+      - name: Stop AWS private operator
+        if: ${{ inputs.operator_type == 'aws' }}
+        env:
+          AWS_STACK_NAME: ${{ needs.e2e-test.outputs.aws_stack_name }}
+          AWS_REGION: ${{ inputs.aws_region }}
+        run: |
+            bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+
+      - name: Stop AKS operator
+        if: ${{ inputs.operator_type == 'aks' }}
+        run: |
+            bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
