@@ -79,13 +79,12 @@ runs:
           else
             echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
           fi
-        elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
-          echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
         elif [[ "$BRANCH_NAME" =~ ^release.* ]]; then
-        # For release branches, append -r with incrementing number
           BASE_VERSION=$NBGV_SimpleVersion
           RELEASE_NUMBER=$GITHUB_RUN_NUMBER
           echo "new_version=$BASE_VERSION-r$RELEASE_NUMBER" >> $GITHUB_OUTPUT
+        elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
+          echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
         else
           echo "new_version=$NBGV_SimpleVersion" >> $GITHUB_OUTPUT
         fi
