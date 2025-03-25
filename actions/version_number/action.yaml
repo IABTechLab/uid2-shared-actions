@@ -81,7 +81,7 @@ runs:
           fi
         elif [[ "$BRANCH_NAME" =~ ^release.* ]]; then
           BASE_VERSION=$NBGV_SimpleVersion
-          RELEASE_NUMBER=$GITHUB_RUN_NUMBER
+          RELEASE_NUMBER=$(git rev-list --count HEAD ^$DEFAULT_BRANCH)
           echo "new_version=$BASE_VERSION-r$RELEASE_NUMBER" >> $GITHUB_OUTPUT
         elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
           echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
