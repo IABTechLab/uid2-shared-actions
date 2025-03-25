@@ -335,7 +335,7 @@ jobs:
             bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
 
   e2e-test-cleanup:
-    name: E2E Test Cleanup
+    name: E2E Test Cleanup (Delayed Operator Shutdown)
     if: ${{ always() && inputs.delay_operator_shutdown && inputs.operator_type != 'public' }}
     needs: [e2e-test]
     runs-on: ubuntu-latest
