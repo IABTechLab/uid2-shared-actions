@@ -14,7 +14,7 @@ on:
         description: The target environment [mock, integ, prod]
         type: string
         default: mock
-      operator_shutdown:
+      delay_operator_shutdown:
         description: If true, will automatically shut down operators after E2E tests. Defaults to true.
         type: boolean
         default: true
@@ -306,7 +306,7 @@ jobs:
           uid2_pipeline_e2e_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_cloud_provider }}
 
       - name: Stop GCP private operator
-        if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'gcp' }}
+        if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'gcp' }}
         env:
           GCP_PROJECT: ${{ inputs.gcp_project }}
           SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
@@ -315,14 +315,14 @@ jobs:
           bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
       - name: Stop Azure private operator
-        if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'azure' }}
+        if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'azure' }}
         env:
           AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
           bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 
       - name: Stop AWS private operator
-        if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'aws' }}
+        if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'aws' }}
         env:
           AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
@@ -330,13 +330,13 @@ jobs:
             bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
 
       - name: Stop AKS operator
-        if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'aks' }}
+        if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'aks' }}
         run: |
             bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
 
   e2e-test-cleanup:
     name: E2E Test Cleanup
-    if: ${{ always() && !inputs.operator_shutdown && inputs.operator_type != 'public' }}
+    if: ${{ always() && inputs.delay_operator_shutdown && inputs.operator_type != 'public' }}
     needs: [e2e-test]
     runs-on: ubuntu-latest
     environment: 'e2e-test-cleanup'
