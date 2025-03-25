@@ -1,0 +1,30 @@
+name: Stop AWS Private Operator
+description: Spins down a AWS private operator
+
+inputs:
+  aws_stack_name:
+    description: The AWS instance name
+    required: true
+  aws_region:
+    description: The AWS region
+    required: true
+
+runs:
+  using: "composite"
+
+  steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::072245134533:role/github-runner-for-uid2-operator
+      - run: aws sts get-caller-identity
+        shell: bash
+
+      - name: Stop AWS private operator
+        shell: bash
+        env:
+          AWS_STACK_NAME: ${{ inputs.aws_stack_name }}
+          AWS_REGION: ${{ inputs.aws_region }}
+        run: |
+            bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh

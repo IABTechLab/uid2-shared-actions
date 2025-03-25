@@ -64,7 +64,7 @@ on:
         type: string
 
       aws_region:
-        description: The AWS region [us-east-1, us-west-1, ca-central-1, eu-central-1]
+        description: The AWS region
         type: string
       aws_ami:
         description: The AWS AMI ID
@@ -350,12 +350,12 @@ jobs:
 
       - name: Stop GCP private operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        env:
-          GCP_PROJECT: ${{ inputs.gcp_project }}
-          SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
-          GCP_INSTANCE_NAME: ${{ needs.e2e-test.outputs.gcp_instance_name }}
-        run: |
-          bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+        uses: IABTechLab/uid2-shared-actions/actions/stop_gcp_private_operator@gdm-UID2-5040-e2e
+        with:
+          gcp_project: ${{ inputs.gcp_project }}
+          gcp_service_account: ${{ inputs.gcp_service_account }}
+          gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
+          gcp_instance_name: ${{ needs.e2e-test.outputs.gcp_instance_name }}
 
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
@@ -366,11 +366,10 @@ jobs:
 
       - name: Stop AWS private operator
         if: ${{ inputs.operator_type == 'aws' }}
-        env:
-          AWS_STACK_NAME: ${{ needs.e2e-test.outputs.aws_stack_name }}
-          AWS_REGION: ${{ inputs.aws_region }}
-        run: |
-            bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aws_private_operator@gdm-UID2-5040-e2e
+        with:
+          aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
+          aws_region: ${{ inputs.aws_region }}
 
       - name: Stop AKS operator
         if: ${{ inputs.operator_type == 'aks' }}
