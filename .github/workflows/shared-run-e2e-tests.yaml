@@ -14,7 +14,7 @@ on:
         description: The target environment [mock, integ, prod]
         type: string
         default: mock
-      operator_shutdown:
+      delay_operator_shutdown:
         description: If true, will automatically shut down operators after E2E tests. Defaults to true.
         type: boolean
         default: true
@@ -64,7 +64,7 @@ on:
         type: string
 
       aws_region:
-        description: The AWS region [us-east-1, us-west-1, ca-central-1, eu-central-1]
+        description: The AWS region
         type: string
       aws_ami:
         description: The AWS AMI ID
@@ -76,13 +76,22 @@ on:
 env:
   REGISTRY: ghcr.io
 
+  E2E_UID2_INTEG_GCP_ARGS_JSON: ${{ secrets.E2E_UID2_INTEG_GCP_ARGS_JSON }}
+  E2E_UID2_INTEG_AWS_ARGS_JSON: ${{ secrets.E2E_UID2_INTEG_AWS_ARGS_JSON }}
+  E2E_UID2_INTEG_AZURE_ARGS_JSON: ${{ secrets.E2E_UID2_INTEG_AZURE_ARGS_JSON }}
   E2E_UID2_INTEG_GCP_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_INTEG_GCP_OPERATOR_API_KEY }}
   E2E_UID2_INTEG_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_INTEG_AWS_OPERATOR_API_KEY }}
 
+  E2E_UID2_PROD_GCP_ARGS_JSON: ${{ secrets.E2E_UID2_PROD_GCP_ARGS_JSON }}
+  E2E_UID2_PROD_AZURE_ARGS_JSON: ${{ secrets.E2E_UID2_PROD_AZURE_ARGS_JSON }}
+  E2E_UID2_PROD_AWS_ARGS_JSON: ${{ secrets.E2E_UID2_PROD_AWS_ARGS_JSON }}
   E2E_UID2_PROD_GCP_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_PROD_GCP_OPERATOR_API_KEY }}
   E2E_UID2_PROD_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_UID2_PROD_AWS_OPERATOR_API_KEY }}
 
+  E2E_EUID_INTEG_AWS_ARGS_JSON: ${{ secrets.E2E_EUID_INTEG_AWS_ARGS_JSON }}
   E2E_EUID_INTEG_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_EUID_INTEG_AWS_OPERATOR_API_KEY }}
+
+  E2E_EUID_PROD_AWS_ARGS_JSON: ${{ secrets.E2E_EUID_PROD_AWS_ARGS_JSON }}
   E2E_EUID_PROD_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_EUID_PROD_AWS_OPERATOR_API_KEY }}
 
 jobs:
@@ -93,6 +102,10 @@ jobs:
       contents: write
       packages: read
       id-token: write
+    outputs:
+      gcp_instance_name: ${{ steps.start_gcp_private_operator.outputs.gcp_instance_name }}
+      azure_container_group_name: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
+      aws_stack_name: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
     steps:
       - name: Log in to the Docker container registry
         uses: docker/login-action@v3
@@ -265,15 +278,14 @@ jobs:
         shell: bash
         env:
           OPERATOR_TYPE: ${{ inputs.operator_type }}
-          OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
           IDENTITY_SCOPE: ${{ inputs.identity_scope }}
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
           BORE_URL_CORE: ${{ steps.bore.outputs.bore_url_core }}
           BORE_URL_OPTOUT: ${{ steps.bore.outputs.bore_url_optout }}
-          GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
-          AKS_OPERATOR_URL: ${{ steps.start_aks_private_operator.outputs.uid2_e2e_pipeline_operator_url }}
+          GCP_OPERATOR_URL: ${{ steps.start_gcp_private_operator.outputs.uid2_pipeline_e2e_operator_url }}
+          AZURE_OPERATOR_URL: ${{ steps.start_azure_private_operator.outputs.uid2_pipeline_e2e_operator_url }}
+          AWS_OPERATOR_URL: ${{ steps.start_aws_private_operator.outputs.uid2_pipeline_e2e_operator_url }}
+          AKS_OPERATOR_URL: ${{ steps.start_aks_private_operator.outputs.uid2_pipeline_e2e_operator_url }}
         run: |
           bash uid2-shared-actions/scripts/decide_e2e_env.sh
 
@@ -283,16 +295,20 @@ jobs:
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
-          uid2_e2e_identity_scope: ${{ inputs.identity_scope }}
-          uid2_e2e_pipeline_operator_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_url }}
-          uid2_e2e_pipeline_operator_type: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_type }}
-          uid2_e2e_pipeline_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_operator_cloud_provider }}
-          uid2_e2e_phone_support: ${{ steps.decide_env_var.outputs.uid2_e2e_phone_support }}
-          uid2_e2e_pipeline_core_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_core_url }}
-          uid2_e2e_pipeline_optout_url: ${{ steps.decide_env_var.outputs.uid2_e2e_pipeline_optout_url }}
+          e2e_suites: ${{ steps.decide_env_var.outputs.e2e_suites }}
+          e2e_args_json: ${{ steps.decide_env_var.outputs.e2e_args_json }}
+          e2e_env: ${{ steps.decide_env_var.outputs.e2e_env }}
+          e2e_identity_scope: ${{ inputs.identity_scope }}
+          e2e_phone_support: ${{ steps.decide_env_var.outputs.e2e_phone_support }}
+          uid2_core_e2e_core_url: ${{ steps.decide_env_var.outputs.uid2_core_e2e_core_url }}
+          uid2_core_e2e_optout_url: ${{ steps.decide_env_var.outputs.uid2_core_e2e_optout_url }}
+          uid2_pipeline_e2e_core_url: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_core_url }}
+          uid2_pipeline_e2e_operator_url: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_url }}
+          uid2_pipeline_e2e_operator_type: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_type }}
+          uid2_pipeline_e2e_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_cloud_provider }}
 
       - name: Stop GCP private operator
-        if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'gcp' }}
+        if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'gcp' }}
         env:
           GCP_PROJECT: ${{ inputs.gcp_project }}
           SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
@@ -301,14 +317,14 @@ jobs:
           bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
 
       - name: Stop Azure private operator
-        if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'azure' }}
+        if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'azure' }}
         env:
           AZURE_CONTAINER_GROUP_NAME: ${{ steps.start_azure_private_operator.outputs.azure_container_group_name }}
         run: |
           bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
 
       - name: Stop AWS private operator
-        if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'aws' }}
+        if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'aws' }}
         env:
           AWS_STACK_NAME: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
@@ -316,6 +332,53 @@ jobs:
             bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
 
       - name: Stop AKS operator
-        if: ${{ always() && inputs.operator_shutdown && inputs.operator_type == 'aks' }}
+        if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'aks' }}
         run: |
             bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
+
+  e2e-test-cleanup:
+    name: E2E Test Cleanup (Delayed Operator Shutdown)
+    if: ${{ always() && inputs.delay_operator_shutdown && inputs.operator_type != 'public' }}
+    needs: [e2e-test]
+    runs-on: ubuntu-latest
+    environment: 'e2e-test-cleanup'
+    permissions:
+      contents: write
+      packages: read
+      id-token: write
+    steps:
+      - name: Checkout uid2-shared-actions repo
+        uses: actions/checkout@v4
+        with:
+          ref: v3
+          repository: IABTechLab/uid2-shared-actions
+          path: uid2-shared-actions
+
+      - name: Stop GCP private operator
+        if: ${{ inputs.operator_type == 'gcp' }}
+        uses: IABTechLab/uid2-shared-actions/actions/stop_gcp_private_operator@v3
+        with:
+          gcp_project: ${{ inputs.gcp_project }}
+          gcp_service_account: ${{ inputs.gcp_service_account }}
+          gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
+          gcp_instance_name: ${{ needs.e2e-test.outputs.gcp_instance_name }}
+
+      - name: Stop Azure private operator
+        if: ${{ inputs.operator_type == 'azure' }}
+        uses: IABTechLab/uid2-shared-actions/actions/stop_azure_private_operator@v3
+        with:
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          azure_container_group_name: ${{ needs.e2e-test.outputs.azure_container_group_name }}
+
+      - name: Stop AWS private operator
+        if: ${{ inputs.operator_type == 'aws' }}
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aws_private_operator@v3
+        with:
+          aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
+          aws_region: ${{ inputs.aws_region }}
+
+      - name: Stop AKS operator
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@v3
+        with:
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}

@@ -85,7 +85,7 @@ IP=$(az deployment group show \
        --query properties.outputs.containerIPv4Address.value | tr -d '"')
 
 echo "Instance IP: ${IP}"
-echo "uid2_e2e_pipeline_operator_url=http://${IP}:8080" >> ${GITHUB_OUTPUT}
+echo "uid2_pipeline_e2e_operator_url=http://${IP}:8080" >> ${GITHUB_OUTPUT}
 
 HEALTHCHECK_URL="http://${IP}:8080/ops/healthcheck"
 
