@@ -91,6 +91,7 @@ else
 
   if [ ${TARGET_ENVIRONMENT} == "mock" ]; then
     python3 ${SHARED_ACTIONS_ROOT}/scripts/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL ${BORE_URL_CORE} OPTOUT_BASE_URL ${BORE_URL_OPTOUT} SKIP_VALIDATIONS true
+  fi
 
   cat ${OUTPUT_TEMPLATE_FILE}
   # --- Finished updating yaml file with resources ---
