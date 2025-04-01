@@ -80,7 +80,7 @@ runs:
           else
             echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
           fi
-        elif [[ "$BRANCH_NAME" =~ ^release.* ]]; then
+        elif [[ "$BRANCH_NAME" =~ ^private-operator-release.* ]]; then
           BASE_VERSION=$NBGV_SimpleVersion
           RELEASE_NUMBER=$(git rev-list --count HEAD ^$DEFAULT_BRANCH)
           echo "new_version=$BASE_VERSION-r$RELEASE_NUMBER" >> $GITHUB_OUTPUT
