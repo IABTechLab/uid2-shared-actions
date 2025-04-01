@@ -25,7 +25,7 @@ runs:
           FORCE_RELEASE=${{ inputs.force_release == 'yes' }}
           FORCE_NOT_RELEASE=${{ inputs.force_release == 'no' }}
           CHECK_BRANCH_FOR_RELEASE=${{ inputs.force_release == 'branch' }}
-          BRANCH_ALLOWS_RELEASE=${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name || startsWith(github.ref_name, 'release')) }}
+          BRANCH_ALLOWS_RELEASE=${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name || startsWith(github.ref_name, 'priv-op-release')) }}
           if $FORCE_RELEASE; then
             ISRELEASE=true
           elif $FORCE_NOT_RELEASE; then
@@ -47,8 +47,8 @@ runs:
             core.setFailed('Snapshot packages can not be created on the default branch. Release Type: ${{ inputs.release_type }}, Branch: ${{ github.ref_name }}')
 
     - name: Fail if Release and not on Default branch or release branch
-      if: ${{ inputs.release_type != 'Snapshot' && github.event.repository.default_branch != github.ref_name && !startsWith(github.ref_name, 'release')}}
+      if: ${{ inputs.release_type != 'Snapshot' && github.event.repository.default_branch != github.ref_name && !startsWith(github.ref_name, 'priv-op-release')}}
       uses: actions/github-script@v7
       with:
           script: |
-            core.setFailed('Releases can not be created on a feature branch. Release Type: ${{ inputs.release_type }}, Branch: ${{ github.ref_name }}')
+            core.setFailed('Releases only be created on a main or priv-op-release-yyyy-q? branch. Release Type: ${{ inputs.release_type }}, Branch: ${{ github.ref_name }}')
