@@ -16,13 +16,14 @@ def create_egress(url, description):
 def get_port(url):
     return url.split(":")[2]
 
-def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_cfg, ip_address, env):
+def create_cloudformation_stack(client, stack_name, cft_content, api_token, dc_cfg, ip_address, env, image_id):
     result = client.create_stack(
         StackName=stack_name,
         TemplateBody=cft_content,
         Capabilities=['CAPABILITY_IAM'],
         Parameters=[
             { 'ParameterKey': 'APIToken', 'ParameterValue': api_token },
+            { 'ParameterKey': 'ImageId', 'ParameterValue': image_id },
             { 'ParameterKey': 'DeployToEnvironment', 'ParameterValue': "prod" if env == "prod" else "integ" }, # Mock env also uses integ
             { 'ParameterKey': 'VpcId', 'ParameterValue': dc_cfg['VpcId'] },
             { 'ParameterKey': 'VpcSubnet1', 'ParameterValue': dc_cfg['VpcSubnet1'] },
@@ -55,8 +56,6 @@ with open('{}/stack.{}.json'.format(args.stack_fp, args.region), 'r') as f:
 with open('{}/{}_CloudFormation.template.yml'.format(args.cftemplate_fp, args.scope), 'r') as f:
     cft = load_yaml(f)
 
-cft['Mappings']['RegionMap'][args.region]['AMI'] = args.ami
-
 if args.env == "mock":
     egress = cft['Resources']['SecurityGroup']['Properties']['SecurityGroupEgress']
     egress.append(create_egress(args.core_url, 'E2E - Core'))
@@ -84,6 +83,7 @@ create_cloudformation_stack(
     stack_name=args.stack,
     cft_content=dump_yaml(cft),
     api_token=args.operator_key,
+    image_id=args.ami,
     dc_cfg=dc_cfg, 
     ip_address=ip,
     env=args.env)
