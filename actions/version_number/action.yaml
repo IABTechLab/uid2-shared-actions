@@ -80,7 +80,7 @@ runs:
           else
             echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
           fi
-        elif [[ "$BRANCH_NAME" =~ ^priop-release.* ]]; then
+        elif [[ "$BRANCH_NAME" =~ ^release.* ]]; then
           git fetch --tags --all
           # Find the base tag that the branch derived from
           BASE_TAG=$(git describe --tags --abbrev=0 $(git merge-base HEAD origin/main))
