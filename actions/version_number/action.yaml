@@ -81,9 +81,14 @@ runs:
             echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
           fi
         elif [[ "$BRANCH_NAME" =~ ^priop-release.* ]]; then
-          BASE_VERSION=$NBGV_SimpleVersion
-          RELEASE_NUMBER=$(git rev-list --count HEAD ^$DEFAULT_BRANCH)
-          echo "new_version=$BASE_VERSION-r$RELEASE_NUMBER" >> $GITHUB_OUTPUT
+          git fetch --tags --all
+          # Find the base tag that the branch derived from
+          BASE_TAG=$(git describe --tags --abbrev=0 $(git merge-base HEAD origin/main))
+          BASE_TAG_CLEAN=$(echo "$BASE_TAG" | sed -E 's/-r[0-9]+$//')
+          # Count number of commits since the clean tag
+          REV_COUNT=$(git rev-list --count ${BASE_TAG_CLEAN}..HEAD)
+          VERSION="${BASE_TAG_CLEAN}-r${REV_COUNT}"
+          echo "new_version=$VERSION" >> $GITHUB_OUTPUT
         elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
           echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
         else
