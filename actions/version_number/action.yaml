@@ -87,7 +87,7 @@ runs:
           BASE_TAG_CLEAN=$(echo "$BASE_TAG" | sed -E 's/-r[0-9]+$//')
           # Count number of commits since the clean tag
           REV_COUNT=$(git rev-list --count ${BASE_TAG_CLEAN}..HEAD)
-          VERSION="${BASE_TAG_CLEAN}-r${REV_COUNT}"
+          VERSION="$(echo "$BASE_TAG_CLEAN" | sed -E 's/^v//')-r${REV_COUNT}"
           echo "new_version=$VERSION" >> $GITHUB_OUTPUT
         elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
           echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
