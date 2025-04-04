@@ -79,6 +79,15 @@ runs:
           else
             echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
           fi
+        elif [[ "$BRANCH_NAME" =~ ^release.* ]]; then
+          git fetch --tags --all
+          # Find the base tag that the branch derived from
+          BASE_TAG=$(git describe --tags --abbrev=0 $(git merge-base HEAD origin/main))
+          BASE_TAG_CLEAN=$(echo "$BASE_TAG" | sed -E 's/-r[0-9]+$//')
+          # Count number of commits since the clean tag
+          REV_COUNT=$(git rev-list --count ${BASE_TAG_CLEAN}..HEAD)
+          VERSION="$(echo "$BASE_TAG_CLEAN" | sed -E 's/^v//')-r${REV_COUNT}"
+          echo "new_version=$VERSION" >> $GITHUB_OUTPUT
         elif [[ "$BRANCH_NAME_TRUNC" != "" && "$BRANCH_NAME_TRUNC" != "master" && "$BRANCH_NAME_TRUNC" != "main" ]]; then
           echo "new_version=$NBGV_SimpleVersion-$BRANCH_NAME_TRUNC" >> $GITHUB_OUTPUT
         else
