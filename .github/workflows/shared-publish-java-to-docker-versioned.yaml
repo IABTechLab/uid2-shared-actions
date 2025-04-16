@@ -115,7 +115,7 @@ jobs:
           pushd ${{ inputs.working_dir }}
           current_version=$(grep -o '<version>.*</version>' pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
           new_version=${{ steps.version.outputs.new_version }} 
-          sed -i "s|<version>$current_version</version>|<version>$new_version</version>|g" pom.xml
+          mvn versions:set versions:commit -DnewVersion="$new_version"
           echo "Version number updated from $current_version to $new_version"
           echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
           popd
