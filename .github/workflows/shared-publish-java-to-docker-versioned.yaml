@@ -123,6 +123,7 @@ jobs:
       - name: Package JAR
         id: package
         run: |
+          cat pom.xml
           pushd ${{ inputs.working_dir }}
           if [[ "${{ inputs.skip_tests }}" == "false" ]]; then
             mvn -B package -P default
