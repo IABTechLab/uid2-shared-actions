@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       vulnerability_severity:
-        description: The severity that will cause the action to fail if a vulnerability at that level is detected. UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+        description: The severity that will cause the action to fail if a vulnerability at that level is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
         default: CRITICAL,HIGH
         type: string
       dotnet_version:
