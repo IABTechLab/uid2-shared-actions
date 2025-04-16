@@ -6,10 +6,10 @@ on:
         description: The type of version number to return. Must be one of [Patch, Minor or Major]
         required: true
         type: string
-      vulnerability_failure_severity:
-        description: The severity to fail the workflow if such vulnerability is detected. DO NOT override it unless a Jira ticket is raised. Must be one of ['CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between).
+      vulnerability_severity:
+        description: The severity that will cause the action to fail if a vulnerability at that level is detected. UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+        default: CRITICAL,HIGH
         type: string
-        default: 'CRITICAL,HIGH'
       dotnet_version:
         type: string
         default: "6.0"
@@ -58,13 +58,6 @@ jobs:
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
 
-      - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v3
-        with:
-          scan_severity: HIGH,CRITICAL
-          failure_severity: ${{ inputs.vulnerability_failure_severity }}
-          publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
-
       - name: Set version number
         id: version
         uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
@@ -80,11 +73,25 @@ jobs:
           sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/UID2.Client.nuspec
           echo "Version number updated from $current_version to $new_version"
 
-      - name: Build, Test and Publish to nuget.org
+      - name: Build and test
         run: | 
           cd ./${{ inputs.working_dir }}
           dotnet test --configuration=Release
           dotnet pack -p:NuspecFile=../../UID2.Client.nuspec --configuration Release
+
+      - name: Vulnerability Scan
+        id: vulnerability-scan
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
+        with:
+          scan_severity: ${{ inputs.vulnerability_severity }}
+          failure_severity: ${{ inputs.vulnerability_severity }}
+          publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
+          scan_type: fs
+        continue-on-error: true
+
+      - name: Publish to nuget.org
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }} 
+        run: | 
           dotnet nuget push ./src/UID2.Client/bin/Release/UID2.Client.${{ steps.version.outputs.new_version }}.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
       - name: Commit UID2.Client.nuspec, version.json and set tag
@@ -95,6 +102,7 @@ jobs:
           tag: v${{ steps.version.outputs.new_version }}          
 
       - name: Build Changelog
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }} 
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v4
         with:
@@ -108,6 +116,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }} 
         uses: softprops/action-gh-release@v2
         with:
           name: v${{ steps.version.outputs.new_version }}
