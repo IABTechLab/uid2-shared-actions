@@ -87,7 +87,7 @@ jobs:
           failure_severity: ${{ inputs.vulnerability_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           scan_type: fs
-        continue-on-error: true
+        continue-on-error: false
 
       - name: Publish to nuget.org
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }} 
