@@ -83,7 +83,7 @@ runs:
 
     - name: Merge PR
       run: |
-        gh pr update-branch $PR_URL $MERGE_PR_STRATEGY
+        gh pr update-branch $PR_URL --merge
         gh pr merge $PR_URL --delete-branch $MERGE_PR_STRATEGY $ADMIN_ACCESS
       if: steps.changes.outputs.changes_exist == 'true'
       shell: bash
