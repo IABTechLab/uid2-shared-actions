@@ -82,9 +82,7 @@ runs:
           core.setOutput('pull-request-number', newPr.number);
 
     - name: Merge PR
-      run: |
-        gh pr update-branch $PR_URL
-        gh pr merge $PR_URL --delete-branch $MERGE_PR_STRATEGY $ADMIN_ACCESS
+      run: gh pr merge $PR_URL --delete-branch $MERGE_PR_STRATEGY $ADMIN_ACCESS
       if: steps.changes.outputs.changes_exist == 'true'
       shell: bash
       env:
