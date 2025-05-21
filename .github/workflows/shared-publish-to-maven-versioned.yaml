@@ -108,7 +108,7 @@ jobs:
           echo "<settings>
                     <servers>
                         <server>
-                            <id>ossrh</id>
+                            <id>central</id>
                             <username>${{ secrets.SONATYPE_REPO_USERNAME }}</username>
                             <password>${{ secrets.SONATYPE_REPO_TOKEN }}</password>
                         </server>
