@@ -38,7 +38,7 @@ jobs:
         with:
           ref: v3
           repository: IABTechLab/uid2-shared-actions
-          path: uid2-shared-actions
+          path: ${{ inputs.working_dir }}/uid2-shared-actions
 
       - name: Set up JDK
         if: ${{ inputs.vulnerability_scan_only == 'false' }}
