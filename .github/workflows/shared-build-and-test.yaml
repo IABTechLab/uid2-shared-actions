@@ -25,6 +25,7 @@ on:
         type: string
         default: 'false'
   workflow_dispatch:
+  push:
 jobs:
   build:
     runs-on: ubuntu-latest
