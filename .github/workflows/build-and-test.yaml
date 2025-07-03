@@ -7,5 +7,3 @@ jobs:
     secrets: inherit
     with:
       vulnerability_scan_only: true
-
-
