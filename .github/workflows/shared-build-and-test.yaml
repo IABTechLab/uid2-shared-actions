@@ -24,7 +24,7 @@ on:
         description: If true, will skip tests when building and running unit tests. Defaults to false. Set to true for repos without tests.
         type: string
         default: 'false'
-
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
