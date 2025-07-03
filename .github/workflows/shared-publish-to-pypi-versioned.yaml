@@ -56,6 +56,7 @@ jobs:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_failure_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
+          scan_type:  'fs'
 
       - name: Set version number
         id: version
