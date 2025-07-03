@@ -3,7 +3,9 @@ on: [pull_request, push]
 
 jobs:
   build:
-    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-build-and-test.yaml
+    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-build-and-test.yaml@wzh-5347-vulnerability-scan-refactor
     secrets: inherit
     with:
       vulnerability_scan_only: true
+
+
