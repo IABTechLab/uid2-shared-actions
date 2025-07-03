@@ -72,7 +72,7 @@ jobs:
           path: ${{ inputs.working_dir }}/target/site/jacoco/*
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@wzh-5347-vulnerability-scan-refactor
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_severity }}
