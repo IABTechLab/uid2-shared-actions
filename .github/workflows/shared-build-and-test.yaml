@@ -78,4 +78,3 @@ jobs:
           failure_severity: ${{ inputs.vulnerability_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           scan_type: 'fs'
-
