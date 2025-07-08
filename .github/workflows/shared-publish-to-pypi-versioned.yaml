@@ -81,6 +81,7 @@ jobs:
       - name: Publish
         run: |
           python3 -m pip install --upgrade twine
+          python3 -m pip install --upgrade packaging
           python3 -m twine upload dist/* -u __token__ -p "${{ secrets.PYPI_API_KEY }}"
 
       - name: Commit pyproject.toml, version.json and set tag
