@@ -48,8 +48,10 @@ source "${ROOT}/healthcheck.sh"
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
 
-# Export to GitHub output Early
+# Export to GitHub output Earlyensure it’s emitted even on failure
 echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
+[ -n "${GITHUB_OUTPUT:-}" ] && echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}"
+trap '[ -n "${GITHUB_OUTPUT:-}" ] && echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}" || true' EXIT
 
 CF_TEMPLATE_SCOPE=""
 case "${IDENTITY_SCOPE}" in
