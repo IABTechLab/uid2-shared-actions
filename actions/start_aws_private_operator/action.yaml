@@ -70,5 +70,4 @@ runs:
         TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
       run: |
-        set -euxo pipefail
         bash "${{ github.action_path }}/../../scripts/aws/start_aws_enclave.sh"
