@@ -48,20 +48,13 @@ source "${ROOT}/healthcheck.sh"
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
 
-# DEBUG: Show what we're working with
-echo "DEBUG: Generated stack name: ${AWS_STACK_NAME}"
-echo "DEBUG: GITHUB_OUTPUT file path: ${GITHUB_OUTPUT:-'NOT SET'}"
-echo "DEBUG: Current directory: $(pwd)"
-
-# Write stack name to GitHub output IMMEDIATELY - this is critical for cleanup
+# Export Stack Name to GitHub output Early for cleanup
 echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
+
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
-  echo "DEBUG: Writing AWS_STACK_NAME to GITHUB_OUTPUT"
   echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}"
-  echo "DEBUG: Contents of GITHUB_OUTPUT after writing stack name:"
-  cat "${GITHUB_OUTPUT}" || echo "DEBUG: Failed to read GITHUB_OUTPUT file"
 else
-  echo "DEBUG: GITHUB_OUTPUT is not set, running outside of GitHub Actions"
+  echo "Not running inside GitHub Actions"
 fi
 
 CF_TEMPLATE_SCOPE=""
