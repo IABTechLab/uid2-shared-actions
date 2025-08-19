@@ -254,7 +254,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@wzh-UID2-5053-cleanup-failed-cf
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@5e6325f4c6e0ee7258f8fbe09c177394aa8d1b8e
         with:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
