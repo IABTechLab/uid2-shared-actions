@@ -48,6 +48,9 @@ source "${ROOT}/healthcheck.sh"
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
 
+# Export to GitHub output Early
+echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
+
 CF_TEMPLATE_SCOPE=""
 case "${IDENTITY_SCOPE}" in
   UID2) CF_TEMPLATE_SCOPE="UID" ;;
@@ -73,9 +76,6 @@ python ${ROOT}/aws/create_cloudformation_stack.py \
 aws cloudformation describe-stacks \
   --stack-name "${AWS_STACK_NAME}" \
   --region "${AWS_REGION}"
-
-# Export to GitHub output
-echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
   echo "Not in GitHub action"
