@@ -57,11 +57,6 @@ runs:
     - run: aws sts get-caller-identity
       shell: bash
 
-    - name: Sanity check script content
-      shell: bash
-      run: |
-        head -100 "${{ github.action_path }}/../../scripts/aws/start_aws_enclave.sh" || true
-
     - name: Start AWS private operator
       id: start_aws
       shell: bash
