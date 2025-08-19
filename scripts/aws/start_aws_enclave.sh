@@ -48,10 +48,21 @@ source "${ROOT}/healthcheck.sh"
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
 
-# Export to GitHub output Earlyensure it’s emitted even on failure
-echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
-[ -n "${GITHUB_OUTPUT:-}" ] && echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}"
-trap '[ -n "${GITHUB_OUTPUT:-}" ] && echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}" || true' EXIT
+# Function to ensure stack name is always written to output
+write_stack_name_to_output() {
+  echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
+  if [ -n "${GITHUB_OUTPUT:-}" ]; then
+    # Use a temp file to avoid duplicate entries
+    grep -v "^AWS_STACK_NAME=" "${GITHUB_OUTPUT}" > "${GITHUB_OUTPUT}.tmp" 2>/dev/null || touch "${GITHUB_OUTPUT}.tmp"
+    echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}.tmp"
+    mv "${GITHUB_OUTPUT}.tmp" "${GITHUB_OUTPUT}"
+  fi
+}
+
+# Write stack name immediately and set trap for cleanup
+write_stack_name_to_output
+trap 'write_stack_name_to_output' EXIT
+
 
 CF_TEMPLATE_SCOPE=""
 case "${IDENTITY_SCOPE}" in
