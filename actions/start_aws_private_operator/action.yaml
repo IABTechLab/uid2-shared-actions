@@ -30,7 +30,7 @@ inputs:
 outputs:
   aws_stack_name:
     description: The AWS instance name
-    value: ${{ steps.start_aws.outputs.AWS_STACK_NAME }}
+    value: ${{ steps.start_aws.outputs.aws_stack_name }}
   uid2_pipeline_e2e_operator_url:
     description: The AWS operator URL
     value: ${{ steps.start_aws.outputs.uid2_pipeline_e2e_operator_url }}

@@ -48,21 +48,21 @@ source "${ROOT}/healthcheck.sh"
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
 
-# Function to ensure stack name is always written to output
-write_stack_name_to_output() {
-  echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
-  if [ -n "${GITHUB_OUTPUT:-}" ]; then
-    # Use a temp file to avoid duplicate entries
-    grep -v "^AWS_STACK_NAME=" "${GITHUB_OUTPUT}" > "${GITHUB_OUTPUT}.tmp" 2>/dev/null || touch "${GITHUB_OUTPUT}.tmp"
-    echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}.tmp"
-    mv "${GITHUB_OUTPUT}.tmp" "${GITHUB_OUTPUT}"
-  fi
-}
+# DEBUG: Show what we're working with
+echo "DEBUG: Generated stack name: ${AWS_STACK_NAME}"
+echo "DEBUG: GITHUB_OUTPUT file path: ${GITHUB_OUTPUT:-'NOT SET'}"
+echo "DEBUG: Current directory: $(pwd)"
 
-# Write stack name immediately and set trap for cleanup
-write_stack_name_to_output
-trap 'write_stack_name_to_output' EXIT
-
+# Write stack name to GitHub output IMMEDIATELY - this is critical for cleanup
+echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "DEBUG: Writing AWS_STACK_NAME to GITHUB_OUTPUT"
+  echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}"
+  echo "DEBUG: Contents of GITHUB_OUTPUT after writing stack name:"
+  cat "${GITHUB_OUTPUT}" || echo "DEBUG: Failed to read GITHUB_OUTPUT file"
+else
+  echo "DEBUG: GITHUB_OUTPUT is not set, running outside of GitHub Actions"
+fi
 
 CF_TEMPLATE_SCOPE=""
 case "${IDENTITY_SCOPE}" in
@@ -89,12 +89,6 @@ python ${ROOT}/aws/create_cloudformation_stack.py \
 aws cloudformation describe-stacks \
   --stack-name "${AWS_STACK_NAME}" \
   --region "${AWS_REGION}"
-
-if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "Not in GitHub action"
-else
-  echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> ${GITHUB_OUTPUT}
-fi
 
 # Get public URL
 AWS_INSTANCE_URL=$(python ${ROOT}/aws/get_instance_url.py \
