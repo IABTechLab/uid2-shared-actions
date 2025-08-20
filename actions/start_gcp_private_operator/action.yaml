@@ -37,11 +37,8 @@ runs:
       id: start_gcp
       shell: bash
       env:
-        #To Do: revert it back after testing done. Intentionally trigger failure
-        BORE_URL_CORE: http://192.0.2.1
-        BORE_URL_OPTOUT: http://192.0.2.1
-#        BORE_URL_CORE: ${{ inputs.bore_url_core }}
-#        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
+        BORE_URL_CORE: ${{ inputs.bore_url_core }}
+        BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
         GCP_PROJECT: ${{ inputs.gcp_project }}
         SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
