@@ -148,7 +148,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: wzh-UID2-5053-cleanup-failed-cf
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -254,7 +254,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@wzh-UID2-5053-cleanup-failed-cf
+        uses: ./actions/start_aws_private_operator
         with:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}

@@ -70,4 +70,4 @@ runs:
         TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
       run: |
-        bash "${{ github.action_path }}/../../scripts/aws/start_aws_enclave.sh"
+        bash uid2-shared-actions/scripts/aws/start_aws_enclave.sh
