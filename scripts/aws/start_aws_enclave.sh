@@ -48,7 +48,7 @@ source "${ROOT}/healthcheck.sh"
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
 
-# Export Stack Name to GitHub output Early for cleanup
+# Export stack name to GitHub output early for cleanup
 echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
 
 if [ -n "${GITHUB_OUTPUT:-}" ]; then
