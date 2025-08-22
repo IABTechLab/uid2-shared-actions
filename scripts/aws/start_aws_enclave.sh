@@ -48,6 +48,15 @@ source "${ROOT}/healthcheck.sh"
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
 
+# Export stack name to GitHub output early for cleanup
+echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
+
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}"
+else
+  echo "Not running inside GitHub Actions"
+fi
+
 CF_TEMPLATE_SCOPE=""
 case "${IDENTITY_SCOPE}" in
   UID2) CF_TEMPLATE_SCOPE="UID" ;;
@@ -73,15 +82,6 @@ python ${ROOT}/aws/create_cloudformation_stack.py \
 aws cloudformation describe-stacks \
   --stack-name "${AWS_STACK_NAME}" \
   --region "${AWS_REGION}"
-
-# Export to GitHub output
-echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
-
-if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "Not in GitHub action"
-else
-  echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> ${GITHUB_OUTPUT}
-fi
 
 # Get public URL
 AWS_INSTANCE_URL=$(python ${ROOT}/aws/get_instance_url.py \
