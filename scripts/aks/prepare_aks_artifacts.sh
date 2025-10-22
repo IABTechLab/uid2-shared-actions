@@ -51,7 +51,7 @@ OPERATOR_ROOT="./uid2-operator"
 SHARED_ACTIONS_ROOT="./uid2-shared-actions"
 OUTPUT_DIR="${SHARED_ACTIONS_ROOT}/scripts/aks/azure-aks-artifacts"
 
-IMAGE="ghcr.io/iabtechlab/uid2-operator:${IMAGE_VERSION}"
+IMAGE="ghcr.io/iabtechlab/uid2-operator:latest"
 
 if [ -d "${OUTPUT_DIR}" ]; then
   echo "${OUTPUT_DIR} exists"
@@ -108,7 +108,9 @@ else
   sed -i 's#{"pattern":"DEPLOYMENT_ENVIRONMENT=integ","required":false,"strategy":"string"}#{"pattern":"DEPLOYMENT_ENVIRONMENT=.+","required":false,"strategy":"re2"}#g' generated.rego
   base64 -w0 < generated.rego > generated.rego.base64
   python3 ${SHARED_ACTIONS_ROOT}/scripts/aks/generate.py generated.rego > ${OUTPUT_POLICY_DIGEST_FILE}
-  
+  sed --in-place "s#CCE_POLICY_PLACEHOLDER#$(cat generated.rego.base64)#g" ${OUTPUT_TEMPLATE_FILE}
+
+
   if [[ $? -ne 0 ]]; then
     echo "Failed to generate template file"
     exit 1
