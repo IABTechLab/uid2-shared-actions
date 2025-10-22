@@ -204,7 +204,7 @@ jobs:
       - name: Prepare AKS metadata
         id: prepare_aks_metadata
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@kcc-UID2-6212-fix-aks-test-failure
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           target_environment: ${{ inputs.target_environment }}
