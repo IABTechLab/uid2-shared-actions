@@ -100,14 +100,22 @@ else
     exit 1
   fi
 
-  # Generate policy using debug mode as we will need to override environment variables
-  yes | az confcom acipolicygen --virtual-node-yaml ${OUTPUT_TEMPLATE_FILE} --debug-mode > ${OUTPUT_POLICY_DIGEST_FILE}
+  # Generate policy using debug mode as we will need to override environment variables  
+  az confcom acipolicygen --virtual-node-yaml ${OUTPUT_TEMPLATE_FILE} --print-policy > policy.base64
+  base64 -di < policy.base64 > generated.rego
+  sed -i 's#{"pattern":"VAULT_NAME=${KEYVAULT_NAME}","required":false,"strategy":"string"}#{"pattern":"VAULT_NAME=.+","required":false,"strategy":"re2"}#g' generated.rego
+  sed -i 's#{"pattern":"OPERATOR_KEY_SECRET_NAME=${KEYVAULT_SECRET_NAME}","required":false,"strategy":"string"}#{"pattern":"OPERATOR_KEY_SECRET_NAME=.+","required":false,"strategy":"re2"}#g' generated.rego
+  sed -i 's#{"pattern":"DEPLOYMENT_ENVIRONMENT=integ","required":false,"strategy":"string"}#{"pattern":"DEPLOYMENT_ENVIRONMENT=.+","required":false,"strategy":"re2"}#g' generated.rego
+  base64 -w0 < generated.rego > generated.rego.base64
+  python3 ${SHARED_ACTIONS_ROOT}/scripts/aks/generate.py generated.rego > ${OUTPUT_POLICY_DIGEST_FILE}
+  
   if [[ $? -ne 0 ]]; then
     echo "Failed to generate template file"
     exit 1
   fi
   # The previous pipe will be stored in ${OUTPUT_POLICY_DIGEST_FILE} as well. The below command is to remove the prompt and only extract the enclave id.
-  sed -i 's/.*(y\/n) //g' "${OUTPUT_POLICY_DIGEST_FILE}"
+  # sed -i 's/.*(y\/n) //g' "${OUTPUT_POLICY_DIGEST_FILE}"
+  cat ${OUTPUT_POLICY_DIGEST_FILE}
 fi
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
