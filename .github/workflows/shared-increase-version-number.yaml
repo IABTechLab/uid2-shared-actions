@@ -45,7 +45,7 @@ jobs:
 
       - name: Set version number
         id: version
-        uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@add-missing-patch-calculation
         with:
           type: ${{ inputs.release_type }}
           version_number: ${{ inputs.version_number_input }}
