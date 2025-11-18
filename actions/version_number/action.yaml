@@ -79,6 +79,14 @@ runs:
           else
             echo "new_version=$NBGV_SimpleVersion-SNAPSHOT" >> $GITHUB_OUTPUT
           fi
+        elif [[ "${{ inputs.type }}" == "Patch" ]]; then
+          CURRENT_PATCH=$(echo $NBGV_SimpleVersion | awk -F. '{print $3}')
+          HEIGHT=$NBGV_VersionHeight
+          if [[ $HEIGHT -lt 1 ]]; then
+            HEIGHT=1
+          fi
+          NEW_PATCH=$(($CURRENT_PATCH + $HEIGHT))
+          echo "new_version=$NBGV_MajorMinorVersion.$NEW_PATCH" >> $GITHUB_OUTPUT
         elif [[ "$BRANCH_NAME" =~ ^release.* ]]; then
           git fetch --tags --all
           # Find the base tag that the branch derived from
