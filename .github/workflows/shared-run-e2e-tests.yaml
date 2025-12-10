@@ -227,6 +227,20 @@ jobs:
         run: |
           bash uid2-shared-actions/scripts/prepare_resources_for_e2e_docker_compose.sh
 
+      - name: Show Docker Compose failure logs
+        if: ${{ failure() && inputs.target_environment == 'mock' }}
+        run: |
+          echo "=== Docker Compose failed - showing container logs ==="
+          echo ""
+          echo "=== Docker Container Status ==="
+          docker ps -a
+          echo ""
+          echo "=== Core Container Logs ==="
+          docker logs core 2>&1 || echo "Core container not found"
+          echo ""
+          echo "=== Localstack Container Logs ==="
+          docker logs localstack 2>&1 | tail -100 || echo "Localstack container not found"
+
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
@@ -306,6 +320,24 @@ jobs:
           uid2_pipeline_e2e_operator_url: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_url }}
           uid2_pipeline_e2e_operator_type: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_type }}
           uid2_pipeline_e2e_operator_cloud_provider: ${{ steps.decide_env_var.outputs.uid2_pipeline_e2e_operator_cloud_provider }}
+
+      - name: Show Docker container logs on failure
+        if: ${{ failure() && inputs.target_environment == 'mock' }}
+        run: |
+          echo "=== Docker Container Status ==="
+          docker ps -a
+          echo ""
+          echo "=== Core Container Logs ==="
+          docker logs core 2>&1 || echo "Core container not found"
+          echo ""
+          echo "=== Optout Container Logs ==="
+          docker logs optout 2>&1 || echo "Optout container not found"
+          echo ""
+          echo "=== Public Operator Container Logs ==="
+          docker logs public_operator 2>&1 || echo "Public operator container not found"
+          echo ""
+          echo "=== Localstack Container Logs ==="
+          docker logs localstack 2>&1 | tail -100 || echo "Localstack container not found"
 
       - name: Stop GCP private operator
         if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'gcp' }}
