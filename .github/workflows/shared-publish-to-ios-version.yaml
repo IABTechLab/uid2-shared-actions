@@ -43,6 +43,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure dotnet environment
+        run: |
+          # See https://github.com/actions/runner-images/issues/13470
+          if [[ "$(uname)" == "Darwin" ]]; then
+            echo "DOTNET_ROOT=$HOME/.dotnet" >> "$GITHUB_ENV"
+          fi
+
       - name: Set version number
         id: version
         uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
