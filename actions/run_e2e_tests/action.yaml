@@ -97,6 +97,7 @@ runs:
         --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
         --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
         --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
+        --env UID2_CORE_E2E_LOCALSTACK_URL='http://localstack:5001' \
         --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
         --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
         --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
