@@ -157,7 +157,7 @@ jobs:
         with:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
-          ref: Ian-Nara-patch-1
+          ref: 'Ian-Nara-patch-1'
       - name: Create Docker network
         if: ${{ inputs.target_environment == 'mock' }}
         run: |
