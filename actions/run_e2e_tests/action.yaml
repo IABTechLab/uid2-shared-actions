@@ -63,10 +63,8 @@ runs:
         --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
         --env UID2_CORE_E2E_OPERATOR_API_KEY='UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdEE=' \
         --env UID2_CORE_E2E_OPTOUT_API_KEY='UID2-O-L-127-pDqphU.6FuXzThQMY8YEsCA8crqvAlzyGrjcF8P6XO84=' \
-        --env UID2_CORE_E2E_OPTOUT_INTERNAL_API_KEY='UID2-O-L-127-pDqphU.6FuXzThQMY8YEsCA8crqvAlzyGrjcF8P6XO84=' \
         --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
         --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
-        --env UID2_CORE_E2E_LOCALSTACK_URL='http://localstack:5001' \
         --env UID2_OPERATOR_E2E_CLIENT_SITE_ID='999' \
         --env UID2_OPERATOR_E2E_CLIENT_API_KEY='UID2-C-L-999-fCXrMM.fsR3mDqAXELtWWMS+xG1s7RdgRTMqdOH2qaAo=' \
         --env UID2_OPERATOR_E2E_CLIENT_API_SECRET='DzBzbjTJcYL0swDtFs2krRNu+g1Eokm2tBU4dEuD0Wk=' \
@@ -97,7 +95,6 @@ runs:
         --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
         --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
         --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
-        --env UID2_CORE_E2E_LOCALSTACK_URL='http://localstack:5001' \
         --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
         --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
         --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
