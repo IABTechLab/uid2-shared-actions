@@ -157,7 +157,7 @@ jobs:
         with:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
-          ref: 'ian-UID2-6945-sqs-e2e'
+          ref: 'ian-UID2-6154-optout-e2e-update-sqs'
       - name: Create Docker network
         if: ${{ inputs.target_environment == 'mock' }}
         run: |
