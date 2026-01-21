@@ -157,7 +157,7 @@ jobs:
         with:
           repository: IABTechLab/uid2-e2e
           path: uid2-e2e
-          ref: 'ian-UID2-6154-optout-e2e-update-sqs'
+
       - name: Create Docker network
         if: ${{ inputs.target_environment == 'mock' }}
         run: |
@@ -273,7 +273,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@ian-UID2-6945-sqs-e2e
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
