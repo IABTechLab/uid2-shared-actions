@@ -76,6 +76,7 @@ if [ ${OPERATOR_TYPE} != "public" ]; then
   jq_number_boolean_update ${DOCKER_CORE_CONFIG_FILE} provide_private_site_data false
 
   jq_string_update ${DOCKER_OPTOUT_CONFIG_FILE} aws_s3_endpoint "${BORE_URL_LOCALSTACK}"
+  jq_string_update ${DOCKER_OPTOUT_CONFIG_FILE} aws_sqs_endpoint "${BORE_URL_LOCALSTACK}"
   jq_string_update ${DOCKER_OPTOUT_CONFIG_FILE} partners_metadata_path "${BORE_URL_CORE}/partners/refresh"
   jq_string_update ${DOCKER_OPTOUT_CONFIG_FILE} operators_metadata_path "${BORE_URL_CORE}/operators/refresh"
   jq_string_update ${DOCKER_OPTOUT_CONFIG_FILE} core_attest_url "${BORE_URL_CORE}/attest"
