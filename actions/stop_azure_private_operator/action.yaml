@@ -24,4 +24,4 @@ runs:
       env:
         AZURE_CONTAINER_GROUP_NAME: ${{ inputs.azure_container_group_name }}
       run: |
-        bash uid2-shared-actions/scripts/azure/stop_azure_enclave.sh
+        bash ${{ github.action_path }}/../../scripts/azure/stop_azure_enclave.sh

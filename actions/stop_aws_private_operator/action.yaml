@@ -27,4 +27,4 @@ runs:
           AWS_STACK_NAME: ${{ inputs.aws_stack_name }}
           AWS_REGION: ${{ inputs.aws_region }}
         run: |
-            bash uid2-shared-actions/scripts/aws/stop_aws_enclave.sh
+            bash ${{ github.action_path }}/../../scripts/aws/stop_aws_enclave.sh

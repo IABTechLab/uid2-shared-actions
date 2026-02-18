@@ -29,7 +29,7 @@ runs:
         ENCLAVE_ID: ${{ inputs.aws_pcr0 }}
         ENCLAVE_PROTOCOL: aws-nitro
       run: |
-        bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh
+        bash ${{ github.action_path }}/../../scripts/save_enclave_id_to_admin.sh
 
     - name: Get operator key
       id: operator_key
@@ -39,4 +39,4 @@ runs:
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
           ENCLAVE_PROTOCOL: aws-nitro
       run: |
-        bash ./uid2-shared-actions/scripts/get_operator_key.sh
+        bash ${{ github.action_path }}/../../scripts/get_operator_key.sh

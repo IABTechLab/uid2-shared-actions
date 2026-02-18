@@ -19,4 +19,4 @@ runs:
     - name: Stop AKS private operator
       shell: bash
       run: |
-        bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
+        bash ${{ github.action_path }}/../../scripts/aks/stop_aks_enclave.sh

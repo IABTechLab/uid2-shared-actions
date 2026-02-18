@@ -20,4 +20,4 @@ runs:
       id: start_aks
       shell: bash
       run: |
-        bash uid2-shared-actions/scripts/aks/start_aks_cluster.sh
+        bash ${{ github.action_path }}/../../scripts/aks/start_aks_cluster.sh

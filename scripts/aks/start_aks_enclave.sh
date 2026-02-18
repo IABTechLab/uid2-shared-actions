@@ -6,10 +6,10 @@ if [[ ! -f ${TEMPLATE_FILE} ]]; then
   exit 1
 fi
 
-ROOT="./uid2-shared-actions/scripts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "${ROOT}/aks/aks_env.sh"
-source "${ROOT}/healthcheck.sh"
+source "${SCRIPT_DIR}/aks_env.sh"
+source "${SCRIPT_DIR}/../healthcheck.sh"
 
 # --- Deploy operator service and make sure it starts ---
 az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
