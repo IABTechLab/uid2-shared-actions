@@ -401,6 +401,6 @@ jobs:
 
       - name: Stop AKS operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@kcc-UID2-6321-reenable-aks-e2e
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
