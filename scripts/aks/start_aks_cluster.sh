@@ -77,15 +77,24 @@ az aks create \
     --nodepool-name oprnodepool \
     --os-sku Ubuntu
 
-export MANAGED_IDENTITY_PRINCIPAL_ID="$(az aks show --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER_NAME} --query "identityProfile.kubeletidentity.clientId" --output tsv)"
+# Get the managed identity object ID for role assignments
+export MANAGED_IDENTITY_OBJECT_ID="$(az aks show --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER_NAME} --query "identityProfile.kubeletidentity.objectId" --output tsv)"
 
-az role assignment create \
-  --assignee ${MANAGED_IDENTITY_PRINCIPAL_ID} \
+# Wait for managed identity to be available in AAD and create role assignments
+echo "Waiting for managed identity to be available in AAD..."
+until az role assignment create \
+  --assignee-object-id ${MANAGED_IDENTITY_OBJECT_ID} \
+  --assignee-principal-type ServicePrincipal \
   --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${AKS_NODE_RESOURCE_GROUP} \
-  --role Contributor
+  --role Contributor 2>/dev/null; do
+  echo "Managed identity not yet available, waiting 10 seconds..."
+  sleep 10
+done
+echo "First role assignment created successfully."
 
 az role assignment create \
-  --assignee ${MANAGED_IDENTITY_PRINCIPAL_ID} \
+  --assignee-object-id ${MANAGED_IDENTITY_OBJECT_ID} \
+  --assignee-principal-type ServicePrincipal \
   --scope /subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RESOURCE_GROUP} \
   --role Contributor
 
