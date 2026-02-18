@@ -16,5 +16,3 @@ export MANAGED_IDENTITY="opr-e2e-vn-aks-opr-id"
 export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
 export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
 export DEPLOYMENT_ENV="integ"
-
-az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}

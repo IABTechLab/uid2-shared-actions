@@ -56,26 +56,31 @@ export AKS_SUBNET_ID=$(az network vnet subnet show \
     --query id \
     --output tsv)
 
-# Create the AKS cluster
-az aks create \
-    --resource-group ${RESOURCE_GROUP} \
-    --name ${AKS_CLUSTER_NAME} \
-    --location ${LOCATION} \
-    --kubernetes-version 1.33 \
-    --network-plugin azure \
-    --network-policy calico \
-    --vnet-subnet-id ${AKS_SUBNET_ID} \
-    --service-cidr 10.4.0.0/16 \
-    --dns-service-ip 10.4.0.10 \
-    --node-vm-size Standard_D4d_v5 \
-    --node-count 2 \
-    --enable-cluster-autoscaler \
-    --min-count 2 \
-    --max-count 5 \
-    --auto-upgrade-channel patch \
-    --enable-managed-identity \
-    --nodepool-name oprnodepool \
-    --os-sku Ubuntu
+# Create the AKS cluster if it doesn't exist
+if az aks show --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER_NAME} &>/dev/null; then
+  echo "AKS cluster '${AKS_CLUSTER_NAME}' already exists, skipping creation."
+else
+  echo "Creating AKS cluster '${AKS_CLUSTER_NAME}'..."
+  az aks create \
+      --resource-group ${RESOURCE_GROUP} \
+      --name ${AKS_CLUSTER_NAME} \
+      --location ${LOCATION} \
+      --kubernetes-version 1.33 \
+      --network-plugin azure \
+      --network-policy calico \
+      --vnet-subnet-id ${AKS_SUBNET_ID} \
+      --service-cidr 10.4.0.0/16 \
+      --dns-service-ip 10.4.0.10 \
+      --node-vm-size Standard_D4d_v5 \
+      --node-count 2 \
+      --enable-cluster-autoscaler \
+      --min-count 2 \
+      --max-count 5 \
+      --auto-upgrade-channel patch \
+      --enable-managed-identity \
+      --nodepool-name oprnodepool \
+      --os-sku Ubuntu
+fi
 
 # Get the managed identity object ID for role assignments
 export MANAGED_IDENTITY_OBJECT_ID="$(az aks show --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER_NAME} --query "identityProfile.kubeletidentity.objectId" --output tsv)"
