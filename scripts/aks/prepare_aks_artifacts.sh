@@ -47,7 +47,16 @@ az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GR
 # Create managed identity
 az identity create --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}"
 # Create key vault with purge protection and RBAC authorization
-az keyvault create --name "${KEYVAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --enable-purge-protection --enable-rbac-authorization
+# Check if vault exists in deleted state and recover it, otherwise create new
+if az keyvault show-deleted --name "${KEYVAULT_NAME}" &>/dev/null; then
+  echo "Key vault '${KEYVAULT_NAME}' exists in deleted state, recovering..."
+  az keyvault recover --name "${KEYVAULT_NAME}"
+elif az keyvault show --name "${KEYVAULT_NAME}" &>/dev/null; then
+  echo "Key vault '${KEYVAULT_NAME}' already exists."
+else
+  echo "Creating key vault '${KEYVAULT_NAME}'..."
+  az keyvault create --name "${KEYVAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --enable-purge-protection --enable-rbac-authorization
+fi
 # Get keyvault resource ID
 export KEYVAULT_RESOURCE_ID="$(az keyvault show --resource-group "${RESOURCE_GROUP}" --name "${KEYVAULT_NAME}" --query id --output tsv)"
 # Set keyvault secret
