@@ -5,7 +5,7 @@
 az account set --subscription "63e97a70-d825-4b08-af6d-c0d8ad98bed3"
 
 export RESOURCE_GROUP="opr-e2e-vn-aks"
-export LOCATION="eastus"
+export LOCATION="westus"
 export VNET_NAME="opr-e2e-vnet"
 export PUBLIC_IP_ADDRESS_NAME="opr-e2e-public-ip"
 export NAT_GATEWAY_NAME="opr-e2e-nat-gateway"
