@@ -8,20 +8,7 @@ fi
 
 ROOT="./uid2-shared-actions/scripts"
 
-# below resources should be prepared ahead
-export RESOURCE_GROUP="pipeline-vn-aks"
-export LOCATION="eastus"
-export VNET_NAME="pipeline-vnet"
-export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
-export NAT_GATEWAY_NAME="pipeline-nat-gateway"
-export AKS_CLUSTER_NAME="pipelinevncluster"
-export KEYVAULT_NAME="pipeline-vn-aks-vault"
-export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
-export MANAGED_IDENTITY="pipeline-vn-aks-opr-id"
-export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
-export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
-export DEPLOYMENT_ENV="integ"
-
+source "${ROOT}/aks/aks_env.sh"
 source "${ROOT}/healthcheck.sh"
 
 # --- Deploy operator service and make sure it starts ---
