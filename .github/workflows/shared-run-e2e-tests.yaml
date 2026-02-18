@@ -372,7 +372,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: kcc-UID2-6321-reenable-aks-e2e
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -399,7 +399,7 @@ jobs:
           aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
           aws_region: ${{ inputs.aws_region }}
 
-      - name: Stop AKS operator
+      - name: Stop AKS private operator
         if: ${{ inputs.operator_type == 'aks' }}
         uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@kcc-UID2-6321-reenable-aks-e2e
         with:
