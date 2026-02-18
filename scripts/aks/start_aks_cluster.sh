@@ -106,7 +106,7 @@ az role assignment create \
 # Setup AKS Cluster
 az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
 az provider register -n Microsoft.ContainerInstance
-git clone git@github.com:microsoft/virtualnodesOnAzureContainerInstances.git
+git clone https://github.com/microsoft/virtualnodesOnAzureContainerInstances.git
 helm install virtualnode virtualnodesOnAzureContainerInstances/Helm/virtualnode
 # Wait for virtualnode-0 to appear
 echo "Waiting for virtualnode-0 to be ready..."
