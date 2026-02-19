@@ -358,6 +358,8 @@ jobs:
 
       - name: Stop AKS operator
         if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'aks' }}
+        env:
+          RUN_ID: ${{ github.run_id }}
         run: |
             bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
 
