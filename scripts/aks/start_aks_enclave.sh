@@ -20,8 +20,24 @@ if [ -z "${GITHUB_OUTPUT}" ]; then
   exit 1
 fi
 
-# Get public IP, need to trim quotes
-IP=$(az network public-ip list --resource-group ${AKS_NODE_RESOURCE_GROUP} --query "[?starts_with(name, 'kubernetes')].ipAddress" --output tsv)
+# Wait for public IP to be assigned (LoadBalancer provisioning can take time)
+echo "Waiting for public IP to be assigned..."
+for i in {1..30}; do
+  IP=$(az network public-ip list --resource-group ${AKS_NODE_RESOURCE_GROUP} --query "[?starts_with(name, 'kubernetes')].ipAddress" --output tsv)
+  if [ -n "${IP}" ]; then
+    echo "Public IP found: ${IP}"
+    break
+  fi
+  echo "Attempt ${i}/30: Public IP not yet available, waiting 10 seconds..."
+  sleep 10
+done
+
+if [ -z "${IP}" ]; then
+  echo "ERROR: Failed to get public IP after 5 minutes"
+  echo "Checking available public IPs in resource group:"
+  az network public-ip list --resource-group ${AKS_NODE_RESOURCE_GROUP} --output table
+  exit 1
+fi
 
 echo "Instance IP: ${IP}"
 echo "uid2_pipeline_e2e_operator_url=http://${IP}" >> ${GITHUB_OUTPUT}
