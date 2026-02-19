@@ -8,6 +8,9 @@ inputs:
   azure_credentials:
     description: The Azure credentials
     required: true
+  run_id:
+    description: Unique run identifier for resource naming
+    required: true
 
 outputs:
   uid2_pipeline_e2e_operator_url:
@@ -29,5 +32,6 @@ runs:
       shell: bash
       env:
         TEMPLATE_FILE: ${{ inputs.template_file }}
+        RUN_ID: ${{ inputs.run_id }}
       run: |
         bash ${{ github.action_path }}/../../scripts/aks/start_aks_enclave.sh

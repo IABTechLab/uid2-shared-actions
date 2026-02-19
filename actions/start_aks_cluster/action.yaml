@@ -1,9 +1,12 @@
-name: Start AKS Private Operator
-description: Spins up an AKS private operator
+name: Start AKS Cluster
+description: Creates the AKS cluster and infrastructure
 
 inputs:
   azure_credentials:
     description: The Azure credentials
+    required: true
+  run_id:
+    description: Unique run identifier for resource naming
     required: true
 
 runs:
@@ -16,8 +19,10 @@ runs:
         creds: ${{ inputs.azure_credentials }}
         enable-AzPSSession: true
 
-    - name: Start AKS private operator
+    - name: Start AKS cluster
       id: start_aks
       shell: bash
+      env:
+        RUN_ID: ${{ inputs.run_id }}
       run: |
         bash ${{ github.action_path }}/../../scripts/aks/start_aks_cluster.sh

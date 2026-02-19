@@ -210,6 +210,7 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/start_aks_cluster@kcc-UID2-6321-reenable-aks-e2e
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          run_id: ${{ github.run_id }}
 
       - name: Get AKS operator key
         id: get_aks_operator_key
@@ -291,10 +292,11 @@ jobs:
       - name: Start AKS private operator
         id: start_aks_private_operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@kcc-UID2-6321-reenable-aks-e2e
         with:
           template_file: ${{ steps.prepare_aks_metadata.outputs.template_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          run_id: ${{ github.run_id }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
@@ -405,3 +407,4 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@kcc-UID2-6321-reenable-aks-e2e
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          run_id: ${{ github.run_id }}
