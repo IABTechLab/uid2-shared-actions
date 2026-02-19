@@ -26,6 +26,11 @@ if [ -z "${OPERATOR_KEY}" ]; then
   exit 1
 fi
 
+if [ -z "${RUN_ID}" ]; then
+  echo "RUN_ID can not be empty"
+  exit 1
+fi
+
 # See https://github.com/UnifiedID2/aks-demo/tree/master/vn-aks#setup-aks--node-pool
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/aks_env.sh"
@@ -109,6 +114,8 @@ else
   sed -i "s#VAULT_NAME_PLACEHOLDER#${KEYVAULT_NAME}#g" "${OUTPUT_TEMPLATE_FILE}"
   sed -i "s#OPERATOR_KEY_SECRET_NAME_PLACEHOLDER#${KEYVAULT_SECRET_NAME}#g" "${OUTPUT_TEMPLATE_FILE}"
   sed -i "s#DEPLOYMENT_ENVIRONMENT_PLACEHOLDER#integ#g" "${OUTPUT_TEMPLATE_FILE}"
+  # Make deployment name unique per run to avoid Azure resource conflicts
+  sed -i "s#operator-deployment#operator-deployment-${RUN_ID}#g" "${OUTPUT_TEMPLATE_FILE}"
   cat ${OUTPUT_TEMPLATE_FILE}
 
   if [ ${TARGET_ENVIRONMENT} == "mock" ]; then

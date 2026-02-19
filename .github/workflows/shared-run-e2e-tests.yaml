@@ -232,6 +232,7 @@ jobs:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
           operator_key: ${{ steps.get_aks_operator_key.outputs.OPERATOR_KEY }}
+          run_id: ${{ github.run_id }}
 
       - name: Bring up Docker Compose
         id: docker-compose
