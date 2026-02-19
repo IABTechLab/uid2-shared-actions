@@ -48,4 +48,4 @@ runs:
         SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
         GCP_INSTANCE_NAME: ${{ inputs.gcp_instance_name }}
       run: |
-        bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh
+        bash ${{ github.action_path }}/../../scripts/gcp/stop_gcp_enclave.sh

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="./uid2-shared-actions/scripts/azure"
-INPUT_DIR="${ROOT}/artifacts_schema"
-OUTPUT_DIR="${ROOT}/azure-artifacts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INPUT_DIR="${SCRIPT_DIR}/artifacts_schema"
+OUTPUT_DIR="${SCRIPT_DIR}/azure-artifacts"
 
 if [ -z "${IMAGE_VERSION}" ]; then
   echo "IMAGE_VERSION can not be empty"

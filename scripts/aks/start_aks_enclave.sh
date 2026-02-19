@@ -6,23 +6,10 @@ if [[ ! -f ${TEMPLATE_FILE} ]]; then
   exit 1
 fi
 
-ROOT="./uid2-shared-actions/scripts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# below resources should be prepared ahead
-export RESOURCE_GROUP="pipeline-vn-aks"
-export LOCATION="eastus"
-export VNET_NAME="pipeline-vnet"
-export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
-export NAT_GATEWAY_NAME="pipeline-nat-gateway"
-export AKS_CLUSTER_NAME="pipelinevncluster"
-export KEYVAULT_NAME="pipeline-vn-aks-vault"
-export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
-export MANAGED_IDENTITY="pipeline-vn-aks-opr-id"
-export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
-export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
-export DEPLOYMENT_ENV="integ"
-
-source "${ROOT}/healthcheck.sh"
+source "${SCRIPT_DIR}/aks_env.sh"
+source "${SCRIPT_DIR}/../healthcheck.sh"
 
 # --- Deploy operator service and make sure it starts ---
 az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
@@ -33,8 +20,24 @@ if [ -z "${GITHUB_OUTPUT}" ]; then
   exit 1
 fi
 
-# Get public IP, need to trim quotes
-IP=$(az network public-ip list --resource-group ${AKS_NODE_RESOURCE_GROUP} --query "[?starts_with(name, 'kubernetes')].ipAddress" --output tsv)
+# Wait for public IP to be assigned (LoadBalancer provisioning can take time)
+echo "Waiting for public IP to be assigned..."
+for i in {1..30}; do
+  IP=$(az network public-ip list --resource-group ${AKS_NODE_RESOURCE_GROUP} --query "[?starts_with(name, 'kubernetes')].ipAddress" --output tsv)
+  if [ -n "${IP}" ]; then
+    echo "Public IP found: ${IP}"
+    break
+  fi
+  echo "Attempt ${i}/30: Public IP not yet available, waiting 10 seconds..."
+  sleep 10
+done
+
+if [ -z "${IP}" ]; then
+  echo "ERROR: Failed to get public IP after 5 minutes"
+  echo "Checking available public IPs in resource group:"
+  az network public-ip list --resource-group ${AKS_NODE_RESOURCE_GROUP} --output table
+  exit 1
+fi
 
 echo "Instance IP: ${IP}"
 echo "uid2_pipeline_e2e_operator_url=http://${IP}" >> ${GITHUB_OUTPUT}

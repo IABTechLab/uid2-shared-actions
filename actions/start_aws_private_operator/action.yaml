@@ -47,7 +47,7 @@ runs:
     - name: Install Python dependencies
       uses: py-actions/py-dependency-install@v4
       with:
-        path: ./uid2-shared-actions/scripts/aws/requirements.txt
+        path: ${{ github.action_path }}/../../scripts/aws/requirements.txt
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -70,4 +70,4 @@ runs:
         TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
       run: |
-        bash uid2-shared-actions/scripts/aws/start_aws_enclave.sh
+        bash ${{ github.action_path }}/../../scripts/aws/start_aws_enclave.sh

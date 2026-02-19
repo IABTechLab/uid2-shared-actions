@@ -1,5 +1,5 @@
-name: Stop AKS Private Operator
-description: Spins down an AKS private operator
+name: Start AKS Cluster
+description: Creates the AKS cluster and infrastructure
 
 inputs:
   azure_credentials:
@@ -19,9 +19,10 @@ runs:
         creds: ${{ inputs.azure_credentials }}
         enable-AzPSSession: true
 
-    - name: Stop AKS private operator
+    - name: Start AKS cluster
+      id: start_aks
       shell: bash
       env:
         RUN_ID: ${{ inputs.run_id }}
       run: |
-        bash ${{ github.action_path }}/../../scripts/aks/stop_aks_enclave.sh
+        bash ${{ github.action_path }}/../../scripts/aks/start_aks_cluster.sh

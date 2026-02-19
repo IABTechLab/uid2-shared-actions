@@ -31,11 +31,11 @@ if [ -z "${IMAGE_HASH}" ]; then
   exit 1
 fi
 
-ROOT="./uid2-shared-actions/scripts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GCP_INSTANCE_NAME="ci-test-${RANDOM}"
 OPERATOR_KEY_SECRET_NAME=${GCP_INSTANCE_NAME}
 
-source "${ROOT}/healthcheck.sh"
+source "${SCRIPT_DIR}/../healthcheck.sh"
 
 gcloud config set project ${GCP_PROJECT}
 

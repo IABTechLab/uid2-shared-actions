@@ -49,4 +49,4 @@ runs:
         PARAMETERS_FILE: ${{ inputs.parameters_file }}
         TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
       run: |
-        bash uid2-shared-actions/scripts/azure/start_azure_enclave.sh
+        bash ${{ github.action_path }}/../../scripts/azure/start_azure_enclave.sh

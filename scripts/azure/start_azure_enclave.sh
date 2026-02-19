@@ -27,10 +27,10 @@ if [ -z "${TARGET_ENVIRONMENT}" ]; then
 fi
 
 # Below resources should be prepared ahead
-ROOT="./uid2-shared-actions/scripts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "${ROOT}/jq_helper.sh"
-source "${ROOT}/healthcheck.sh"
+source "${SCRIPT_DIR}/../jq_helper.sh"
+source "${SCRIPT_DIR}/../healthcheck.sh"
 
 RESOURCE_GROUP="uid-enclave-ci-cd"
 IDENTITY="uid-operator"
