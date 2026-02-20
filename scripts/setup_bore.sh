@@ -23,9 +23,11 @@ if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
   docker run --init --rm --network e2e_default ekzhang/bore local --local-host core --to ${BORE_URL} --secret ${BORE_SECRET} 8088  > ${ROOT}/bore_core.out &
   docker run --init --rm --network e2e_default ekzhang/bore local --local-host optout --to ${BORE_URL} --secret ${BORE_SECRET} 8081  > ${ROOT}/bore_optout.out &
 
-  until [ -f ${ROOT}/bore_localstack.out ] && [ -f ${ROOT}/bore_core.out ] && [ -f ${ROOT}/bore_optout.out ]
+  until grep -q " at " ${ROOT}/bore_localstack.out 2>/dev/null && \
+        grep -q " at " ${ROOT}/bore_core.out 2>/dev/null && \
+        grep -q " at " ${ROOT}/bore_optout.out 2>/dev/null
   do
-    sleep 5
+    sleep 1
   done
 
   cat ${ROOT}/bore_localstack.out

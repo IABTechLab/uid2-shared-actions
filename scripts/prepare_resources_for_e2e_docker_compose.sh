@@ -84,7 +84,9 @@ if [ ${OPERATOR_TYPE} != "public" ]; then
   jq_string_update ${DOCKER_OPTOUT_CONFIG_FILE} optout_url "${BORE_URL_OPTOUT}"
 fi
 
-jq_string_update ${DOCKER_OPERATOR_CONFIG_FILE} identity_scope ${IDENTITY_SCOPE}
+if [ -f "${DOCKER_OPERATOR_CONFIG_FILE}" ]; then
+  jq_string_update ${DOCKER_OPERATOR_CONFIG_FILE} identity_scope ${IDENTITY_SCOPE}
+fi
 
 cat ${DOCKER_CORE_CONFIG_FILE}
 cat ${DOCKER_OPTOUT_CONFIG_FILE}
