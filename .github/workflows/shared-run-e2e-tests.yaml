@@ -180,7 +180,7 @@ jobs:
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: ./actions/prepare_gcp_metadata
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v3
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           target_environment: ${{ inputs.target_environment }}
@@ -190,7 +190,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: ./actions/prepare_azure_metadata
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v3
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           target_environment: ${{ inputs.target_environment }}
@@ -198,7 +198,7 @@ jobs:
       - name: Prepare AWS metadata
         id: prepare_aws_metadata
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: ./actions/prepare_aws_metadata
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@v3
         with:
           identity_scope: ${{ inputs.identity_scope }}
           target_environment: ${{ inputs.target_environment }}
@@ -207,7 +207,7 @@ jobs:
       - name: Start AKS cluster
         id: start_aks_cluster
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: ./actions/start_aks_cluster
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_cluster@kcc-UID2-6321-reenable-aks-e2e
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
@@ -226,7 +226,7 @@ jobs:
       - name: Prepare AKS metadata
         id: prepare_aks_metadata
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: ./actions/prepare_aks_metadata
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@kcc-UID2-6321-reenable-aks-e2e
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           target_environment: ${{ inputs.target_environment }}
@@ -254,7 +254,7 @@ jobs:
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: ./actions/start_gcp_private_operator
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
@@ -266,7 +266,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: ./actions/start_azure_private_operator
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
@@ -278,7 +278,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: ./actions/start_aws_private_operator
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v3
         with:
           bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
@@ -292,7 +292,7 @@ jobs:
       - name: Start AKS private operator
         id: start_aks_private_operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: ./actions/start_aks_private_operator
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@kcc-UID2-6321-reenable-aks-e2e
         with:
           template_file: ${{ steps.prepare_aks_metadata.outputs.template_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
@@ -316,7 +316,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: ./actions/run_e2e_tests
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
@@ -383,7 +383,7 @@ jobs:
 
       - name: Stop GCP private operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: ./actions/stop_gcp_private_operator
+        uses: IABTechLab/uid2-shared-actions/actions/stop_gcp_private_operator@v3
         with:
           gcp_project: ${{ inputs.gcp_project }}
           gcp_service_account: ${{ inputs.gcp_service_account }}
@@ -392,21 +392,21 @@ jobs:
 
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: ./actions/stop_azure_private_operator
+        uses: IABTechLab/uid2-shared-actions/actions/stop_azure_private_operator@v3
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           azure_container_group_name: ${{ needs.e2e-test.outputs.azure_container_group_name }}
 
       - name: Stop AWS private operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: ./actions/stop_aws_private_operator
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aws_private_operator@v3
         with:
           aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
           aws_region: ${{ inputs.aws_region }}
 
       - name: Stop AKS private operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: ./actions/stop_aks_private_operator
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@kcc-UID2-6321-reenable-aks-e2e
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
