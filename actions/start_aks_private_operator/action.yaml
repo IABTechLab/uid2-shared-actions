@@ -34,4 +34,4 @@ runs:
         TEMPLATE_FILE: ${{ inputs.template_file }}
         RUN_ID: ${{ inputs.run_id }}
       run: |
-        bash ${{ github.action_path }}/../../scripts/aks/start_aks_enclave.sh
+        bash uid2-shared-actions/scripts/aks/start_aks_enclave.sh

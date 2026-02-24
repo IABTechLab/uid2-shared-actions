@@ -69,7 +69,7 @@ runs:
       env:
         IMAGE_HASH: ${{ steps.image_digest.outputs.image_hash }}
       run: |
-        bash ${{ github.action_path }}/../../scripts/gcp/prepare_gcp_enclave_id.sh
+        bash uid2-shared-actions/scripts/gcp/prepare_gcp_enclave_id.sh
 
     - name: Prepare GCP enclave metadata
       id: enclave_metadata
@@ -79,7 +79,7 @@ runs:
         ENCLAVE_ID: ${{ steps.enclave_id.outputs.enclave_id }}
         ENCLAVE_PROTOCOL: gcp-oidc
       run: |
-        bash ${{ github.action_path }}/../../scripts/save_enclave_id_to_admin.sh
+        bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh
 
     - name: Get operator key
       id: operator_key
@@ -89,4 +89,4 @@ runs:
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
           ENCLAVE_PROTOCOL: gcp-oidc
       run: |
-        bash ${{ github.action_path }}/../../scripts/get_operator_key.sh
+        bash uid2-shared-actions/scripts/get_operator_key.sh

@@ -45,7 +45,7 @@ runs:
         OPERATOR_KEY: ${{ inputs.operator_key }}
         RUN_ID: ${{ inputs.run_id }}
       run: |
-        bash ${{ github.action_path }}/../../scripts/aks/prepare_aks_artifacts.sh
+        bash uid2-shared-actions/scripts/aks/prepare_aks_artifacts.sh
 
     - name: Prepare AKS enclave ID
       id: enclave_id
@@ -53,7 +53,7 @@ runs:
       env:
         POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.policy_digest_file }}
       run: |
-        bash ${{ github.action_path }}/../../scripts/aks/prepare_aks_enclave_id.sh
+        bash uid2-shared-actions/scripts/aks/prepare_aks_enclave_id.sh
 
     - name: Prepare AKS enclave metadata
       id: enclave_metadata
@@ -62,4 +62,4 @@ runs:
         ENCLAVE_ID: ${{ steps.enclave_id.outputs.enclave_id }}
         ENCLAVE_PROTOCOL: azure-cc
       run: |
-        bash ${{ github.action_path }}/../../scripts/save_enclave_id_to_admin.sh
+        bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh

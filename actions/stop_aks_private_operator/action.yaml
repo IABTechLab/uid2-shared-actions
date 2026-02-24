@@ -24,4 +24,4 @@ runs:
       env:
         RUN_ID: ${{ inputs.run_id }}
       run: |
-        bash ${{ github.action_path }}/../../scripts/aks/stop_aks_enclave.sh
+        bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
