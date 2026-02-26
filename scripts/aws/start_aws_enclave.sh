@@ -41,9 +41,9 @@ if [ -z "${OPERATOR_KEY}" ]; then
   exit 1
 fi
 
-ROOT="./uid2-shared-actions/scripts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-source "${ROOT}/healthcheck.sh"
+source "${SCRIPT_DIR}/../healthcheck.sh"
 
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
@@ -66,8 +66,8 @@ case "${IDENTITY_SCOPE}" in
     exit 1 ;;
 esac
 
-python ${ROOT}/aws/create_cloudformation_stack.py \
-  --stack_fp "${ROOT}/aws/stacks" \
+python ${SCRIPT_DIR}/create_cloudformation_stack.py \
+  --stack_fp "${SCRIPT_DIR}/stacks" \
   --cftemplate_fp "../uid2-operator/scripts/aws" \
   --core_url "${BORE_URL_CORE}" \
   --optout_url "${BORE_URL_OPTOUT}" \
@@ -84,7 +84,7 @@ aws cloudformation describe-stacks \
   --region "${AWS_REGION}"
 
 # Get public URL
-AWS_INSTANCE_URL=$(python ${ROOT}/aws/get_instance_url.py \
+AWS_INSTANCE_URL=$(python ${SCRIPT_DIR}/get_instance_url.py \
   --region "${AWS_REGION}" \
   --stack "${AWS_STACK_NAME}")
 

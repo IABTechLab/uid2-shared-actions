@@ -21,31 +21,58 @@ if [ -z "${TARGET_ENVIRONMENT}" ]; then
   exit 1
 fi
 
-# Below resources should be prepared ahead of running the E2E test.
+if [ -z "${OPERATOR_KEY}" ]; then
+  echo "OPERATOR_KEY can not be empty"
+  exit 1
+fi
+
+if [ -z "${RUN_ID}" ]; then
+  echo "RUN_ID can not be empty"
+  exit 1
+fi
+
 # See https://github.com/UnifiedID2/aks-demo/tree/master/vn-aks#setup-aks--node-pool
-export RESOURCE_GROUP="pipeline-vn-aks"
-export LOCATION="eastus"
-export VNET_NAME="pipeline-vnet"
-export PUBLIC_IP_ADDRESS_NAME="pipeline-public-ip"
-export NAT_GATEWAY_NAME="pipeline-nat-gateway"
-export AKS_CLUSTER_NAME="pipelinevncluster"
-export KEYVAULT_NAME="pipeline-vn-aks-vault"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/aks_env.sh"
+
 if [ ${TARGET_ENVIRONMENT} == "mock" ]; then
-  export KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name"
+  export KEYVAULT_SECRET_NAME="opr-e2e-vn-aks-opr-key-name"
 elif [ ${TARGET_ENVIRONMENT} == "integ" ]; then
-  KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name-integ"
+  export KEYVAULT_SECRET_NAME="opr-e2e-vn-aks-opr-key-name-integ"
 elif [ ${TARGET_ENVIRONMENT} == "prod" ]; then
-  KEYVAULT_SECRET_NAME="pipeline-vn-aks-opr-key-name-prod"
+  export KEYVAULT_SECRET_NAME="opr-e2e-vn-aks-opr-key-name-prod"
 else
   echo "Arguments not supported: TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
   exit 1
 fi
 
-export MANAGED_IDENTITY="pipeline-vn-aks-opr-id"
-export AKS_NODE_RESOURCE_GROUP="MC_${RESOURCE_GROUP}_${AKS_CLUSTER_NAME}_${LOCATION}"
-export SUBSCRIPTION_ID="$(az account show --query id --output tsv)"
-export DEPLOYMENT_ENV="integ"
-export MANAGED_IDENTITY_ID="/subscriptions/001a3882-eb1c-42ac-9edc-5e2872a07783/resourcegroups/pipeline-vn-aks/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pipeline-vn-aks-opr-id"
+# --- Create Key Vault & Managed Identity ---
+# Login to AKS cluster
+az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
+# Create managed identity
+az identity create --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}"
+# Create key vault with purge protection and RBAC authorization
+# Check if vault exists in deleted state and recover it, otherwise create new
+if az keyvault show-deleted --name "${KEYVAULT_NAME}" &>/dev/null; then
+  echo "Key vault '${KEYVAULT_NAME}' exists in deleted state, recovering..."
+  az keyvault recover --name "${KEYVAULT_NAME}"
+elif az keyvault show --name "${KEYVAULT_NAME}" &>/dev/null; then
+  echo "Key vault '${KEYVAULT_NAME}' already exists."
+else
+  echo "Creating key vault '${KEYVAULT_NAME}'..."
+  az keyvault create --name "${KEYVAULT_NAME}" --resource-group "${RESOURCE_GROUP}" --location "${LOCATION}" --enable-purge-protection --enable-rbac-authorization
+fi
+# Get keyvault resource ID
+export KEYVAULT_RESOURCE_ID="$(az keyvault show --resource-group "${RESOURCE_GROUP}" --name "${KEYVAULT_NAME}" --query id --output tsv)"
+# Set keyvault secret
+az keyvault secret set --vault-name "${KEYVAULT_NAME}" --name "${KEYVAULT_SECRET_NAME}" --value "${OPERATOR_KEY}"
+# Get identity principal ID
+export IDENTITY_PRINCIPAL_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query principalId --output tsv)"
+# Create role assignment for Key Vault Secrets User
+az role assignment create --assignee-object-id "${IDENTITY_PRINCIPAL_ID}" --role "Key Vault Secrets User" --scope "${KEYVAULT_RESOURCE_ID}" --assignee-principal-type ServicePrincipal
+
+# Get managed identity ID
+export MANAGED_IDENTITY_ID="$(az identity show --name "${MANAGED_IDENTITY}" --resource-group "${RESOURCE_GROUP}" --query id --output tsv)"
 
 OPERATOR_ROOT="./uid2-operator"
 SHARED_ACTIONS_ROOT="./uid2-shared-actions"
@@ -87,11 +114,12 @@ else
   sed -i "s#VAULT_NAME_PLACEHOLDER#${KEYVAULT_NAME}#g" "${OUTPUT_TEMPLATE_FILE}"
   sed -i "s#OPERATOR_KEY_SECRET_NAME_PLACEHOLDER#${KEYVAULT_SECRET_NAME}#g" "${OUTPUT_TEMPLATE_FILE}"
   sed -i "s#DEPLOYMENT_ENVIRONMENT_PLACEHOLDER#integ#g" "${OUTPUT_TEMPLATE_FILE}"
+  # Make deployment name unique per run to avoid Azure resource conflicts
+  sed -i "s#operator-deployment#operator-deployment-${RUN_ID}#g" "${OUTPUT_TEMPLATE_FILE}"
   cat ${OUTPUT_TEMPLATE_FILE}
 
-  if [ ${TARGET_ENVIRONMENT} == "mock" ]; then
-    python3 ${SHARED_ACTIONS_ROOT}/scripts/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL ${BORE_URL_CORE} OPTOUT_BASE_URL ${BORE_URL_OPTOUT} SKIP_VALIDATIONS true
-  fi
+  # Add bore URLs for connecting to mock core/optout services (used in all E2E test environments)
+  python3 ${SHARED_ACTIONS_ROOT}/scripts/aks/add_env.py ${OUTPUT_TEMPLATE_FILE} uid2-operator CORE_BASE_URL ${BORE_URL_CORE} OPTOUT_BASE_URL ${BORE_URL_OPTOUT} SKIP_VALIDATIONS true
 
   cat ${OUTPUT_TEMPLATE_FILE}
   # --- Finished updating yaml file with resources ---

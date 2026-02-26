@@ -14,6 +14,12 @@ inputs:
   bore_url_optout:
     description: The bore URL for optout service
     required: true
+  operator_key:
+    description: The operator key secret for the target environment
+    required: true
+  run_id:
+    description: Unique run identifier to avoid Azure resource conflicts
+    required: true
 outputs:
   template_file:
     description: The template file
@@ -36,6 +42,8 @@ runs:
         BORE_URL_OPTOUT: ${{ inputs.bore_url_optout }}
         IMAGE_VERSION: ${{ inputs.operator_image_version }}
         TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+        OPERATOR_KEY: ${{ inputs.operator_key }}
+        RUN_ID: ${{ inputs.run_id }}
       run: |
         bash uid2-shared-actions/scripts/aks/prepare_aks_artifacts.sh
 

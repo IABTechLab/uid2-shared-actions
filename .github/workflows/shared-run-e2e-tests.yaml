@@ -94,6 +94,9 @@ env:
   E2E_EUID_PROD_AWS_ARGS_JSON: ${{ secrets.E2E_EUID_PROD_AWS_ARGS_JSON }}
   E2E_EUID_PROD_AWS_OPERATOR_API_KEY: ${{ secrets.E2E_EUID_PROD_AWS_OPERATOR_API_KEY }}
 
+  E2E_UID2_INTEG_AKS_OPERATOR_KEY: ${{ secrets.E2E_UID2_INTEG_AKS_OPERATOR_KEY }}
+  E2E_UID2_PROD_AKS_OPERATOR_KEY: ${{ secrets.E2E_UID2_PROD_AKS_OPERATOR_KEY }}
+
 jobs:
   e2e-test:
     name: E2E Test
@@ -201,6 +204,37 @@ jobs:
           target_environment: ${{ inputs.target_environment }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
 
+      - name: Start AKS cluster
+        id: start_aks_cluster
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_cluster@v3
+        with:
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          run_id: ${{ github.run_id }}
+
+      - name: Get AKS operator key
+        id: get_aks_operator_key
+        if: ${{ inputs.operator_type == 'aks' }}
+        shell: bash
+        env:
+          IDENTITY_SCOPE: ${{ inputs.identity_scope }}
+          TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
+          ENCLAVE_PROTOCOL: azure-cc
+        run: |
+          bash uid2-shared-actions/scripts/get_operator_key.sh
+
+      - name: Prepare AKS metadata
+        id: prepare_aks_metadata
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@v3
+        with:
+          operator_image_version: ${{ inputs.operator_image_version }}
+          target_environment: ${{ inputs.target_environment }}
+          bore_url_core: ${{ steps.bore.outputs.bore_url_core }}
+          bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
+          operator_key: ${{ steps.get_aks_operator_key.outputs.OPERATOR_KEY }}
+          run_id: ${{ github.run_id }}
+
       - name: Bring up Docker Compose
         id: docker-compose
         if: ${{ inputs.target_environment == 'mock' }}
@@ -254,6 +288,15 @@ jobs:
           identity_scope: ${{ inputs.identity_scope }}
           target_environment: ${{ inputs.target_environment }}
           operator_key: ${{ steps.prepare_aws_metadata.outputs.operator_key }}
+
+      - name: Start AKS private operator
+        id: start_aks_private_operator
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@v3
+        with:
+          template_file: ${{ steps.prepare_aks_metadata.outputs.template_file }}
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          run_id: ${{ github.run_id }}
 
       - name: Decide E2E test environment variables
         id: decide_env_var
@@ -315,6 +358,8 @@ jobs:
 
       - name: Stop AKS operator
         if: ${{ always() && !inputs.delay_operator_shutdown && inputs.operator_type == 'aks' }}
+        env:
+          RUN_ID: ${{ github.run_id }}
         run: |
             bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
 
@@ -358,3 +403,10 @@ jobs:
         with:
           aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
           aws_region: ${{ inputs.aws_region }}
+
+      - name: Stop AKS private operator
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@v3
+        with:
+          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          run_id: ${{ github.run_id }}

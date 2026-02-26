@@ -34,6 +34,10 @@ elif [ "${IDENTITY_SCOPE}" == "EUID" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ]
   OPERATOR_KEY=${E2E_EUID_INTEG_AWS_OPERATOR_API_KEY}
 elif [ "${IDENTITY_SCOPE}" == "EUID" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ] && [ "${ENCLAVE_PROTOCOL}" == "aws-nitro" ]; then
   OPERATOR_KEY=${E2E_EUID_PROD_AWS_OPERATOR_API_KEY}
+elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "integ" ] && [ "${ENCLAVE_PROTOCOL}" == "azure-cc" ]; then
+  OPERATOR_KEY=${E2E_UID2_INTEG_AKS_OPERATOR_KEY}
+elif [ "${IDENTITY_SCOPE}" == "UID2" ] && [ "${TARGET_ENVIRONMENT}" == "prod" ] && [ "${ENCLAVE_PROTOCOL}" == "azure-cc" ]; then
+  OPERATOR_KEY=${E2E_UID2_PROD_AKS_OPERATOR_KEY}
 else
   echo "Arguments not supported: IDENTITY_SCOPE=${IDENTITY_SCOPE}, TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}, ENCLAVE_PROTOCOL=${ENCLAVE_PROTOCOL}"
   exit 1

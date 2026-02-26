@@ -89,4 +89,4 @@ runs:
           TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
           ENCLAVE_PROTOCOL: gcp-oidc
       run: |
-        bash ./uid2-shared-actions/scripts/get_operator_key.sh
+        bash uid2-shared-actions/scripts/get_operator_key.sh
