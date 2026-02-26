@@ -23,19 +23,33 @@ if [ "${TARGET_ENVIRONMENT}" == "mock" ]; then
   docker run --init --rm --network e2e_default ekzhang/bore local --local-host core --to ${BORE_URL} --secret ${BORE_SECRET} 8088  > ${ROOT}/bore_core.out &
   docker run --init --rm --network e2e_default ekzhang/bore local --local-host optout --to ${BORE_URL} --secret ${BORE_SECRET} 8081  > ${ROOT}/bore_optout.out &
 
-  until [ -f ${ROOT}/bore_localstack.out ] && [ -f ${ROOT}/bore_core.out ] && [ -f ${ROOT}/bore_optout.out ]
-  do
+  # Wait for bore tunnels to establish and output their URLs (not just for files to exist)
+  echo "Waiting for bore tunnels to establish..."
+  for i in {1..60}; do
+    BORE_URL_LOCALSTACK=$(grep -o 'listening at [^ ]*' ${ROOT}/bore_localstack.out 2>/dev/null | cut -d ' ' -f3 || echo "")
+    BORE_URL_CORE=$(grep -o 'listening at [^ ]*' ${ROOT}/bore_core.out 2>/dev/null | cut -d ' ' -f3 || echo "")
+    BORE_URL_OPTOUT=$(grep -o 'listening at [^ ]*' ${ROOT}/bore_optout.out 2>/dev/null | cut -d ' ' -f3 || echo "")
+    
+    if [ -n "${BORE_URL_LOCALSTACK}" ] && [ -n "${BORE_URL_CORE}" ] && [ -n "${BORE_URL_OPTOUT}" ]; then
+      echo "All bore tunnels established!"
+      break
+    fi
+    echo "Attempt ${i}/60: Waiting for bore tunnels..."
     sleep 5
   done
 
-  cat ${ROOT}/bore_localstack.out
-  cat ${ROOT}/bore_core.out
-  cat ${ROOT}/bore_optout.out
+  if [ -z "${BORE_URL_LOCALSTACK}" ] || [ -z "${BORE_URL_CORE}" ] || [ -z "${BORE_URL_OPTOUT}" ]; then
+    echo "ERROR: Failed to establish bore tunnels after 5 minutes"
+    echo "bore_localstack.out contents:"
+    cat ${ROOT}/bore_localstack.out 2>/dev/null || echo "(file not found)"
+    echo "bore_core.out contents:"
+    cat ${ROOT}/bore_core.out 2>/dev/null || echo "(file not found)"
+    echo "bore_optout.out contents:"
+    cat ${ROOT}/bore_optout.out 2>/dev/null || echo "(file not found)"
+    exit 1
+  fi
 
   PROTOCOL="http"
-  BORE_URL_LOCALSTACK=$(cat ${ROOT}/bore_localstack.out | grep at | cut -d ' ' -f7)
-  BORE_URL_CORE=$(cat ${ROOT}/bore_core.out | grep at | cut -d ' ' -f7)
-  BORE_URL_OPTOUT=$(cat ${ROOT}/bore_optout.out | grep at | cut -d ' ' -f7)
 else
   PROTOCOL="https"
   BORE_URL_LOCALSTACK="NOT_REQUIRED"
