@@ -363,50 +363,50 @@ jobs:
         run: |
             bash uid2-shared-actions/scripts/aks/stop_aks_enclave.sh
 
-  e2e-test-cleanup:
-    name: E2E Test Cleanup (Delayed Operator Shutdown)
-    if: ${{ always() && inputs.delay_operator_shutdown && inputs.operator_type != 'public' }}
-    needs: [e2e-test]
-    runs-on: ubuntu-latest
-    environment: 'e2e-test-cleanup'
-    permissions:
-      contents: write
-      packages: read
-      id-token: write
-    steps:
-      - name: Checkout uid2-shared-actions repo
-        uses: actions/checkout@v4
-        with:
-          ref: kcc-UID2-6321-reenable-aks-e2e
-          repository: IABTechLab/uid2-shared-actions
-          path: uid2-shared-actions
+  # e2e-test-cleanup:
+  #   name: E2E Test Cleanup (Delayed Operator Shutdown)
+  #   if: ${{ always() && inputs.delay_operator_shutdown && inputs.operator_type != 'public' }}
+  #   needs: [e2e-test]
+  #   runs-on: ubuntu-latest
+  #   environment: 'e2e-test-cleanup'
+  #   permissions:
+  #     contents: write
+  #     packages: read
+  #     id-token: write
+  #   steps:
+  #     - name: Checkout uid2-shared-actions repo
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: kcc-UID2-6321-reenable-aks-e2e
+  #         repository: IABTechLab/uid2-shared-actions
+  #         path: uid2-shared-actions
 
-      - name: Stop GCP private operator
-        if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_gcp_private_operator@v3
-        with:
-          gcp_project: ${{ inputs.gcp_project }}
-          gcp_service_account: ${{ inputs.gcp_service_account }}
-          gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
-          gcp_instance_name: ${{ needs.e2e-test.outputs.gcp_instance_name }}
+  #     - name: Stop GCP private operator
+  #       if: ${{ inputs.operator_type == 'gcp' }}
+  #       uses: IABTechLab/uid2-shared-actions/actions/stop_gcp_private_operator@v3
+  #       with:
+  #         gcp_project: ${{ inputs.gcp_project }}
+  #         gcp_service_account: ${{ inputs.gcp_service_account }}
+  #         gcp_workload_identity_provider_id: ${{ inputs.gcp_workload_identity_provider_id }}
+  #         gcp_instance_name: ${{ needs.e2e-test.outputs.gcp_instance_name }}
 
-      - name: Stop Azure private operator
-        if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_azure_private_operator@v3
-        with:
-          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          azure_container_group_name: ${{ needs.e2e-test.outputs.azure_container_group_name }}
+  #     - name: Stop Azure private operator
+  #       if: ${{ inputs.operator_type == 'azure' }}
+  #       uses: IABTechLab/uid2-shared-actions/actions/stop_azure_private_operator@v3
+  #       with:
+  #         azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  #         azure_container_group_name: ${{ needs.e2e-test.outputs.azure_container_group_name }}
 
-      - name: Stop AWS private operator
-        if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_aws_private_operator@v3
-        with:
-          aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
-          aws_region: ${{ inputs.aws_region }}
+  #     - name: Stop AWS private operator
+  #       if: ${{ inputs.operator_type == 'aws' }}
+  #       uses: IABTechLab/uid2-shared-actions/actions/stop_aws_private_operator@v3
+  #       with:
+  #         aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
+  #         aws_region: ${{ inputs.aws_region }}
 
-      - name: Stop AKS private operator
-        if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@kcc-UID2-6321-reenable-aks-e2e
-        with:
-          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          run_id: ${{ github.run_id }}
+  #     - name: Stop AKS private operator
+  #       if: ${{ inputs.operator_type == 'aks' }}
+  #       uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@kcc-UID2-6321-reenable-aks-e2e
+  #       with:
+  #         azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
+  #         run_id: ${{ github.run_id }}
