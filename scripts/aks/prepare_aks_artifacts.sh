@@ -139,6 +139,11 @@ else
   fi
   # The previous pipe will be stored in ${OUTPUT_POLICY_DIGEST_FILE} as well. The below command is to remove the prompt and only extract the enclave id.
   sed -i 's/.*(y\/n) //g' "${OUTPUT_POLICY_DIGEST_FILE}"
+  
+  # Print the generated template file with CCE policy
+  echo "=== Generated operator.yaml with CCE policy ==="
+  cat ${OUTPUT_TEMPLATE_FILE}
+  echo "=== End of operator.yaml ==="
 fi
 
 if [ -z "${GITHUB_OUTPUT}" ]; then
