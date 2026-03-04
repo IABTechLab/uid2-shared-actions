@@ -110,10 +110,7 @@ else
   # Generate deployment template
   cp ${INPUT_TEMPLATE_FILE} ${OUTPUT_TEMPLATE_FILE}
   sed -i "s#IMAGE_PLACEHOLDER#${IMAGE}#g" ${OUTPUT_TEMPLATE_FILE}
-  # TODO: Commented out for testing identity-related 409 conflict issue with MS support
-  # sed -i "s#IDENTITY_PLACEHOLDER#${MANAGED_IDENTITY_ID}#g" "${OUTPUT_TEMPLATE_FILE}"
-  # Remove the identity annotation entirely for testing
-  sed -i '/microsoft.containerinstance.virtualnode.identity/d' "${OUTPUT_TEMPLATE_FILE}"
+  sed -i "s#IDENTITY_PLACEHOLDER#${MANAGED_IDENTITY_ID}#g" "${OUTPUT_TEMPLATE_FILE}"
   sed -i "s#VAULT_NAME_PLACEHOLDER#${KEYVAULT_NAME}#g" "${OUTPUT_TEMPLATE_FILE}"
   sed -i "s#OPERATOR_KEY_SECRET_NAME_PLACEHOLDER#${KEYVAULT_SECRET_NAME}#g" "${OUTPUT_TEMPLATE_FILE}"
   sed -i "s#DEPLOYMENT_ENVIRONMENT_PLACEHOLDER#integ#g" "${OUTPUT_TEMPLATE_FILE}"
