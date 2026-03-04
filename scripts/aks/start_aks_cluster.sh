@@ -106,13 +106,32 @@ az role assignment create \
 # Setup AKS Cluster
 az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
 az provider register -n Microsoft.ContainerInstance
-git clone https://github.com/microsoft/virtualnodesOnAzureContainerInstances.git
-helm install virtualnode virtualnodesOnAzureContainerInstances/Helm/virtualnode
-# Wait for virtualnode-0 to appear
-echo "Waiting for virtualnode-0 to be ready..."
-while ! kubectl get nodes | grep -q "virtualnode-0"; do
-  echo "virtualnode-0 not found yet, waiting 10 seconds..."
+
+# --- Option 1: OSS/Helm Virtual Node Installation (COMMENTED OUT for testing) ---
+# git clone https://github.com/microsoft/virtualnodesOnAzureContainerInstances.git
+# helm install virtualnode virtualnodesOnAzureContainerInstances/Helm/virtualnode
+# # Wait for virtualnode-0 to appear
+# echo "Waiting for virtualnode-0 to be ready..."
+# while ! kubectl get nodes | grep -q "virtualnode-0"; do
+#   echo "virtualnode-0 not found yet, waiting 10 seconds..."
+#   sleep 10
+# done
+# echo "virtualnode-0 is ready!"
+# kubectl get nodes
+
+# --- Option 2: Built-in AKS Virtual Nodes Addon (MS Support recommended for testing) ---
+# Reference: https://learn.microsoft.com/azure/aks/virtual-nodes-cli
+az aks enable-addons \
+  --resource-group ${RESOURCE_GROUP} \
+  --name ${AKS_CLUSTER_NAME} \
+  --addons virtual-node \
+  --subnet-name cg
+
+# Wait for virtual-node-aci-linux to appear (built-in addon uses this name)
+echo "Waiting for virtual-node-aci-linux to be ready..."
+while ! kubectl get nodes | grep -q "virtual-node-aci-linux"; do
+  echo "virtual-node-aci-linux not found yet, waiting 10 seconds..."
   sleep 10
 done
-echo "virtualnode-0 is ready!"
+echo "virtual-node-aci-linux is ready!"
 kubectl get nodes

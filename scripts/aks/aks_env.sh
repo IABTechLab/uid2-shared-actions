@@ -15,7 +15,7 @@ else
 fi
 
 export RESOURCE_GROUP="opr-e2e-aks${RUN_SUFFIX}"
-export LOCATION="westus"
+export LOCATION="eastus"
 export VNET_NAME="opr-e2e-vnet${RUN_SUFFIX}"
 export PUBLIC_IP_ADDRESS_NAME="opr-e2e-ip${RUN_SUFFIX}"
 export NAT_GATEWAY_NAME="opr-e2e-nat${RUN_SUFFIX}"
