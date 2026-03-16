@@ -153,7 +153,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@v4
         with:
-          ref: v3
+          ref: sch-UID2-6632-load-test-private-operator
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -179,7 +179,7 @@ jobs:
       - name: Prepare GCP metadata
         id: prepare_gcp_metadata
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@v2
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_gcp_metadata@sch-UID2-6632-load-test-private-operator
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -189,7 +189,7 @@ jobs:
       - name: Prepare Azure metadata
         id: prepare_azure_metadata
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_azure_metadata@sch-UID2-6632-load-test-private-operator
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -197,7 +197,7 @@ jobs:
       - name: Prepare AWS metadata
         id: prepare_aws_metadata
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aws_metadata@sch-UID2-6632-load-test-private-operator
         with:
           admin_root: ${{ inputs.admin_root }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
@@ -205,7 +205,7 @@ jobs:
       - name: Prepare EKS metadata
         id: prepare_eks_metadata
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_eks_metadata@sch-UID2-6632-load-test-private-operator
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -214,7 +214,7 @@ jobs:
       - name: Prepare AKS metadata
         id: prepare_aks_metadata
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@v3
+        uses: IABTechLab/uid2-shared-actions/actions/prepare_aks_metadata@sch-UID2-6632-load-test-private-operator
         with:
           operator_image_version: ${{ inputs.operator_image_version }}
           admin_root: ${{ inputs.admin_root }}
@@ -243,7 +243,7 @@ jobs:
       - name: Start GCP private operator
         id: start_gcp_private_operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@v2
+        uses: IABTechLab/uid2-shared-actions/actions/start_gcp_private_operator@sch-UID2-6632-load-test-private-operator
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -255,7 +255,7 @@ jobs:
       - name: Start Azure private operator
         id: start_azure_private_operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_azure_private_operator@sch-UID2-6632-load-test-private-operator
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -266,7 +266,7 @@ jobs:
       - name: Start AWS private operator
         id: start_aws_private_operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_aws_private_operator@sch-UID2-6632-load-test-private-operator
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -279,7 +279,7 @@ jobs:
       - name: Start EKS operator
         id: start_EKS_operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_eks_operator@sch-UID2-6632-load-test-private-operator
         with:
           bore_url_core: ${{ steps.bore.outputs.BORE_URL_CORE }}
           bore_url_optout: ${{ steps.bore.outputs.BORE_URL_OPTOUT }}
@@ -294,7 +294,7 @@ jobs:
       - name: Start AKS private operator
         id: start_aks_private_operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@sch-UID2-6632-load-test-private-operator
         with:
           output_template_file: ${{ steps.prepare_aks_metadata.outputs.output_template_file }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
@@ -318,7 +318,7 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@v3
+        uses: IABTechLab/uid2-shared-actions/actions/run_e2e_tests@sch-UID2-6632-load-test-private-operator
         with:
           e2e_network: ${{ steps.decide_env_var.outputs.e2e_network }}
           e2e_image_version: ${{ inputs.e2e_image_version }}
@@ -362,7 +362,7 @@ jobs:
 
       - name: Stop EKS operator
         if: ${{ inputs.operator_type == 'eks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/stop_eks_operator@sch-UID2-6632-load-test-private-operator
         with:
           eks_test_cluster: ${{ inputs.eks_test_cluster }}
           eks_test_cluster_region: ${{ inputs.eks_test_cluster_region }}
