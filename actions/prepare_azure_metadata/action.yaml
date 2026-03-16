@@ -5,16 +5,16 @@ inputs:
   operator_image_version:
     description: The uid2-operator image version
     default: latest
-  admin_root:
-    description: The root path for uid2-admin folder
-    default: uid2-admin
+  target_environment:
+    description: The target environment [mock, integ, prod]
+    required: true
 outputs:
-  output_template_file:
-    description: The output template file
-    value: ${{ steps.enclave_artifacts.outputs.OUTPUT_TEMPLATE_FILE }}
-  output_parameters_file:
-    description: The output parameters file
-    value: ${{ steps.enclave_artifacts.outputs.OUTPUT_PARAMETERS_FILE }}
+  template_file:
+    description: The template file
+    value: ${{ steps.enclave_artifacts.outputs.template_file }}
+  parameters_file:
+    description: The parameters file
+    value: ${{ steps.enclave_artifacts.outputs.parameters_file }}
 
 runs:
   using: "composite"
@@ -37,16 +37,16 @@ runs:
       id: enclave_id
       shell: bash
       env:
-        OUTPUT_POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.OUTPUT_POLICY_DIGEST_FILE }}
+        POLICY_DIGEST_FILE: ${{ steps.enclave_artifacts.outputs.policy_digest_file }}
       run: |
         bash uid2-shared-actions/scripts/azure/prepare_azure_enclave_id.sh
 
     - name: Prepare Azure enclave metadata
       id: enclave_metadata
+      if: ${{ inputs.target_environment == 'mock' }}
       shell: bash
       env:
-        ADMIN_ROOT: ${{ inputs.admin_root }}
-        ENCLAVE_ID: ${{ steps.enclave_id.outputs.ENCLAVE_ID }}
+        ENCLAVE_ID: ${{ steps.enclave_id.outputs.enclave_id }}
         ENCLAVE_PROTOCOL: azure-cc
       run: |
         bash uid2-shared-actions/scripts/save_enclave_id_to_admin.sh

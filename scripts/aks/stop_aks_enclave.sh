@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -ex
 
-export RESOURCE_GROUP="pipeline-vn-aks"
-export AKS_CLUSTER_NAME="pipelinevncluster"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/aks_env.sh"
 
-az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
-if kubectl get deployment operator-deployment -o name > /dev/null 2>&1; then
-  kubectl delete deployment operator-deployment
-  echo "Deployment 'operator-deployment' deleted."
+if az group exists --name ${RESOURCE_GROUP} | grep -q true; then
+  echo "Deleting resource group '${RESOURCE_GROUP}'..."
+  az group delete --name ${RESOURCE_GROUP} --yes
+  echo "Resource group '${RESOURCE_GROUP}' successfully deleted."
 else
-  echo "Deployment 'operator-deployment' does not exist."
+  echo "Resource group '${RESOURCE_GROUP}' does not exist."
 fi

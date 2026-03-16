@@ -82,11 +82,12 @@ jobs:
           key: ${{ secrets.GPG_KEY }}
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v3
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_failure_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
+          scan_type: 'fs'
 
       - name: Set version number
         id: version
@@ -108,9 +109,9 @@ jobs:
           echo "<settings>
                     <servers>
                         <server>
-                            <id>ossrh</id>
-                            <username>${{ secrets.SONATYPE_REPO_USERNAME }}</username>
-                            <password>${{ secrets.SONATYPE_REPO_TOKEN }}</password>
+                            <id>central</id>
+                            <username>${{ secrets.CENTRAL_SONATYPE_REPO_USERNAME }}</username>
+                            <password>${{ secrets.CENTRAL_SONATYPE_REPO_PASSWORD }}</password>
                         </server>
                     </servers>
                 </settings>

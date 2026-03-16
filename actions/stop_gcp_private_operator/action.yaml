@@ -1,0 +1,51 @@
+name: Stop GCP Private Operator
+description: Spins down a GCP private operator
+
+inputs:
+  gcp_project:
+    description: The name of the GCP project
+    required: true
+  gcp_service_account:
+    description: The GCP service account
+    required: true
+  gcp_workload_identity_provider_id:
+    description: The GCP workload identity provider id
+    required: true
+  gcp_instance_name:
+    description: The GCP instance name
+    required: true
+  gcp_registry:
+    description: The GCP docker registry
+    default: us-docker.pkg.dev
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Authenticate with Google Cloud
+      id: gcp_auth
+      uses: google-github-actions/auth@v2
+      with:
+        token_format: access_token
+        workload_identity_provider: ${{ inputs.gcp_workload_identity_provider_id }}
+        service_account: ${{ inputs.gcp_service_account }}
+        access_token_lifetime: 1200s
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+      
+    - name: Log in to the GCP Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.gcp_registry }}
+        username: oauth2accesstoken
+        password: ${{ steps.gcp_auth.outputs.access_token }}
+
+    - name: Stop GCP private operator
+      shell: bash
+      env:
+        GCP_PROJECT: ${{ inputs.gcp_project }}
+        SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
+        GCP_INSTANCE_NAME: ${{ inputs.gcp_instance_name }}
+      run: |
+        bash uid2-shared-actions/scripts/gcp/stop_gcp_enclave.sh

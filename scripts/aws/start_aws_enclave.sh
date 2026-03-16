@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="uid2-shared-actions/scripts"
-
-source "${ROOT}/healthcheck.sh"
-
 if [ -z "${BORE_URL_CORE}" ]; then
   echo "BORE_URL_CORE can not be empty"
   exit 1
@@ -30,9 +26,13 @@ if [ -z "${AWS_AMI}" ]; then
   exit 1
 fi
 
-
 if [ -z "${IDENTITY_SCOPE}" ]; then
   echo "IDENTITY_SCOPE can not be empty"
+  exit 1
+fi
+
+if [ -z "${TARGET_ENVIRONMENT}" ]; then
+  echo "TARGET_ENVIRONMENT can not be empty"
   exit 1
 fi
 
@@ -41,8 +41,21 @@ if [ -z "${OPERATOR_KEY}" ]; then
   exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+source "${SCRIPT_DIR}/../healthcheck.sh"
+
 DATE=$(date '+%Y%m%d%H%M%S')
 AWS_STACK_NAME="uid2-operator-e2e-${AWS_AMI}-${DATE}"
+
+# Export stack name to GitHub output early for cleanup
+echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
+
+if [ -n "${GITHUB_OUTPUT:-}" ]; then
+  echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> "${GITHUB_OUTPUT}"
+else
+  echo "Not running inside GitHub Actions"
+fi
 
 CF_TEMPLATE_SCOPE=""
 case "${IDENTITY_SCOPE}" in
@@ -53,8 +66,8 @@ case "${IDENTITY_SCOPE}" in
     exit 1 ;;
 esac
 
-python ${ROOT}/aws/create_cloudformation_stack.py \
-  --stack_fp "${ROOT}/aws/stacks" \
+python ${SCRIPT_DIR}/create_cloudformation_stack.py \
+  --stack_fp "${SCRIPT_DIR}/stacks" \
   --cftemplate_fp "../uid2-operator/scripts/aws" \
   --core_url "${BORE_URL_CORE}" \
   --optout_url "${BORE_URL_OPTOUT}" \
@@ -63,28 +76,20 @@ python ${ROOT}/aws/create_cloudformation_stack.py \
   --ami "${AWS_AMI}" \
   --stack "${AWS_STACK_NAME}" \
   --scope "${CF_TEMPLATE_SCOPE}" \
+  --env "${TARGET_ENVIRONMENT}" \
   --key "${OPERATOR_KEY}"
 
 aws cloudformation describe-stacks \
   --stack-name "${AWS_STACK_NAME}" \
   --region "${AWS_REGION}"
 
-# Export to GitHub output
-echo "AWS_STACK_NAME=${AWS_STACK_NAME}"
-
-if [ -z "${GITHUB_OUTPUT}" ]; then
-  echo "Not in GitHub action"
-else
-  echo "AWS_STACK_NAME=${AWS_STACK_NAME}" >> ${GITHUB_OUTPUT}
-fi
-
 # Get public URL
-AWS_INSTANCE_URL=$(python ${ROOT}/aws/get_instance_url.py \
+AWS_INSTANCE_URL=$(python ${SCRIPT_DIR}/get_instance_url.py \
   --region "${AWS_REGION}" \
   --stack "${AWS_STACK_NAME}")
 
 echo "Instance URL: ${AWS_INSTANCE_URL}"
-echo "uid2_e2e_pipeline_operator_url=${AWS_INSTANCE_URL}" >> ${GITHUB_OUTPUT}
+echo "uid2_pipeline_e2e_operator_url=${AWS_INSTANCE_URL}" >> ${GITHUB_OUTPUT}
 
 HEALTHCHECK_URL="${AWS_INSTANCE_URL}/ops/healthcheck"
 

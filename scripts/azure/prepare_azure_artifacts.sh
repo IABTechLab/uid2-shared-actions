@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -ex
 
-ROOT="uid2-shared-actions/scripts/azure"
-INPUT_DIR="${ROOT}/artifacts_schema"
-OUTPUT_DIR="${ROOT}/azure-artifacts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INPUT_DIR="${SCRIPT_DIR}/artifacts_schema"
+OUTPUT_DIR="${SCRIPT_DIR}/azure-artifacts"
 
 if [ -z "${IMAGE_VERSION}" ]; then
   echo "IMAGE_VERSION can not be empty"
@@ -61,7 +61,7 @@ fi
 if [ -z "${GITHUB_OUTPUT}" ]; then
   echo "Not in GitHub action"
 else
-  echo "OUTPUT_TEMPLATE_FILE=${OUTPUT_TEMPLATE_FILE}" >> ${GITHUB_OUTPUT}
-  echo "OUTPUT_PARAMETERS_FILE=${OUTPUT_PARAMETERS_FILE}" >> ${GITHUB_OUTPUT}
-  echo "OUTPUT_POLICY_DIGEST_FILE=${OUTPUT_POLICY_DIGEST_FILE}" >> ${GITHUB_OUTPUT}
+  echo "TEMPLATE_FILE=${OUTPUT_TEMPLATE_FILE}" >> ${GITHUB_OUTPUT}
+  echo "PARAMETERS_FILE=${OUTPUT_PARAMETERS_FILE}" >> ${GITHUB_OUTPUT}
+  echo "POLICY_DIGEST_FILE=${OUTPUT_POLICY_DIGEST_FILE}" >> ${GITHUB_OUTPUT}
 fi

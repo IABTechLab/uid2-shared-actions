@@ -16,7 +16,7 @@ on:
         default: '.'
       publish_vulnerabilities:
         type: string
-        default: true
+        default: "true"
 
 env:
   REPO: ${{ github.event.repository.name }}
@@ -51,11 +51,12 @@ jobs:
           fetch-depth: 0
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan_filesystem@v3
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_failure_severity }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
+          scan_type: 'fs'
 
       - name: Set version number
         id: version
@@ -80,6 +81,7 @@ jobs:
       - name: Publish
         run: |
           python3 -m pip install --upgrade twine
+          python3 -m pip install --upgrade packaging
           python3 -m twine upload dist/* -u __token__ -p "${{ secrets.PYPI_API_KEY }}"
 
       - name: Commit pyproject.toml, version.json and set tag

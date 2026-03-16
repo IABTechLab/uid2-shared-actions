@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -ex
 
-if [[ ! -f ${OUTPUT_POLICY_DIGEST_FILE} ]]; then
-  echo "OUTPUT_POLICY_DIGEST_FILE does not exist"
+if [[ ! -f ${POLICY_DIGEST_FILE} ]]; then
+  echo "POLICY_DIGEST_FILE does not exist"
   exit 1
 fi
 
-AZURE_POLICY_DIGEST="$(cat ${OUTPUT_POLICY_DIGEST_FILE})"
+AZURE_POLICY_DIGEST="$(cat ${POLICY_DIGEST_FILE})"
 echo "AZURE_POLICY_DIGEST=${AZURE_POLICY_DIGEST}"
 
 ENCLAVE_ID=${AZURE_POLICY_DIGEST}

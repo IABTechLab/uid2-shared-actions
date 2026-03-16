@@ -19,7 +19,8 @@ on:
       java_version:
         type: string
         default: '11'
-      upload_vulnerabilities:
+      publish_vulnerabilities:
+        description: If true, will attempt to publish the results to the GitHub security tab
         type: boolean
         default: true
       skip_tests:
