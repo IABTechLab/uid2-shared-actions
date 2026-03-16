@@ -52,12 +52,12 @@ gcloud compute instances create ${GCP_INSTANCE_NAME} \
     --confidential-compute \
     --shielded-secure-boot \
     --maintenance-policy Terminate \
-    --machine-type n2d-standard-8 \
+    --machine-type n2d-standard-4 \
     --scopes cloud-platform \
     --image-project confidential-space-images \
     --image-family confidential-space-debug \
     --service-account $SERVICE_ACCOUNT \
-    --metadata ^~^tee-image-reference=us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator@${IMAGE_HASH}~tee-restart-policy=Never~tee-container-log-redirect=true~tee-env-SKIP_VALIDATIONS=true~tee-env-DEPLOYMENT_ENVIRONMENT=integ~tee-env-API_TOKEN_SECRET_NAME=${OPERATOR_KEY_SECRET_VERSION}~tee-env-CORE_BASE_URL=${BORE_URL_CORE}~tee-env-OPTOUT_BASE_URL=${BORE_URL_OPTOUT}~tee-env-service_instances=6~tee-env-default_worker_pool_thread_count=6
+    --metadata ^~^tee-image-reference=us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator@${IMAGE_HASH}~tee-restart-policy=Never~tee-container-log-redirect=true~tee-env-SKIP_VALIDATIONS=true~tee-env-DEPLOYMENT_ENVIRONMENT=integ~tee-env-API_TOKEN_SECRET_NAME=${OPERATOR_KEY_SECRET_VERSION}~tee-env-CORE_BASE_URL=${BORE_URL_CORE}~tee-env-OPTOUT_BASE_URL=${BORE_URL_OPTOUT}
 
 # Export to GitHub output
 echo "GCP_INSTANCE_NAME=${GCP_INSTANCE_NAME}"
