@@ -207,7 +207,7 @@ jobs:
       - name: Start AKS cluster
         id: start_aks_cluster
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/start_aks_cluster@v3
+        uses: IABTechLab/uid2-shared-actions/actions/start_aks_cluster@sch-UID2-6632-load-test-private-operator
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
@@ -383,7 +383,7 @@ jobs:
 
       - name: Stop GCP private operator
         if: ${{ inputs.operator_type == 'gcp' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_gcp_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/stop_gcp_private_operator@sch-UID2-6632-load-test-private-operator
         with:
           gcp_project: ${{ inputs.gcp_project }}
           gcp_service_account: ${{ inputs.gcp_service_account }}
@@ -392,21 +392,21 @@ jobs:
 
       - name: Stop Azure private operator
         if: ${{ inputs.operator_type == 'azure' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_azure_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/stop_azure_private_operator@sch-UID2-6632-load-test-private-operator
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           azure_container_group_name: ${{ needs.e2e-test.outputs.azure_container_group_name }}
 
       - name: Stop AWS private operator
         if: ${{ inputs.operator_type == 'aws' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_aws_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aws_private_operator@sch-UID2-6632-load-test-private-operator
         with:
           aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
           aws_region: ${{ inputs.aws_region }}
 
       - name: Stop AKS private operator
         if: ${{ inputs.operator_type == 'aks' }}
-        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@v3
+        uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@sch-UID2-6632-load-test-private-operator
         with:
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
