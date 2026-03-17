@@ -38,6 +38,10 @@ on:
         description: Additional string to append to the image name.
         type: string
         default: ''
+    secrets:
+      GH_MERGE_TOKEN:
+        description: GitHub token used to merge the PR. If not set, will use GITHUB_TOKEN.
+        required: false
     outputs:
       version_number_output:
         description: The complete version number 
@@ -140,6 +144,7 @@ jobs:
         with:
           add: '${{inputs.working_dir}}/pom.xml version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          github_token: ${{ secrets.GH_MERGE_TOKEN }}
 
       - name: Commit pom.xml, version.json and set tag
         if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.is_release == 'true' }}
@@ -148,6 +153,7 @@ jobs:
           add: '${{inputs.working_dir}}/pom.xml version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
+          github_token: ${{ secrets.GH_MERGE_TOKEN }}
 
       - name: Log in to the Docker container registry
         uses: docker/login-action@v3
