@@ -52,6 +52,7 @@ gcloud compute instances create ${GCP_INSTANCE_NAME} \
     --confidential-compute \
     --shielded-secure-boot \
     --maintenance-policy Terminate \
+    --machine-type n2d-standard-4 \
     --scopes cloud-platform \
     --image-project confidential-space-images \
     --image-family confidential-space-debug \
