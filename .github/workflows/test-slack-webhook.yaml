@@ -1,0 +1,9 @@
+name: Test Slack Webhook
+on:
+  workflow_dispatch:
+
+jobs:
+  test-slack-webhook:
+    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-test-slack-webhook.yaml@bmz-UID2-6787-slack-webhook-test-workflow
+    secrets:
+      SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
