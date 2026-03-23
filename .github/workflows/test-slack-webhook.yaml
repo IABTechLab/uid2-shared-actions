@@ -1,6 +1,9 @@
 name: Test Slack Webhook
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - bmz-UID2-6787-slack-webhook-test-workflow
 
 jobs:
   test-slack-webhook:
