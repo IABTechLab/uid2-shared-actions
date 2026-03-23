@@ -1,0 +1,18 @@
+name: Shared Test Slack Webhook
+on:
+  workflow_call:
+    secrets:
+      SLACK_WEBHOOK:
+        required: true
+
+jobs:
+  test-slack-webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack test message
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: Slack Webhook Test
+          SLACK_MESSAGE: "Slack webhook secret is working correctly in ${{ github.repository }}"
+          SLACK_COLOR: good
