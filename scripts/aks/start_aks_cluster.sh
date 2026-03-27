@@ -106,6 +106,7 @@ az role assignment create \
 # Setup AKS Cluster
 az aks get-credentials --name ${AKS_CLUSTER_NAME} --resource-group ${RESOURCE_GROUP}
 az provider register -n Microsoft.ContainerInstance
+
 git clone https://github.com/microsoft/virtualnodesOnAzureContainerInstances.git
 helm install virtualnode virtualnodesOnAzureContainerInstances/Helm/virtualnode
 # Wait for virtualnode-0 to appear
@@ -115,4 +116,8 @@ while ! kubectl get nodes | grep -q "virtualnode-0"; do
   sleep 10
 done
 echo "virtualnode-0 is ready!"
+kubectl get nodes
+
+echo "=== AKS cluster setup complete ==="
+echo "Virtual Node installation skipped - ready for MS support call"
 kubectl get nodes
