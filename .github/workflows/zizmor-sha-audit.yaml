@@ -1,0 +1,35 @@
+name: Zizmor SHA Pinning Audit
+
+on:
+  workflow_dispatch:
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout uid2-shared-actions
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Install zizmor
+        run: pip install zizmor
+
+      - name: Get all uid2 repos
+        id: repos
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # zizmor accepts owner/repo slugs as inputs but doesn't support org-level wildcards,
+          # so we dynamically build the list of all repos in the org
+
+          repos=$(gh repo list UnifiedID2 --json name --no-limit -q '.[] | "UnifiedID2/" + .name' | tr '\n' ' ')
+          echo "repos=$repos" >> $GITHUB_OUTPUT
+
+      - name: Run zizmor
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          zizmor --config .github/zizmor.yml --min-severity high \
+            ${{ steps.repos.outputs.repos }}
