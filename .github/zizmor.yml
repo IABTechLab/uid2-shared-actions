@@ -1,7 +1,0 @@
-rules:
-  unpinned-uses:
-    config:
-      policies:
-        "IABTechLab/*": ref-pin  # internal org, tag pinning is acceptable
-        "actions/*": ref-pin     # GitHub-owned, low risk — TODO: move to hash-pin
-        "*": hash-pin            # all external actions must be SHA-pinned
