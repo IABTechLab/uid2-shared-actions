@@ -24,7 +24,20 @@ jobs:
           # zizmor accepts owner/repo slugs as inputs but doesn't support org-level wildcards,
           # so we dynamically build the list of all repos in the org
 
-          repos=$(gh repo list UnifiedID2 --json name --no-limit -q '.[] | "UnifiedID2/" + .name' | tr '\n' ' ')
+          # Add repo names to exclude from the audit (space-separated)
+          EXCLUDE=""
+
+          if [ -n "$EXCLUDE" ]; then
+            repos=$(gh repo list IABTechLab --json name --limit 1000 \
+              -q '.[] | select(.name | contains("uid2")) | .name' \
+              | grep -vFf <(echo "$EXCLUDE" | tr ' ' '\n') \
+              | sed 's/^/IABTechLab\//' \
+              | tr '\n' ' ')
+          else
+            repos=$(gh repo list IABTechLab --json name --limit 1000 \
+              -q '.[] | select(.name | contains("uid2")) | "IABTechLab/" + .name' \
+              | tr '\n' ' ')
+          fi
           echo "repos=$repos" >> $GITHUB_OUTPUT
 
       - name: Run zizmor

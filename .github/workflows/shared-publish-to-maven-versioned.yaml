@@ -155,7 +155,7 @@ jobs:
       - name: Build Changelog
         id: github_release
         if: ${{ env.IS_RELEASE == 'true' }}
-        uses: mikepenz/release-changelog-builder-action@v4
+        uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
         with:
           toTag: v${{ steps.version.outputs.new_version }}
           configurationJson: |
@@ -168,7 +168,7 @@ jobs:
 
       - name: Create Release
         if: ${{ env.IS_RELEASE == 'true' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
         with:
           name: v${{ steps.version.outputs.new_version }}
           body: ${{ steps.github_release.outputs.changelog }}

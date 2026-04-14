@@ -99,7 +99,7 @@ jobs:
           fetch-depth: 0
 
       - name: Restore timestamps
-        uses: thetradedesk/git-restore-mtime-action@v1.3
+        uses: thetradedesk/git-restore-mtime-action@a6059d100648f8027eb1af5e6e6fd6e1328083af # v1.3
 
       - name: Set version number
         id: version
@@ -150,7 +150,7 @@ jobs:
           tag: v${{ steps.version.outputs.new_version }}
 
       - name: Log in to the Docker container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -158,7 +158,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}
           tags: |
@@ -172,7 +172,7 @@ jobs:
           echo "firstTag=$FIRST_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and export to Docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: ${{inputs.working_dir}}
           load: true
@@ -192,7 +192,7 @@ jobs:
           scan_type: image
 
       - name: Push to Docker
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: ${{inputs.working_dir}}
           push: true
@@ -205,7 +205,7 @@ jobs:
       - name: Build Changelog
         id: github_release
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
-        uses: mikepenz/release-changelog-builder-action@v4
+        uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
         with:
           toTag: v${{ steps.version.outputs.new_version }}
           configurationJson: |
@@ -222,7 +222,7 @@ jobs:
 
       - name: Create Release
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
         with:
           name: v${{ steps.version.outputs.new_version }}
           body: ${{ steps.github_release.outputs.changelog }}
