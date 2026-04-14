@@ -72,7 +72,7 @@ jobs:
           path: ${{ inputs.working_dir }}/target/site/jacoco/*
 
       - name: Vulnerability Scan
-        uses: ./${{ inputs.working_dir }}/uid2-shared-actions/actions/vulnerability_scan
+        uses: ./uid2-shared-actions/actions/vulnerability_scan
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_severity }}
