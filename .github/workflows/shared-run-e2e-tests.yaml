@@ -111,7 +111,7 @@ jobs:
       aws_stack_name: ${{ steps.start_aws_private_operator.outputs.aws_stack_name }}
     steps:
       - name: Log in to the Docker container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
