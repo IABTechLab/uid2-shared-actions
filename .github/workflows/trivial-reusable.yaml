@@ -1,0 +1,10 @@
+name: Trivial Reusable Workflow (no actions)
+on:
+  workflow_call:
+
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - name: No actions here, just a shell command
+        run: echo "This reusable workflow has no uses: steps, only run: steps"
