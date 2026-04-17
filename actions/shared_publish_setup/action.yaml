@@ -45,21 +45,21 @@ runs:
           IS_RELEASE: ${{ steps.checkRelease.outputs.IS_RELEASE }}
 
     - name: Set up JDK
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
       if: ${{ inputs.java_version != '' }}
       with:
         distribution: 'temurin'
         java-version: ${{ inputs.java_version }}
 
     - name: Checkout full history on the commit that triggered the workflow
-      uses: actions/checkout@v4
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       if: ${{ inputs.git_tag_or_hash == ''}}
       with:
         # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
         fetch-depth: 0
 
     - name: Checkout full history at tag ${{ inputs.git_tag_or_hash }}
-      uses: actions/checkout@v4
+      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       if: ${{ inputs.git_tag_or_hash != ''}}
       with:
         ref: ${{ inputs.git_tag_or_hash }}
@@ -67,4 +67,4 @@ runs:
         fetch-depth: 0
 
     - name: Restore timestamps
-      uses: thetradedesk/git-restore-mtime-action@v1.3
+      uses: thetradedesk/git-restore-mtime-action@a6059d100648f8027eb1af5e6e6fd6e1328083af # v1.3

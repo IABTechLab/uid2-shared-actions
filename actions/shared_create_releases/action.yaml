@@ -31,7 +31,7 @@ runs:
     - name: Build Docker Changelog
       id: github_release_docker
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker'}}
-      uses: mikepenz/release-changelog-builder-action@v4
+      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
       with:
         toTag: v${{ inputs.new_version }}
         configurationJson: |
@@ -45,7 +45,7 @@ runs:
     - name: Build Maven Changelog
       id: github_release_maven
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
-      uses: mikepenz/release-changelog-builder-action@v4
+      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
       with:
         toTag: v${{ inputs.new_version }}
         configurationJson: |
@@ -58,7 +58,7 @@ runs:
 
     - name: Create Docker Release
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker' }}
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
       with:
         name: v${{ inputs.new_version }}
         body: ${{ steps.github_release_docker.outputs.changelog }}
@@ -66,7 +66,7 @@ runs:
 
     - name: Create Maven Release
       if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
       with:
         name: v${{ inputs.new_version }}
         body: ${{ steps.github_release_maven.outputs.changelog }}
