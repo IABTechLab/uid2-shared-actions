@@ -32,7 +32,7 @@ runs:
   steps:
     - name: Authenticate with Google Cloud
       id: gcp_auth
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
       with:
         token_format: access_token
         workload_identity_provider: ${{ inputs.gcp_workload_identity_provider_id }}
@@ -40,10 +40,10 @@ runs:
         access_token_lifetime: 1200s
 
     - name: Set up Cloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+      uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2
     
     - name: Log in to the GCP Registry
-      uses: docker/login-action@v3
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
       with:
         registry: ${{ inputs.gcp_registry }}
         username: oauth2accesstoken
