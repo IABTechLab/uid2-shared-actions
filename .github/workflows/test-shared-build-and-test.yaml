@@ -1,0 +1,20 @@
+name: Test shared-build-and-test
+on:
+  push:
+    branches:
+      - bmz-fix-vulnerability-scan-checkout-path
+  workflow_dispatch:
+
+jobs:
+  test-default-working-dir:
+    uses: ./.github/workflows/shared-build-and-test.yaml
+    with:
+      vulnerability_scan_only: 'true'
+      publish_vulnerabilities: 'false'
+
+  test-custom-working-dir:
+    uses: ./.github/workflows/shared-build-and-test.yaml
+    with:
+      vulnerability_scan_only: 'true'
+      publish_vulnerabilities: 'false'
+      working_dir: 'actions'
