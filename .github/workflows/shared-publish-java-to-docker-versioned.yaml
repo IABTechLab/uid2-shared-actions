@@ -38,6 +38,10 @@ on:
         description: Additional string to append to the image name.
         type: string
         default: ''
+      merge_environment:
+        description: GitHub Environment to use for accessing the merge token. Leave empty to use the default GITHUB_TOKEN.
+        type: string
+        default: ''
     outputs:
       version_number_output:
         description: The complete version number 
@@ -52,6 +56,7 @@ jobs:
   buildImage:
     name: Build Image
     runs-on: ubuntu-latest
+    environment: ${{ inputs.merge_environment }}
     permissions:
       contents: write
       security-events: write
@@ -140,6 +145,7 @@ jobs:
         with:
           add: '${{inputs.working_dir}}/pom.xml version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Commit pom.xml, version.json and set tag
         if: ${{ inputs.version_number_input == '' && steps.checkRelease.outputs.is_release == 'true' }}
@@ -148,6 +154,7 @@ jobs:
           add: '${{inputs.working_dir}}/pom.xml version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
+          github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Log in to the Docker container registry
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
