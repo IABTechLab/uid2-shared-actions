@@ -47,11 +47,10 @@ runs:
           echo "changes_exist=true" >> $GITHUB_OUTPUT
         fi
 
-    - name: Generate random number for branch
-      id: random-number
+    - name: Generate branch name
+      id: branch
       shell: bash
-      run: |
-        echo "num=${RANDOM}" >> $GITHUB_OUTPUT
+      run: echo "name=ci-${{ github.sha }}-${RANDOM}" >> $GITHUB_OUTPUT
 
     - name: Commit to new branch
       uses: EndBug/add-and-commit@a94899bca583c204427a224a7af87c02f9b325d5 # v9
@@ -61,9 +60,9 @@ runs:
         message: '[CI Pipeline] ${{ inputs.message }}'
         author_name: Release Workflow
         author_email: unifiedid-admin+release@thetradedesk.com
-        new_branch: 'ci-${{ github.sha }}-${{ steps.random-number.outputs.num }}'
+        new_branch: ${{ steps.branch.outputs.name }}
         add: ${{ inputs.add }}
-        
+
     - name: Create PR
       uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
       if: steps.changes.outputs.changes_exist == 'true'
@@ -74,7 +73,7 @@ runs:
             owner: context.repo.owner,
             repo: context.repo.repo,
             title: '[CI Pipeline] ${{ inputs.message }}',
-            head: 'ci-${{ github.sha }}-${{ steps.random-number.outputs.num }}',
+            head: '${{ steps.branch.outputs.name }}',
             base: '${{ inputs.base_branch == '' && github.ref_name || inputs.base_branch }}',
             body: '[CI Pipeline] Automated update'
           })).data;
@@ -87,7 +86,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github_token == '' && github.token || inputs.github_token }}
         PR_NUMBER: ${{ steps.create-pr.outputs.pull-request-number }}
-        BRANCH: 'ci-${{ github.sha }}-${{ steps.random-number.outputs.num }}'
+        BRANCH: ${{ steps.branch.outputs.name }}
         MERGE_METHOD: ${{ github.ref_protected == 'true' && 'merge' || 'rebase' }}
       run: |
         # Merge the PR
