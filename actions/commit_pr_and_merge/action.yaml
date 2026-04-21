@@ -90,9 +90,13 @@ runs:
         BRANCH: 'ci-${{ github.sha }}-${{ steps.random-number.outputs.num }}'
         MERGE_METHOD: ${{ github.ref_protected == 'true' && 'merge' || 'rebase' }}
       run: |
+        # Merge the PR
         gh api --method PUT \
           "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" \
           -f merge_method="$MERGE_METHOD"
+
+        # Delete the branch
+        # || true - so the step doesn't fail if the branch is already deleted
         gh api --method DELETE \
           "repos/${{ github.repository }}/git/refs/heads/$BRANCH" || true
     
