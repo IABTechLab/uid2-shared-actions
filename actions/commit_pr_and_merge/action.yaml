@@ -82,14 +82,19 @@ runs:
           core.setOutput('pull-request-number', newPr.number);
 
     - name: Merge PR
-      run: gh pr merge $PR_URL --delete-branch $MERGE_PR_STRATEGY $ADMIN_ACCESS
       if: steps.changes.outputs.changes_exist == 'true'
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token == '' && github.token || inputs.github_token }}
-        PR_URL: ${{ steps.create-pr.outputs.pull-request-url }}
-        MERGE_PR_STRATEGY: ${{ github.ref_protected == 'true' && '--merge' || '--rebase' }}
-        ADMIN_ACCESS: ${{ inputs.admin_access == 'true' && '--admin' || '' }}
+        PR_NUMBER: ${{ steps.create-pr.outputs.pull-request-number }}
+        BRANCH: 'ci-${{ github.sha }}-${{ steps.random-number.outputs.num }}'
+        MERGE_METHOD: ${{ github.ref_protected == 'true' && 'merge' || 'rebase' }}
+      run: |
+        gh api --method PUT \
+          "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" \
+          -f merge_method="$MERGE_METHOD"
+        gh api --method DELETE \
+          "repos/${{ github.repository }}/git/refs/heads/$BRANCH" || true
     
     - name: Tag commit
       uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
