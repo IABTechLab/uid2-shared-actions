@@ -29,6 +29,10 @@ on:
         description: If true, will skip tests when compiling. Defaults to false. Set to true for repos without tests.
         type: boolean
         default: false
+      merge_environment:
+        description: GitHub Environment to use for accessing the merge token. Leave empty to use the default GITHUB_TOKEN.
+        type: string
+        default: ''
  
 env:
   IS_RELEASE: ${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name ) }}
@@ -38,6 +42,7 @@ jobs:
   release:
     name: ${{ ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) && 'Create Release' || 'Publish Pre-release' }}
     runs-on: ubuntu-latest
+    environment: ${{ inputs.merge_environment }}
     permissions:
       pull-requests: write
       contents: write
@@ -138,19 +143,21 @@ jobs:
           mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile -DskipTests
 
       - name: Commit pom.xml and version.json
-        if: ${{ steps.checkRelease.outputs.is_release != 'true' }} 
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
+        if: ${{ steps.checkRelease.outputs.is_release != 'true' }}
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
           add: '${{ inputs.working_dir }}/pom.xml ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Commit pom.xml, version.json and set tag
-        if: ${{ steps.checkRelease.outputs.is_release == 'true' }} 
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
           add: '${{ inputs.working_dir }}/pom.xml ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-          tag: v${{ steps.version.outputs.new_version }}          
+          tag: v${{ steps.version.outputs.new_version }}
+          github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Build Changelog
         id: github_release
