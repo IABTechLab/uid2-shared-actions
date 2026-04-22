@@ -17,6 +17,10 @@ on:
       publish_vulnerabilities:
         type: string
         default: "true"
+      merge_environment:
+        description: GitHub Environment to use for accessing the merge token. Leave empty to use the default GITHUB_TOKEN.
+        type: string
+        default: ''
 
 env:
   REPO: ${{ github.event.repository.name }}
@@ -25,6 +29,7 @@ jobs:
   release:
     name: Create Release
     runs-on: ubuntu-latest
+    environment: ${{ inputs.merge_environment }}
     permissions:
       pull-requests: write
       contents: write
@@ -85,11 +90,12 @@ jobs:
           python3 -m twine upload dist/* -u __token__ -p "${{ secrets.PYPI_API_KEY }}"
 
       - name: Commit pyproject.toml, version.json and set tag
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
           add: '${{ inputs.working_dir }}/pyproject.toml ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-          tag: v${{ steps.version.outputs.new_version }}          
+          tag: v${{ steps.version.outputs.new_version }}
+          github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Build Changelog
         id: github_release

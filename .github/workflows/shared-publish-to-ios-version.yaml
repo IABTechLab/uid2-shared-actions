@@ -10,6 +10,10 @@ on:
         description: The path to the directory for which the version should be determined.
         type: string
         default: '.'
+      merge_environment:
+        description: GitHub Environment to use for accessing the merge token. Leave empty to use the default GITHUB_TOKEN.
+        type: string
+        default: ''
 
 env:
   REPO: ${{ github.event.repository.name }}
@@ -18,6 +22,7 @@ jobs:
   release:
     name: Create Release
     runs-on: macos-15
+    environment: ${{ inputs.merge_environment }}
     permissions:
       pull-requests: write
       contents: write
@@ -86,11 +91,12 @@ jobs:
           xcodebuild test -scheme UID2Prebid -destination "OS=26.2,name=iPhone 17"
 
       - name: Commit SDK properties, podspecs, version.json and set tag
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v2
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
           add: '${{ inputs.working_dir }}/Sources/UID2/Properties/UID2SDKProperties.swift ${{ inputs.working_dir }}/UID2.podspec.json ${{ inputs.working_dir }}/UID2Prebid.podspec.json ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
-          tag: v${{ steps.version.outputs.new_version }}          
+          tag: v${{ steps.version.outputs.new_version }}
+          github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Build Changelog
         id: github_release
