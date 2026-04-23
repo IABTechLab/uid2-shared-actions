@@ -14,6 +14,10 @@ on:
         description: The path to the directory for which the version should be determined.
         type: string
         default: '.'
+      merge_environment:
+        description: GitHub Environment to use for accessing the merge token. Leave empty to use the default GITHUB_TOKEN.
+        type: string
+        default: ''
     outputs:
       new_version:
         description: The new version number to publish for the docker repo
@@ -28,6 +32,7 @@ on:
 jobs:
   incrementVersionNumber:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.merge_environment }}
     outputs:
       new_version: ${{ steps.version.outputs.new_version }}
       image_tag: ${{ steps.updatePackageJson.outputs.image_tag }}
@@ -67,21 +72,23 @@ jobs:
           npm install --package-lock-only
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/package-lock.json and ${{ inputs.working_dir }}/version.json
-        if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE != 'true' }} 
+        if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE != 'true' }}
         id: commit-without-tag
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
           add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
+          github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/package-lock.json, ${{ inputs.working_dir }}/version.json and set tag
-        if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE == 'true' }} 
+        if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE == 'true' }}
         id: commit-and-tag
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@main
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
           add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
+          github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Print outputs
         uses: actions/github-script@v7
