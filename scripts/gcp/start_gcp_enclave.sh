@@ -39,7 +39,7 @@ source "${SCRIPT_DIR}/../healthcheck.sh"
 
 gcloud config set project ${GCP_PROJECT}
 
-gcloud config set compute/zone asia-southeast1-a
+gcloud config set compute/zone us-east1-b
 
 # Create secret
 echo -n "${OPERATOR_KEY}" | gcloud secrets create ${OPERATOR_KEY_SECRET_NAME} \
