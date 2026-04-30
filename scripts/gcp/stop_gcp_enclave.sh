@@ -20,7 +20,7 @@ OPERATOR_KEY_SECRET_NAME=${GCP_INSTANCE_NAME}
 
 gcloud config set project ${GCP_PROJECT}
 
-gcloud config set compute/zone asia-southeast1-a
+gcloud config set compute/zone us-east1-b
 
 gcloud compute instances delete ${GCP_INSTANCE_NAME} --quiet
 
