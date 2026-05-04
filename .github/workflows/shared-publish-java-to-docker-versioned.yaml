@@ -51,16 +51,7 @@ on:
         value: ${{ jobs.buildImage.outputs.image_tag }}
     secrets:
       GH_MERGE_TOKEN:
-        description: |
-          PAT used by `commit_pr_and_merge` to merge the version-bump PR back to the default branch
-          when branch-protection rules require a bypass. Required when `merge_environment` is set and
-          the calling repository's default branch is protected by a PR-review ruleset that GITHUB_TOKEN
-          cannot bypass. Otherwise optional — without it, the action falls back to GITHUB_TOKEN.
-
-          Pass via `secrets: inherit` (works when the secret is at org level, or at env level when caller
-          and reusable workflow are in the same enterprise), or explicitly via
-          `secrets: { GH_MERGE_TOKEN: ${{ secrets.GH_MERGE_TOKEN }} }` (works cross-organization).
-          See https://github.com/actions/runner/issues/1490 for the cross-org inheritance limitation.
+        description: PAT used by commit_pr_and_merge to bypass branch protection on the auto-PR. Falls back to GITHUB_TOKEN if not set.
         required: false
 env:
   REGISTRY: ghcr.io
