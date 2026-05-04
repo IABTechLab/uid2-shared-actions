@@ -91,7 +91,7 @@ jobs:
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Print outputs
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             console.log('Result', '${{ steps.commit-and-tag.outcome }}');
