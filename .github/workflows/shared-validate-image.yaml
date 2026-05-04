@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Checkout full history
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
           fetch-depth: 0
@@ -71,7 +71,7 @@ jobs:
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT
 
       - name: Log in to the Docker container registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}

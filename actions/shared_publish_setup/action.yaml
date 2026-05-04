@@ -52,14 +52,14 @@ runs:
         java-version: ${{ inputs.java_version }}
 
     - name: Checkout full history on the commit that triggered the workflow
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       if: ${{ inputs.git_tag_or_hash == ''}}
       with:
         # git-restore-mtime requires full git history. The default fetch-depth value (1) creates a shallow checkout.
         fetch-depth: 0
 
     - name: Checkout full history at tag ${{ inputs.git_tag_or_hash }}
-      uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       if: ${{ inputs.git_tag_or_hash != ''}}
       with:
         ref: ${{ inputs.git_tag_or_hash }}

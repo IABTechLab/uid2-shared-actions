@@ -64,12 +64,12 @@ jobs:
           release_type: ${{ inputs.release_type }}
     
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Checkout uid2-shared-actions repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: v3
           repository: IABTechLab/uid2-shared-actions
