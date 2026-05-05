@@ -59,7 +59,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup dotnet ${{ inputs.dotnet_version }}
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@c2fa09f4bde5ebb9d1777cf28262a3eb3db3ced7 # v5.2.0
         with:
           dotnet-version: ${{ inputs.dotnet_version }}
 
