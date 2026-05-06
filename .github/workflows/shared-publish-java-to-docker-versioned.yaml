@@ -66,6 +66,8 @@ jobs:
       security-events: write
       packages: write
       pull-requests: write
+      id-token: write
+      attestations: write
     outputs:
       jar_version: ${{ steps.version.outputs.new_version }}
       image_tag: ${{ steps.updatePom.outputs.image_tag }}
@@ -203,6 +205,7 @@ jobs:
           scan_type: image
 
       - name: Push to Docker
+        id: push
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
           context: ${{inputs.working_dir}}
@@ -212,6 +215,16 @@ jobs:
           build-args: |
             JAR_VERSION=${{ steps.version.outputs.new_version }}
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
+
+      - name: Attest build provenance
+        if: ${{ steps.checkRelease.outputs.not_snapshot == 'true' }}
+        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+        env:
+          NODE_OPTIONS: --max-http-header-size=32768
+        with:
+          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
 
       - name: Build Changelog
         id: github_release
