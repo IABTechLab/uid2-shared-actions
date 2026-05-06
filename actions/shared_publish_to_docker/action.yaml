@@ -90,6 +90,7 @@ runs:
         scan_type: ${{ inputs.scan_type }}
 
     - name: Push to Docker
+      id: push
       uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
       with:
         context: ${{ inputs.docker_context }}
@@ -100,3 +101,13 @@ runs:
         build-args: |
           JAR_VERSION=${{ inputs.new_version }}
           IMAGE_VERSION=${{ inputs.new_version }}
+
+    - name: Attest build provenance
+      if: ${{ inputs.not_snapshot == 'true' }}
+      uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+      env:
+        NODE_OPTIONS: --max-http-header-size=32768
+      with:
+        subject-name: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
+        subject-digest: ${{ steps.push.outputs.digest }}
+        push-to-registry: true
