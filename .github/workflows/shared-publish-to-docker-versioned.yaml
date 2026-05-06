@@ -51,6 +51,8 @@ jobs:
       security-events: write
       packages: write
       pull-requests: write
+      id-token: write
+      attestations: write
     steps:
       - name: Setup
         id: setup
