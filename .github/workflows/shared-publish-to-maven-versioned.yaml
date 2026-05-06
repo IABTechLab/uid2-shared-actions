@@ -71,7 +71,7 @@ jobs:
       - name: Checkout uid2-shared-actions repo
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: v3
+          ref: sch-UID2-6742-update-node20-actions
           repository: IABTechLab/uid2-shared-actions
           path: uid2-shared-actions
 
@@ -87,7 +87,7 @@ jobs:
           key: ${{ secrets.GPG_KEY }}
 
       - name: Vulnerability Scan
-        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@sch-UID2-6742-update-node20-actions
         with:
           scan_severity: HIGH,CRITICAL
           failure_severity: ${{ inputs.vulnerability_failure_severity }}
@@ -144,7 +144,7 @@ jobs:
 
       - name: Commit pom.xml and version.json
         if: ${{ steps.checkRelease.outputs.is_release != 'true' }}
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@sch-UID2-6742-update-node20-actions
         with:
           add: '${{ inputs.working_dir }}/pom.xml ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
@@ -152,7 +152,7 @@ jobs:
 
       - name: Commit pom.xml, version.json and set tag
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
-        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
+        uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@sch-UID2-6742-update-node20-actions
         with:
           add: '${{ inputs.working_dir }}/pom.xml ${{ inputs.working_dir }}/version.json'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
