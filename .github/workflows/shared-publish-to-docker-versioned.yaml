@@ -62,7 +62,7 @@ jobs:
 
       - name: Publish to Docker
         id: publishToDocker
-        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@sch-UID2-6742-update-node20-actions
+        uses: IABTechLab/uid2-shared-actions/actions/shared_publish_to_docker@v3
         with:
           new_version: ${{ inputs.new_version }}
           image_tag: ${{ inputs.image_tag }}
