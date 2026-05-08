@@ -7,6 +7,11 @@ name: Test attest_image composite action
 
 on:
   workflow_dispatch:
+  push:
+    branches: [bmz-UID2-6764-artifact-attestation]
+    paths:
+      - .github/workflows/test-attest-image.yaml
+      - actions/attest_image/**
 
 env:
   TEST_IMAGE: ghcr.io/${{ github.repository }}/test-attest
