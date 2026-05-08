@@ -13,9 +13,6 @@ on:
       - .github/workflows/test-attest-image.yaml
       - actions/attest_image/**
 
-env:
-  TEST_IMAGE: ghcr.io/${{ github.repository }}/test-attest
-
 jobs:
   smoke:
     name: Smoke-test attest_image
@@ -28,6 +25,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Compute lowercased test image ref
+        id: image
+        run: echo "ref=ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')/test-attest" >> "$GITHUB_OUTPUT"
 
       - name: Log in to GHCR
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
@@ -53,20 +54,22 @@ jobs:
           context: .
           file: Dockerfile.test-attest
           push: true
-          tags: ${{ env.TEST_IMAGE }}:run-${{ github.run_id }}
+          tags: ${{ steps.image.outputs.ref }}:run-${{ github.run_id }}
 
       - name: Attest image (the system under test)
         uses: ./actions/attest_image
         with:
-          subject_name: ${{ env.TEST_IMAGE }}
+          subject_name: ${{ steps.image.outputs.ref }}
           subject_digest: ${{ steps.push.outputs.digest }}
 
       - name: Independent re-verify
         env:
           GH_TOKEN: ${{ github.token }}
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+          IMAGE_DIGEST: ${{ steps.push.outputs.digest }}
         run: |
-          echo "Verifying ${TEST_IMAGE}@${{ steps.push.outputs.digest }} ..."
+          echo "Verifying ${IMAGE_REF}@${IMAGE_DIGEST} ..."
           gh attestation verify \
-            "oci://${TEST_IMAGE}@${{ steps.push.outputs.digest }}" \
+            "oci://${IMAGE_REF}@${IMAGE_DIGEST}" \
             --owner "${{ github.repository_owner }}" \
             --format json | jq '.[0].verificationResult.signature.certificate | {issuer, subjectAlternativeName, runnerEnvironment}'
