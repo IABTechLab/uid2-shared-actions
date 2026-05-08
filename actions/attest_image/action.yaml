@@ -1,0 +1,49 @@
+name: Attest container image
+description: |
+  Generates a SLSA build-provenance attestation for an OCI image, pushes the
+  signed bundle to the registry alongside the image, and verifies it via
+  `gh attestation verify` so a misconfigured signature fails the build rather
+  than the consumer pull.
+
+  actions/attest already lowercases subject-name when push-to-registry is true
+  (see github.com/actions/attest src/main.ts and src/subject.ts), but
+  `gh attestation verify` does not lowercase the OCI URI we pass to it. To
+  keep the signed name and the verified URI byte-identical, we lowercase
+  once here and reuse the value in both steps.
+
+inputs:
+  subject_name:
+    description: Fully qualified image reference (registry/owner/repo[+suffix]). Mixed case is fine — this action lowercases it for OCI compliance.
+    required: true
+  subject_digest:
+    description: OCI manifest digest (sha256:...) emitted by docker/build-push-action.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Lowercase image reference
+      id: ref
+      shell: bash
+      run: |
+        value="$(printf '%s' '${{ inputs.subject_name }}' | tr '[:upper:]' '[:lower:]')"
+        echo "value=${value}" >> "$GITHUB_OUTPUT"
+
+    - name: Attest build provenance
+      uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
+      env:
+        # Mirrors actions/attest-build-provenance, prevents oversized OCI registry auth-challenge headers triggering HPE_HEADER_OVERFLOW.
+        NODE_OPTIONS: --max-http-header-size=32768
+      with:
+        subject-name: ${{ steps.ref.outputs.value }}
+        subject-digest: ${{ inputs.subject_digest }}
+        push-to-registry: true
+
+    - name: Verify attestation
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh attestation verify \
+          "oci://${{ steps.ref.outputs.value }}@${{ inputs.subject_digest }}" \
+          --owner "${{ github.repository_owner }}"

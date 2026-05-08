@@ -218,13 +218,10 @@ jobs:
 
       - name: Attest build provenance
         if: ${{ steps.checkRelease.outputs.not_snapshot == 'true' }}
-        uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
-        env:
-          NODE_OPTIONS: --max-http-header-size=32768
+        uses: IABTechLab/uid2-shared-actions/actions/attest_image@v3
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}
-          subject-digest: ${{ steps.push.outputs.digest }}
-          push-to-registry: true
+          subject_name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}
+          subject_digest: ${{ steps.push.outputs.digest }}
 
       - name: Build Changelog
         id: github_release
