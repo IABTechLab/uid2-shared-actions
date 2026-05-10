@@ -2,18 +2,11 @@ name: Attest container image
 description: |
   Generates a SLSA build-provenance attestation for an OCI image, pushes the
   signed bundle to the registry alongside the image, and verifies it via
-  `gh attestation verify` so a misconfigured signature fails the build rather
-  than the consumer pull.
-
-  actions/attest already lowercases subject-name when push-to-registry is true
-  (see github.com/actions/attest src/main.ts and src/subject.ts), but
-  `gh attestation verify` does not lowercase the OCI URI we pass to it. To
-  keep the signed name and the verified URI byte-identical, we lowercase
-  once here and reuse the value in both steps.
+  `gh attestation verify`.
 
 inputs:
   subject_name:
-    description: Fully qualified image reference (registry/owner/repo[+suffix]). Mixed case is fine — this action lowercases it for OCI compliance.
+    description: Fully qualified image reference (registry/owner/repo[+suffix]).
     required: true
   subject_digest:
     description: OCI manifest digest (sha256:...) emitted by docker/build-push-action.
