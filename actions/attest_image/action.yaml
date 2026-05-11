@@ -37,20 +37,22 @@ runs:
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
-        set +e
+        # gh attestation verify enforces both a source-repo-owner policy (via
+        # --owner) and a signer-identity policy (the cert SAN regex). With
+        # only --owner, the SAN regex defaults to ^https://github.com/<owner>/,
+        # which breaks every reusable-workflow caller because the signer SAN
+        # is the reusable workflow's own URL, not the caller's repo (see
+        # cli/cli#9045 and `gh attestation verify --help`).
+        #
+        # attest_image gets signed under one of two SANs:
+        #   - From a reusable workflow under IABTechLab/uid2-shared-actions
+        #     (shared-publish-{,java-}to-docker-versioned.yaml) -- the
+        #     reusable workflow is itself the signer.
+        #   - From the composite action actions/shared_publish_to_docker
+        #     invoked directly by a caller -- the caller's workflow is the
+        #     signer (path under ${{ github.repository }}).
+        # Accept either pattern explicitly.
         gh attestation verify \
           "oci://${{ steps.ref.outputs.value }}@${{ inputs.subject_digest }}" \
-          --owner "${{ github.repository_owner }}"
-        rc=$?
-        if [ "$rc" -ne 0 ] && [ "${{ github.event.repository.private }}" = "true" ]; then
-          # Private-repo attestations are signed by GitHub's internal Sigstore
-          # instance ("GitHub, Inc." CA). gh CLI <= 2.92 rejects this cert
-          # chain even with --no-public-good / --bundle-from-oci. Signing and
-          # upload succeed (bundle is in both the attestations API and the
-          # OCI registry); only the in-CI verify is brittle. Demote to a
-          # warning so private consumers don't hard-fail; external verifiers
-          # remain authoritative.
-          echo "::warning::gh attestation verify failed; private-repo verification is a known gh CLI limitation. Attestation was signed and uploaded successfully."
-          exit 0
-        fi
-        exit "$rc"
+          --owner "${{ github.repository_owner }}" \
+          --cert-identity-regex "^https://github\.com/(IABTechLab/uid2-shared-actions|${{ github.repository }})/"
