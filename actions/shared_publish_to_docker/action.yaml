@@ -104,7 +104,7 @@ runs:
 
     - name: Attest build provenance
       if: ${{ inputs.not_snapshot == 'true' }}
-      uses: IABTechLab/uid2-shared-actions/actions/attest_image@v3
+      uses: IABTechLab/uid2-shared-actions/actions/attest_image@bmz-UID2-6764-smoke
       with:
         subject_name: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
         subject_digest: ${{ steps.push.outputs.digest }}

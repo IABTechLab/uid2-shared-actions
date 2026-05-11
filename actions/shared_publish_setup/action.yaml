@@ -30,7 +30,7 @@ runs:
   steps:
     - name: Check branch and release type
       id: checkRelease
-      uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2
+      uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@bmz-UID2-6764-smoke
       with:
         release_type: ${{ inputs.release_type }}
         force_release: ${{ inputs.force_release }}
