@@ -1,36 +1,36 @@
 name: Create releases
-description: Create releases and build changelogs
+description: Build the release-notes changelog, delete stale draft releases, and create a draft GitHub Release for a published artifact. Canonical release-notes pipeline for this repo — every shared publish workflow should call this action rather than inlining mikepenz/release-changelog-builder. Decision and rationale documented in UID2-6762.
 
 inputs:
   is_release:
-    description: True if a release should be created
+    description: True if a release should be created (Patch/Minor/Major). When false, the action is a no-op — safe to call unconditionally for Snapshot/pre-release builds.
     default: 'false'
   new_version:
-    description: The new version number to be incremented to
+    description: The new version number being released (without leading v).
     required: true
-  tags:
-    description: The docker image tags
-    default: ''
-  image_tag:
-    description: The image tag for the new version
-    default: ''
   github_token:
-    description: The github token to login to Docker container
+    description: GitHub token used by mikepenz to read merged PRs and by softprops to create the draft release.
     required: true
   publish_platform:
-    description: The platform we are publishing to. Must be one of [Docker or Maven]
+    description: Must be one of [Docker, Maven, PyPI, NuGet, iOS].
     required: true
   repo:
-    description: The repo that publishing to.
+    description: Package/artifact identifier. Used by Maven (artifactId in the dependency snippet and jar URL), PyPI (pip install target and PyPI page link), and NuGet (package id). Not used by Docker or iOS.
+    default: ''
+  tags:
+    description: Comma-separated docker image tags (Docker only). Typically the output of docker/metadata-action.
+    default: ''
+  image_tag:
+    description: The image reference shown in the release notes as the deploy target (Docker only).
     default: ''
 
 runs:
-  using: "composite" 
+  using: "composite"
 
   steps:
     - name: Build Docker Changelog
       id: github_release_docker
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker'}}
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker' }}
       uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
       with:
         toTag: v${{ inputs.new_version }}
@@ -44,7 +44,7 @@ runs:
 
     - name: Build Maven Changelog
       id: github_release_maven
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven' }}
       uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
       with:
         toTag: v${{ inputs.new_version }}
@@ -56,18 +56,56 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
 
-    - name: Create Docker Release
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker' }}
-      uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+    - name: Build PyPI Changelog
+      id: github_release_pypi
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'PyPI' }}
+      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
       with:
-        name: v${{ inputs.new_version }}
-        body: ${{ steps.github_release_docker.outputs.changelog }}
-        draft: true
+        toTag: v${{ inputs.new_version }}
+        configurationJson: |
+          {
+            "template": "#{{CHANGELOG}}\n## PyPI\n```\npip install ${{ inputs.repo }}==${{ inputs.new_version }}\n```\n\n## PyPI page\n- [${{ inputs.repo }} ${{ inputs.new_version }}](https://pypi.org/project/${{ inputs.repo }}/${{ inputs.new_version }}/)\n\n## Changelog\n#{{UNCATEGORIZED}}",
+            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+          }
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
 
-    - name: Create Maven Release
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven'}}
+    - name: Build NuGet Changelog
+      id: github_release_nuget
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'NuGet' }}
+      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
+      with:
+        toTag: v${{ inputs.new_version }}
+        configurationJson: |
+          {
+            "template": "#{{CHANGELOG}}\n## NuGet\n```\ndotnet add package ${{ inputs.repo }} --version ${{ inputs.new_version }}\n```\n\n## NuGet page\n- [${{ inputs.repo }} ${{ inputs.new_version }}](https://www.nuget.org/packages/${{ inputs.repo }}/${{ inputs.new_version }})\n\n## Changelog\n#{{UNCATEGORIZED}}",
+            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+          }
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    - name: Build iOS Changelog
+      id: github_release_ios
+      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'iOS' }}
+      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
+      with:
+        toTag: v${{ inputs.new_version }}
+        configurationJson: |
+          {
+            "template": "#{{CHANGELOG}}\n## Changelog\n#{{UNCATEGORIZED}}",
+            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
+          }
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    - name: Delete Draft Releases
+      if: ${{ inputs.is_release == 'true' }}
+      uses: IABTechLab/uid2-shared-actions/actions/delete_draft_releases@v3
+
+    - name: Create Release
+      if: ${{ inputs.is_release == 'true' }}
       uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
       with:
         name: v${{ inputs.new_version }}
-        body: ${{ steps.github_release_maven.outputs.changelog }}
+        body: ${{ inputs.publish_platform == 'Docker' && steps.github_release_docker.outputs.changelog || inputs.publish_platform == 'Maven' && steps.github_release_maven.outputs.changelog || inputs.publish_platform == 'PyPI' && steps.github_release_pypi.outputs.changelog || inputs.publish_platform == 'NuGet' && steps.github_release_nuget.outputs.changelog || steps.github_release_ios.outputs.changelog }}
         draft: true
