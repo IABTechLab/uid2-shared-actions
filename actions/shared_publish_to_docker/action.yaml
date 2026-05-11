@@ -90,6 +90,7 @@ runs:
         scan_type: ${{ inputs.scan_type }}
 
     - name: Push to Docker
+      id: push
       uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
       with:
         context: ${{ inputs.docker_context }}
@@ -100,3 +101,10 @@ runs:
         build-args: |
           JAR_VERSION=${{ inputs.new_version }}
           IMAGE_VERSION=${{ inputs.new_version }}
+
+    - name: Attest build provenance
+      if: ${{ inputs.not_snapshot == 'true' }}
+      uses: IABTechLab/uid2-shared-actions/actions/attest_image@v3
+      with:
+        subject_name: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
+        subject_digest: ${{ steps.push.outputs.digest }}
