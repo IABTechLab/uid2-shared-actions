@@ -68,6 +68,7 @@ jobs:
       pull-requests: write
       id-token: write
       attestations: write
+      artifact-metadata: write
     outputs:
       jar_version: ${{ steps.version.outputs.new_version }}
       image_tag: ${{ steps.updatePom.outputs.image_tag }}

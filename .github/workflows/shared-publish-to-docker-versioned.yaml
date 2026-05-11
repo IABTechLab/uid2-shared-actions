@@ -53,6 +53,7 @@ jobs:
       pull-requests: write
       id-token: write
       attestations: write
+      artifact-metadata: write
     steps:
       - name: Setup
         id: setup
