@@ -5,26 +5,22 @@ name: Smoke test shared_create_releases (TEMPORARY)
 # and any draft releases it produces once verification is complete.
 
 on:
-  workflow_dispatch:
-    inputs:
-      platform:
-        description: Platform to exercise
-        required: true
-        type: choice
-        options:
-          - Docker
-          - Maven
-          - PyPI
-          - NuGet
-          - iOS
-      to_tag_version:
-        description: Existing v<version> tag in this repo to use as toTag (mikepenz needs an existing tag to compare against).
-        required: true
-        type: string
-        default: '3.82'
+  push:
+    branches:
+      - jon-UID2-6762-consolidate-release-notes
+    paths:
+      - .github/workflows/smoke-create-releases.yaml
+
+env:
+  TO_TAG_VERSION: '3.82'
 
 jobs:
   smoke:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        platform: [Docker, Maven, PyPI, NuGet, iOS]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -34,14 +30,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Smoke shared_create_releases
+      - name: Smoke shared_create_releases (${{ matrix.platform }})
         uses: ./actions/shared_create_releases
         with:
           is_release: 'true'
-          new_version: ${{ inputs.to_tag_version }}
+          new_version: ${{ env.TO_TAG_VERSION }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_platform: ${{ inputs.platform }}
+          publish_platform: ${{ matrix.platform }}
           # Mock inputs — only consumed by the matching platform branch:
           tags: 'ghcr.io/iabtechlab/uid2-smoke-fake:smoke'
           image_tag: 'uid2-smoke-fake:smoke'
-          repo: ${{ inputs.platform == 'NuGet' && 'UID2.Client' || 'uid2-smoke-fake' }}
+          repo: ${{ matrix.platform == 'NuGet' && 'UID2.Client' || 'uid2-smoke-fake' }}
+
+      - name: Dump draft release body for ${{ matrix.platform }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== Draft release body (${{ matrix.platform }}) ==="
+          # Find the latest draft release matching this version tag and print its body.
+          gh release list --limit 20 --json tagName,isDraft,name,createdAt \
+            --jq '[.[] | select(.isDraft and .name == "v${{ env.TO_TAG_VERSION }}")] | sort_by(.createdAt) | last'
+          echo "--- body ---"
+          gh release view "v${{ env.TO_TAG_VERSION }}" --json body --jq .body
+          echo "=== end ==="
