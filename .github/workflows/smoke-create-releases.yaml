@@ -47,9 +47,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "=== Draft release body (${{ matrix.platform }}) ==="
-          # Find the latest draft release matching this version tag and print its body.
-          gh release list --limit 20 --json tagName,isDraft,name,createdAt \
-            --jq '[.[] | select(.isDraft and .name == "v${{ env.TO_TAG_VERSION }}")] | sort_by(.createdAt) | last'
+          # `gh release view` resolves by tag — but drafts have no tag, so it'd
+          # return the published v3.82 release instead. Fetch the latest draft
+          # by release ID via the API instead.
+          release_id=$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
+            --jq "[.[] | select(.draft and .name == \"v${TO_TAG_VERSION}\")] | sort_by(.created_at) | last | .id")
+          echo "Draft release id: $release_id"
           echo "--- body ---"
-          gh release view "v${{ env.TO_TAG_VERSION }}" --json body --jq .body
+          gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq .body
           echo "=== end ==="
