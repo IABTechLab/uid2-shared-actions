@@ -228,28 +228,12 @@ jobs:
           subject_name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}
           subject_digest: ${{ steps.push.outputs.digest }}
 
-      - name: Build Changelog
-        id: github_release
-        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
-        uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
-        with:
-          toTag: v${{ steps.version.outputs.new_version }}
-          configurationJson: |
-            {
-              "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ steps.meta.outputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ steps.updatePom.outputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
-              "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
-            }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Delete Draft Releases
-        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
-        uses: IABTechLab/uid2-shared-actions/actions/delete_draft_releases@v3
-
       - name: Create Release
-        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v3
         with:
-          name: v${{ steps.version.outputs.new_version }}
-          body: ${{ steps.github_release.outputs.changelog }}
-          draft: true
+          is_release: ${{ steps.checkRelease.outputs.is_release }}
+          new_version: ${{ steps.version.outputs.new_version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          image_tag: ${{ steps.updatePom.outputs.image_tag }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_platform: Docker

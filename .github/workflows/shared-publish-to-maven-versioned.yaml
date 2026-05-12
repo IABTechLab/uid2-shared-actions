@@ -159,24 +159,27 @@ jobs:
           tag: v${{ steps.version.outputs.new_version }}
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
-      - name: Build Changelog
-        id: github_release
-        if: ${{ env.IS_RELEASE == 'true' }}
-        uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
-        with:
-          toTag: v${{ steps.version.outputs.new_version }}
-          configurationJson: |
-            {
-              "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ env.REPO }}</artifactId>\n    <version>${{ steps.version.outputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/${{ env.REPO }}/${{ steps.version.outputs.new_version }}/${{ env.REPO }}-${{ steps.version.outputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
-              "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
-            }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract Maven artifactId
+        id: package_name
+        run: |
+          # Maven artifactId comes from pom.xml, not the github repo name
+          # (e.g. uid2-attestation-azure repo publishes the `attestation-azure`
+          # artifact). Use `mvn help:evaluate` as the canonical source so
+          # release-notes install snippets match what `mvn deploy` actually
+          # published.
+          artifact_id=$(mvn -B -f "${{ inputs.working_dir }}/pom.xml" help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+          if [ -z "$artifact_id" ]; then
+            echo "ERROR: could not extract artifactId from ${{ inputs.working_dir }}/pom.xml" >&2
+            exit 1
+          fi
+          echo "Extracted Maven artifactId: $artifact_id"
+          echo "name=$artifact_id" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
-        if: ${{ env.IS_RELEASE == 'true' }}
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
+        uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v3
         with:
-          name: v${{ steps.version.outputs.new_version }}
-          body: ${{ steps.github_release.outputs.changelog }}
-          draft: true
+          is_release: ${{ env.IS_RELEASE }}
+          new_version: ${{ steps.version.outputs.new_version }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_platform: Maven
+          repo: ${{ steps.package_name.outputs.name }}
