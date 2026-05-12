@@ -42,17 +42,25 @@ jobs:
           image_tag: 'uid2-smoke-fake:smoke'
           repo: ${{ matrix.platform == 'NuGet' && 'UID2.Client' || 'uid2-smoke-fake' }}
 
-      - name: Dump draft release body for ${{ matrix.platform }}
+      - name: Tag draft and dump body for ${{ matrix.platform }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLATFORM: ${{ matrix.platform }}
         run: |
-          echo "=== Draft release body (${{ matrix.platform }}) ==="
-          # `gh release view` resolves by tag — but drafts have no tag, so it'd
-          # return the published v3.82 release instead. Fetch the latest draft
-          # by release ID via the API instead.
+          # Drafts have no tag — `gh release view "v..."` returns the published
+          # release. Fetch the latest draft by ID via the API instead.
           release_id=$(gh api "repos/${GITHUB_REPOSITORY}/releases" \
-            --jq "[.[] | select(.draft and .name == \"v${TO_TAG_VERSION}\")] | sort_by(.created_at) | last | .id")
+            --jq "[.[] | select(.draft and (.name | startswith(\"v${TO_TAG_VERSION}\")))] | sort_by(.created_at) | last | .id")
           echo "Draft release id: $release_id"
-          echo "--- body ---"
-          gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq .body
+          # Prepend a marker that delete_draft_releases skips ("--editing--"),
+          # and rename the draft so each platform's smoke draft is preserved
+          # for review across matrix iterations.
+          body=$(gh api "repos/${GITHUB_REPOSITORY}/releases/${release_id}" --jq .body)
+          marked_body=$'--editing--\n[smoke '"$PLATFORM"$']\n\n'"$body"
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/${release_id}" \
+            -f name="v${TO_TAG_VERSION} (smoke ${PLATFORM})" \
+            -f body="$marked_body" \
+            --jq '"Patched draft: \(.html_url)"'
+          echo "=== Draft release body (${PLATFORM}) ==="
+          echo "$body"
           echo "=== end ==="
