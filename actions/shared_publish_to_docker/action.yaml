@@ -32,6 +32,9 @@ inputs:
   scan_type:
     description: The scan-type for aquasecurity/trivy-action action. Default to a fs scan.
     default: fs
+  attestation_enabled:
+    description: Set to 'false' to skip SLSA build-provenance attestation + verification. Default 'true'.
+    default: 'true'
 
 outputs:
   tags:
@@ -108,3 +111,4 @@ runs:
       with:
         subject_name: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
         subject_digest: ${{ steps.push.outputs.digest }}
+        attestation_enabled: ${{ inputs.attestation_enabled }}

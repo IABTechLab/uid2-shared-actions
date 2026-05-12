@@ -1,0 +1,127 @@
+name: Smoke test attest_image opt-out
+
+# Mirrors run 25542801315 — builds a throwaway alpine image inline and exercises
+# the attest_image composite directly. Two jobs:
+#   1. default-enabled: omits attestation_enabled, expects an attestation to exist + verify to succeed
+#   2. opted-out: passes attestation_enabled=false, expects NO attestation to exist
+# Uses push: trigger so it can fire before the workflow file exists on main
+# (workflow_dispatch API requires the workflow on the default branch).
+# Delete this file after evidence is captured — the run ID is permanent.
+
+on:
+  push:
+    branches:
+      - bmz-UID2-6764-attestation-opt-out
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+env:
+  IMAGE_BASE: ghcr.io/iabtechlab/uid2-shared-actions
+
+jobs:
+  default-enabled:
+    name: Default (attestation_enabled omitted) — expect attestation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare context
+        run: |
+          mkdir -p ${{ runner.temp }}/ctx-default
+          cat > ${{ runner.temp }}/ctx-default/Dockerfile <<EOF
+          FROM alpine:3
+          RUN echo "default-enabled-${{ github.run_id }}" > /tag.txt
+          EOF
+
+      - name: Build + push throwaway image
+        id: build
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+        with:
+          context: ${{ runner.temp }}/ctx-default
+          push: true
+          tags: ${{ env.IMAGE_BASE }}/test-attest-optout-default:${{ github.run_id }}
+
+      - name: Call attest_image (default)
+        uses: ./actions/attest_image
+        with:
+          subject_name: ${{ env.IMAGE_BASE }}/test-attest-optout-default
+          subject_digest: ${{ steps.build.outputs.digest }}
+
+      - name: External verify — expect SUCCESS
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh attestation verify \
+            "oci://${{ env.IMAGE_BASE }}/test-attest-optout-default@${{ steps.build.outputs.digest }}" \
+            --owner IABTechLab \
+            --signer-repo IABTechLab/uid2-shared-actions
+          echo "Default behavior confirmed: attestation present, verify succeeded."
+
+  opted-out:
+    name: attestation_enabled=false — expect no attestation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare context
+        run: |
+          mkdir -p ${{ runner.temp }}/ctx-optout
+          cat > ${{ runner.temp }}/ctx-optout/Dockerfile <<EOF
+          FROM alpine:3
+          RUN echo "opted-out-${{ github.run_id }}" > /tag.txt
+          EOF
+
+      - name: Build + push throwaway image
+        id: build
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+        with:
+          context: ${{ runner.temp }}/ctx-optout
+          push: true
+          tags: ${{ env.IMAGE_BASE }}/test-attest-optout-disabled:${{ github.run_id }}
+
+      - name: Call attest_image (attestation_enabled=false)
+        uses: ./actions/attest_image
+        with:
+          subject_name: ${{ env.IMAGE_BASE }}/test-attest-optout-disabled
+          subject_digest: ${{ steps.build.outputs.digest }}
+          attestation_enabled: 'false'
+
+      - name: External verify — expect FAILURE (no attestations)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          output=$(gh attestation verify \
+            "oci://${{ env.IMAGE_BASE }}/test-attest-optout-disabled@${{ steps.build.outputs.digest }}" \
+            --owner IABTechLab \
+            --signer-repo IABTechLab/uid2-shared-actions 2>&1)
+          rc=$?
+          echo "$output"
+          if [ "$rc" -eq 0 ]; then
+            echo "::error::Expected verify to fail (no attestations) but it succeeded — opt-out did not skip the attest step."
+            exit 1
+          fi
+          if ! echo "$output" | grep -qi "no attestations"; then
+            echo "::error::Expected 'no attestations' in failure output; got a different error."
+            exit 1
+          fi
+          echo "Opt-out confirmed: no attestation present, verify failed as expected."

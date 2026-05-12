@@ -42,6 +42,10 @@ on:
         description: If true, will attempt to publish any vulnerabilities to GitHub. Defaults to true. Set to false for private repos.
         type: string
         default: 'true'
+      attestation_enabled:
+        description: If false, skips SLSA build-provenance attestation + verification. Defaults to true.
+        type: boolean
+        default: true
 jobs:
   buildImage:
     name: Build Image
@@ -77,6 +81,7 @@ jobs:
           docker_context: ${{ inputs.docker_context }}
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           scan_type: image
+          attestation_enabled: ${{ inputs.attestation_enabled }}
 
       - name: Create Release
         id: github_release
