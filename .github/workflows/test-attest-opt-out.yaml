@@ -120,8 +120,10 @@ jobs:
             echo "::error::Expected verify to fail (no attestations) but it succeeded — opt-out did not skip the attest step."
             exit 1
           fi
-          if ! echo "$output" | grep -qi "no attestations"; then
-            echo "::error::Expected 'no attestations' in failure output; got a different error."
+          # gh attestation verify against a digest with no attestation returns:
+          #   Error: HTTP 404: Not Found (https://api.github.com/orgs/<owner>/attestations/<digest>...)
+          if ! echo "$output" | grep -qE "HTTP 404|no attestations"; then
+            echo "::error::Expected 'HTTP 404' or 'no attestations' in failure output; got a different error."
             exit 1
           fi
           echo "Opt-out confirmed: no attestation present, verify failed as expected."
