@@ -97,6 +97,21 @@ jobs:
           tag: v${{ steps.version.outputs.new_version }}
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
+      - name: Extract PyPI package name
+        id: package_name
+        run: |
+          # PyPI package name comes from pyproject.toml, not the github repo name
+          # (e.g. uid2-client-python repo publishes the `uid2-client` package).
+          # Read the top-level `name = "..."` field so release-notes install snippets
+          # match the real PyPI package, not the git repo.
+          name=$(grep -E '^\s*name\s*=' "${{ inputs.working_dir }}/pyproject.toml" | head -1 | cut -d '"' -f 2)
+          if [ -z "$name" ]; then
+            echo "ERROR: could not extract 'name' from ${{ inputs.working_dir }}/pyproject.toml" >&2
+            exit 1
+          fi
+          echo "Extracted PyPI package name: $name"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
       - name: Create Release
         uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v3
         with:
@@ -104,4 +119,4 @@ jobs:
           new_version: ${{ steps.version.outputs.new_version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: PyPI
-          repo: ${{ env.REPO }}
+          repo: ${{ steps.package_name.outputs.name }}
