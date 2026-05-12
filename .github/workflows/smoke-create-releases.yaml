@@ -13,6 +13,7 @@ on:
 
 env:
   TO_TAG_VERSION: '3.82'
+  FROM_TAG: 'v3.81'
 
 jobs:
   smoke:
@@ -35,6 +36,7 @@ jobs:
         with:
           is_release: 'true'
           new_version: ${{ env.TO_TAG_VERSION }}
+          from_tag: ${{ env.FROM_TAG }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: ${{ matrix.platform }}
           # Mock inputs — only consumed by the matching platform branch:
