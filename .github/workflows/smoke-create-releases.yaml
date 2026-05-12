@@ -1,0 +1,47 @@
+name: Smoke test shared_create_releases (TEMPORARY)
+# Temporary smoke harness for UID2-6762 / PR #229. Exercises each platform
+# branch of actions/shared_create_releases against an existing v3 tag so we
+# can inspect the resulting draft-release body before merge. Delete this file
+# and any draft releases it produces once verification is complete.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to exercise
+        required: true
+        type: choice
+        options:
+          - Docker
+          - Maven
+          - PyPI
+          - NuGet
+          - iOS
+      to_tag_version:
+        description: Existing v<version> tag in this repo to use as toTag (mikepenz needs an existing tag to compare against).
+        required: true
+        type: string
+        default: '3.82'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Smoke shared_create_releases
+        uses: ./actions/shared_create_releases
+        with:
+          is_release: 'true'
+          new_version: ${{ inputs.to_tag_version }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_platform: ${{ inputs.platform }}
+          # Mock inputs — only consumed by the matching platform branch:
+          tags: 'ghcr.io/iabtechlab/uid2-smoke-fake:smoke'
+          image_tag: 'uid2-smoke-fake:smoke'
+          repo: ${{ inputs.platform == 'NuGet' && 'UID2.Client' || 'uid2-smoke-fake' }}
