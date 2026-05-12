@@ -42,6 +42,10 @@ on:
         description: GitHub Environment to use for accessing the merge token. Leave empty to use the default GITHUB_TOKEN.
         type: string
         default: ''
+      attestation_enabled:
+        description: If false, skips SLSA build-provenance attestation + verification. Defaults to true.
+        type: boolean
+        default: true
     outputs:
       version_number_output:
         description: The complete version number 
@@ -218,7 +222,7 @@ jobs:
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
 
       - name: Attest build provenance
-        if: ${{ steps.checkRelease.outputs.not_snapshot == 'true' }}
+        if: ${{ steps.checkRelease.outputs.not_snapshot == 'true' && inputs.attestation_enabled }}
         uses: IABTechLab/uid2-shared-actions/actions/attest_image@v3
         with:
           subject_name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}

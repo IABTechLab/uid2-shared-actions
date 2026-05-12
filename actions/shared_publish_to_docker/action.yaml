@@ -32,6 +32,9 @@ inputs:
   scan_type:
     description: The scan-type for aquasecurity/trivy-action action. Default to a fs scan.
     default: fs
+  attestation_enabled:
+    description: Set to 'false' to skip SLSA build-provenance attestation + verification. Default 'true'.
+    default: 'true'
 
 outputs:
   tags:
@@ -103,7 +106,7 @@ runs:
           IMAGE_VERSION=${{ inputs.new_version }}
 
     - name: Attest build provenance
-      if: ${{ inputs.not_snapshot == 'true' }}
+      if: ${{ inputs.not_snapshot == 'true' && inputs.attestation_enabled == 'true' }}
       uses: IABTechLab/uid2-shared-actions/actions/attest_image@v3
       with:
         subject_name: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
