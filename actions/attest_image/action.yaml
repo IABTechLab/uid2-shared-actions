@@ -11,16 +11,11 @@ inputs:
   subject_digest:
     description: OCI manifest digest (sha256:...) emitted by docker/build-push-action.
     required: true
-  attestation_enabled:
-    description: Set to 'false' to skip attestation + verification. Default 'true'.
-    required: false
-    default: 'true'
 
 runs:
   using: composite
   steps:
     - name: Lowercase image reference
-      if: ${{ inputs.attestation_enabled == 'true' }}
       id: ref
       shell: bash
       run: |
@@ -28,7 +23,6 @@ runs:
         echo "value=${value}" >> "$GITHUB_OUTPUT"
 
     - name: Attest build provenance
-      if: ${{ inputs.attestation_enabled == 'true' }}
       uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
       env:
         # Mirrors actions/attest-build-provenance, prevents oversized OCI registry auth-challenge headers triggering HPE_HEADER_OVERFLOW.
@@ -39,7 +33,6 @@ runs:
         push-to-registry: true
 
     - name: Verify attestation
-      if: ${{ inputs.attestation_enabled == 'true' }}
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}

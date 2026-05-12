@@ -106,9 +106,8 @@ runs:
           IMAGE_VERSION=${{ inputs.new_version }}
 
     - name: Attest build provenance
-      if: ${{ inputs.not_snapshot == 'true' }}
+      if: ${{ inputs.not_snapshot == 'true' && inputs.attestation_enabled == 'true' }}
       uses: IABTechLab/uid2-shared-actions/actions/attest_image@v3
       with:
         subject_name: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
         subject_digest: ${{ steps.push.outputs.digest }}
-        attestation_enabled: ${{ inputs.attestation_enabled }}

@@ -222,12 +222,11 @@ jobs:
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
 
       - name: Attest build provenance
-        if: ${{ steps.checkRelease.outputs.not_snapshot == 'true' }}
+        if: ${{ steps.checkRelease.outputs.not_snapshot == 'true' && inputs.attestation_enabled }}
         uses: IABTechLab/uid2-shared-actions/actions/attest_image@v3
         with:
           subject_name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}
           subject_digest: ${{ steps.push.outputs.digest }}
-          attestation_enabled: ${{ inputs.attestation_enabled }}
 
       - name: Build Changelog
         id: github_release
