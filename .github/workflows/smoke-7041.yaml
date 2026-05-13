@@ -5,6 +5,8 @@ name: UID2-7041 smoke — tag-after-verify
 # (not the @v3 alias). Delete after capturing green + forced-failure runs.
 
 on:
+  push:
+    branches: [bmz-UID2-7041-retag-promotion]
   workflow_dispatch:
     inputs:
       force_verify_failure:
