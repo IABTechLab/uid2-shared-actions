@@ -71,6 +71,13 @@ runs:
         FIRST_TAG=${DOCKER_METADATA_OUTPUT_TAGS%%$'\n'*}
         echo "firstTag=$FIRST_TAG" >> $GITHUB_OUTPUT
 
+    - name: Lowercase image reference
+      id: imageRef
+      shell: bash
+      run: |
+        value="$(printf '%s' '${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}' | tr '[:upper:]' '[:lower:]')"
+        echo "value=${value}" >> "$GITHUB_OUTPUT"
+
     - name: Build and export to Docker
       uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
       with:
@@ -99,7 +106,7 @@ runs:
         context: ${{ inputs.docker_context }}
         file: ${{ inputs.docker_file }}
         labels: ${{ steps.meta.outputs.labels }}
-        outputs: type=image,name=${{ inputs.docker_registry }}/${{ inputs.docker_image_name }},push-by-digest=true,push=true
+        outputs: type=image,name=${{ steps.imageRef.outputs.value }},push-by-digest=true,push=true
         build-args: |
           JAR_VERSION=${{ inputs.new_version }}
           IMAGE_VERSION=${{ inputs.new_version }}
@@ -116,7 +123,7 @@ runs:
       env:
         DIGEST: ${{ steps.push.outputs.digest }}
         TAGS: ${{ steps.meta.outputs.tags }}
-        SOURCE: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
+        SOURCE: ${{ steps.imageRef.outputs.value }}
       run: |
         set -euo pipefail
         while IFS= read -r tag; do
