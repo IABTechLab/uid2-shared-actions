@@ -1,0 +1,67 @@
+name: UID2-7041 buildx-fix smoke
+
+# Throwaway smoke that proves push-by-digest works once Set up Docker Buildx
+# is present. Mirrors the Java workflow shape (setup-buildx before build).
+# Delete after capturing a green run.
+
+on:
+  push:
+    branches: [bmz-UID2-7041-setup-buildx-java]
+
+env:
+  TEST_IMAGE: ghcr.io/${{ github.repository }}/test-7041-buildx
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase image name
+        id: lc
+        run: |
+          IMG="$(printf '%s' "${TEST_IMAGE}" | tr '[:upper:]' '[:lower:]')"
+          echo "image=${IMG}" >> "$GITHUB_OUTPUT"
+
+      - name: Write throwaway Dockerfile
+        run: |
+          cat > Dockerfile.test-7041-buildx <<'DOCKERFILE'
+          FROM alpine:3.20
+          RUN echo "uid2-7041 buildx-fix smoke, run $GITHUB_RUN_ID" > /uid2-7041.txt
+          DOCKERFILE
+
+      - name: Build and export to Docker (mirrors Java workflow shape, load:true)
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+        with:
+          context: .
+          file: Dockerfile.test-7041-buildx
+          load: true
+          tags: ${{ steps.lc.outputs.image }}:scan-${{ github.run_id }}
+
+      - name: Push by digest (the previously-failing call)
+        id: push
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+        with:
+          context: .
+          file: Dockerfile.test-7041-buildx
+          outputs: type=image,name=${{ steps.lc.outputs.image }},push-by-digest=true,push=true
+
+      - name: Assert digest emitted
+        run: |
+          set -eu
+          [[ -n "${{ steps.push.outputs.digest }}" ]] || { echo "::error::No digest"; exit 1; }
+          echo "Push-by-digest succeeded: ${{ steps.push.outputs.digest }}"
