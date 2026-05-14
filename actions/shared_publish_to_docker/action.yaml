@@ -92,15 +92,14 @@ runs:
         image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
         scan_type: ${{ inputs.scan_type }}
 
-    - name: Push to Docker
+    - name: Push to Docker (by digest, untagged)
       id: push
       uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
       with:
         context: ${{ inputs.docker_context }}
         file: ${{ inputs.docker_file }}
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        outputs: type=image,name=${{ inputs.docker_registry }}/${{ inputs.docker_image_name }},push-by-digest=true,push=true
         build-args: |
           JAR_VERSION=${{ inputs.new_version }}
           IMAGE_VERSION=${{ inputs.new_version }}
@@ -111,3 +110,16 @@ runs:
       with:
         subject_name: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
         subject_digest: ${{ steps.push.outputs.digest }}
+
+    - name: Promote digest to consumable tag(s)
+      shell: bash
+      env:
+        DIGEST: ${{ steps.push.outputs.digest }}
+        TAGS: ${{ steps.meta.outputs.tags }}
+        SOURCE: ${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}
+      run: |
+        set -euo pipefail
+        while IFS= read -r tag; do
+          [[ -z "$tag" ]] && continue
+          docker buildx imagetools create -t "$tag" "${SOURCE}@${DIGEST}"
+        done <<< "$TAGS"
