@@ -189,6 +189,15 @@ jobs:
           FIRST_TAG=${DOCKER_METADATA_OUTPUT_TAGS%%$'\n'*}
           echo "firstTag=$FIRST_TAG" >> $GITHUB_OUTPUT
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Lowercase image reference
+        id: imageRef
+        run: |
+          value="$(printf '%s' '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}' | tr '[:upper:]' '[:lower:]')"
+          echo "value=${value}" >> "$GITHUB_OUTPUT"
+
       - name: Build and export to Docker
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
         with:
@@ -215,7 +224,7 @@ jobs:
         with:
           context: ${{inputs.working_dir}}
           labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }},push-by-digest=true,push=true
+          outputs: type=image,name=${{ steps.imageRef.outputs.value }},push-by-digest=true,push=true
           build-args: |
             JAR_VERSION=${{ steps.version.outputs.new_version }}
             IMAGE_VERSION=${{ steps.version.outputs.new_version }}
@@ -232,7 +241,7 @@ jobs:
         env:
           DIGEST: ${{ steps.push.outputs.digest }}
           TAGS: ${{ steps.meta.outputs.tags }}
-          SOURCE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}
+          SOURCE: ${{ steps.imageRef.outputs.value }}
         run: |
           set -euo pipefail
           while IFS= read -r tag; do
