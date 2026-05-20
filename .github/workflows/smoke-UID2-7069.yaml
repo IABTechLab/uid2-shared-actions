@@ -211,16 +211,30 @@ jobs:
           git push --delete origin v0.0.0-smoke 2>/dev/null || true
           git tag -d v0.0.0-smoke 2>/dev/null || true
 
-      - name: Pick fromTag (newest existing v-prefixed tag in repo)
+      - name: Pick fromTag (5th-newest v-prefixed tag — needs merged PRs in range)
         id: pick_tag
         run: |
           set -euo pipefail
-          from_tag=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | head -1)
+          # If we use the newest tag as fromTag and HEAD as toTag with HEAD
+          # being a feature branch with no merged PRs since the newest tag,
+          # mikepenz hits its empty_template fallback ("- no changes") and
+          # the entire platform template gets discarded. To exercise the
+          # template-substitution path, pick a tag several releases back so
+          # there are guaranteed merged PRs in the range.
+          from_tag=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -5 | tail -1)
+          if [ -z "$from_tag" ]; then
+            # Fallback to plain v[0-9]+ pattern if SemVer didn't match
+            from_tag=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | head -5 | tail -1)
+          fi
           if [ -z "$from_tag" ]; then
             echo "ERROR: no v-prefixed tag found to use as fromTag" >&2
             exit 1
           fi
-          echo "Using fromTag=$from_tag"
+          merges=$(git log "$from_tag..HEAD" --merges --oneline | wc -l)
+          echo "Using fromTag=$from_tag (merged PRs in range: $merges)"
+          if [ "$merges" -lt 1 ]; then
+            echo "WARNING: no merged PRs in $from_tag..HEAD — mikepenz will fall back to empty_template and the body verification will fail." >&2
+          fi
           echo "from_tag=$from_tag" >> "$GITHUB_OUTPUT"
 
       - name: Create temporary v0.0.0-smoke tag pointing at HEAD
