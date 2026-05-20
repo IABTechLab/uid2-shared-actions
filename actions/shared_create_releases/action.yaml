@@ -147,7 +147,9 @@ runs:
         template="${template//__VERSION__/$VERSION}"
 
         # Compact JSON (single line) keeps the step output value on one line —
-        # simpler to pass into mikepenz's configurationJson input via ${{ }}.
+        # simpler to pass into mikepenz's configurationJson input via a
+        # GitHub Actions expression (no multi-line $GITHUB_OUTPUT delimiter
+        # needed downstream).
         config=$(jq -nc \
           --arg t "$template" \
           --arg p ' - #{{TITLE}} - ( PR: ##{{NUMBER}} )' \
