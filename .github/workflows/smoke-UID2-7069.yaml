@@ -51,6 +51,79 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: ${{ matrix.platform }}
 
+  # Path C: run the new Extract bash logic from each publish workflow
+  # against real consumer-repo fixtures, without actually publishing.
+  # Catches drift between the assumed package shape and what real repos use
+  # (e.g. uid2-client-python publishes "uid2_client" with an underscore, not
+  # "uid2-client" — exactly the kind of mismatch the new tomllib parser
+  # would have to handle right).
+  extract_maven_artifactid:
+    name: Extract Maven artifactId from uid2-attestation-aws fixture
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout uid2-attestation-aws (fixture)
+        uses: actions/checkout@v4
+        with:
+          repository: IABTechLab/uid2-attestation-aws
+          ref: main
+          path: fixture
+      - name: Set up JDK 11 (matches consumer's default)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+      - name: Run the new Extract Maven artifactId logic
+        run: |
+          set -euo pipefail
+          # Same command used in shared-publish-to-maven-versioned.yaml.
+          # Consumer passes working_dir=attestation-aws, so the pom lives at
+          # fixture/attestation-aws/pom.xml here.
+          artifact_id=$(mvn -B -f fixture/attestation-aws/pom.xml help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+          echo "Extracted artifactId: $artifact_id"
+          test "$artifact_id" = "attestation-aws"
+          echo "OK: matches expected 'attestation-aws'"
+
+  extract_pypi_name:
+    name: Extract PyPI name from uid2-client-python fixture
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout uid2-client-python (fixture)
+        uses: actions/checkout@v4
+        with:
+          repository: IABTechLab/uid2-client-python
+          ref: main
+          path: fixture
+      - name: Run the new tomllib-based PyPI name extraction
+        run: |
+          set -euo pipefail
+          # Same command used in shared-publish-to-pypi-versioned.yaml.
+          name=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['name'])" fixture/pyproject.toml)
+          echo "Extracted name: $name"
+          # uid2-client-python publishes as 'uid2_client' (underscore) — NOT
+          # 'uid2-client' as one might guess from the repo name. The new
+          # tomllib parser correctly returns whatever [project].name says.
+          test "$name" = "uid2_client"
+          echo "OK: matches expected 'uid2_client'"
+
+  extract_nuget_id:
+    name: Extract NuGet id from uid2-client-net fixture
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout uid2-client-net (fixture)
+        uses: actions/checkout@v4
+        with:
+          repository: IABTechLab/uid2-client-net
+          ref: main
+          path: fixture
+      - name: Run the new xmllint-based NuGet id extraction
+        run: |
+          set -euo pipefail
+          # Same command used in shared-publish-to-nuget-versioned.yaml.
+          package_id=$(xmllint --xpath 'string(//*[local-name()="package"]/*[local-name()="metadata"]/*[local-name()="id"])' fixture/UID2.Client.nuspec)
+          echo "Extracted package id: $package_id"
+          test "$package_id" = "UID2.Client"
+          echo "OK: matches expected 'UID2.Client'"
+
   render_template_on_linux:
     name: Render template on Linux for ${{ matrix.platform }}
     runs-on: ubuntu-latest
