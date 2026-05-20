@@ -18,6 +18,11 @@ on:
   push:
     branches: [jn-UID2-7069-harden-shared-create-releases]
   workflow_dispatch:
+    inputs:
+      run_destructive_e2e:
+        description: 'Also run the destructive is_release=true end-to-end (snapshots and restores all draft releases; creates and deletes a v0.0.0-smoke tag). Only set true when you intend to actually exercise the full composite.'
+        type: boolean
+        default: false
 
 jobs:
   validate_rejects_bad_platform:
@@ -174,3 +179,160 @@ jobs:
           TAIL
           } > /tmp/run.sh
           bash /tmp/run.sh
+
+  # End-to-end coverage of the composite's is_release=true path: the only
+  # smoke that actually invokes mikepenz, Delete Draft Releases, and Create
+  # Release in sequence. Destructive (it deletes all draft releases as a
+  # side effect of how the composite works), so it snapshots them before-
+  # hand and restores them in an `if: always()` cleanup step.
+  #
+  # workflow_dispatch only — do NOT auto-run on push. Run manually:
+  #   gh workflow run smoke-UID2-7069.yaml \
+  #     --ref jn-UID2-7069-harden-shared-create-releases \
+  #     -f run_destructive_e2e=true
+  #
+  # Covers what the standalone render_template_on_linux jobs can't: the
+  # GHA $GITHUB_OUTPUT plumbing between Prepare-changelog-template and
+  # mikepenz, mikepenz's parsing of the new configurationJson string, and
+  # the body interpolation into softprops/action-gh-release.
+  end_to_end_is_release_true:
+    name: End-to-end composite (is_release=true, Maven, snapshot+restore)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_destructive_e2e }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # tag operations + Create Release + Delete Draft Releases
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need tags for mikepenz to compute a diff
+
+      - name: Cleanup any leftover v0.0.0-smoke tag from a previous failed run
+        run: |
+          git push --delete origin v0.0.0-smoke 2>/dev/null || true
+          git tag -d v0.0.0-smoke 2>/dev/null || true
+
+      - name: Pick fromTag (newest existing v-prefixed tag in repo)
+        id: pick_tag
+        run: |
+          set -euo pipefail
+          from_tag=$(git tag --sort=-version:refname | grep -E '^v[0-9]' | head -1)
+          if [ -z "$from_tag" ]; then
+            echo "ERROR: no v-prefixed tag found to use as fromTag" >&2
+            exit 1
+          fi
+          echo "Using fromTag=$from_tag"
+          echo "from_tag=$from_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Create temporary v0.0.0-smoke tag pointing at HEAD
+        run: |
+          git tag v0.0.0-smoke
+          git push origin v0.0.0-smoke
+
+      - name: Snapshot existing draft releases
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const drafts = (await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            })).data.filter(r => r.draft);
+            const snapshot = drafts.map(d => ({
+              name: d.name,
+              tag_name: d.tag_name,
+              target_commitish: d.target_commitish,
+              body: d.body,
+              prerelease: d.prerelease,
+              draft: true,
+            }));
+            require('fs').writeFileSync(
+              process.env.GITHUB_WORKSPACE + '/drafts-snapshot.json',
+              JSON.stringify(snapshot),
+            );
+            core.info(`Snapshotted ${snapshot.length} draft release(s)`);
+
+      - name: Run composite with is_release=true publish_platform=Maven
+        uses: ./actions/shared_create_releases
+        with:
+          is_release: 'true'
+          new_version: 0.0.0-smoke
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_platform: Maven
+          repo: smoke-pkg
+          from_tag: ${{ steps.pick_tag.outputs.from_tag }}
+
+      - name: Verify smoke draft release was created with Maven template content
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const releases = (await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            })).data;
+            const smoke = releases.find(r => r.draft && r.name === 'v0.0.0-smoke');
+            if (!smoke) {
+              throw new Error('Smoke draft release v0.0.0-smoke was NOT created by the composite');
+            }
+            core.info(`Smoke draft id=${smoke.id}`);
+            core.info(`Body (first 1000 chars):\n${(smoke.body || '').slice(0, 1000)}`);
+            if (!smoke.body || smoke.body.length === 0) {
+              throw new Error('Smoke draft body is EMPTY — template flow broken');
+            }
+            const expectedMarker = '<artifactId>smoke-pkg</artifactId>';
+            if (!smoke.body.includes(expectedMarker)) {
+              throw new Error(`Body missing expected marker "${expectedMarker}"`);
+            }
+            core.info(`OK: Maven template content present in draft body`);
+
+      - name: Cleanup — delete smoke draft + restore snapshotted drafts
+        if: always()
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            // Delete v0.0.0-smoke draft (it survived the composite, or was
+            // never created — either way clean up).
+            const releases = (await github.rest.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            })).data;
+            for (const r of releases.filter(r => r.draft && r.name === 'v0.0.0-smoke')) {
+              try {
+                await github.rest.repos.deleteRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  release_id: r.id,
+                });
+                core.info(`Deleted smoke draft id=${r.id}`);
+              } catch (e) {
+                core.warning(`Failed to delete smoke draft id=${r.id}: ${e.message}`);
+              }
+            }
+            // Restore snapshotted drafts (Delete Draft Releases nuked them
+            // mid-run, so they need to come back).
+            const fs = require('fs');
+            const path = process.env.GITHUB_WORKSPACE + '/drafts-snapshot.json';
+            if (fs.existsSync(path)) {
+              const snapshot = JSON.parse(fs.readFileSync(path, 'utf8'));
+              for (const d of snapshot) {
+                try {
+                  await github.rest.repos.createRelease({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ...d,
+                  });
+                  core.info(`Restored draft: ${d.name || d.tag_name}`);
+                } catch (e) {
+                  core.warning(`Failed to restore draft ${d.name || d.tag_name}: ${e.message}`);
+                }
+              }
+              core.info(`Restore pass complete (${snapshot.length} draft(s) attempted)`);
+            } else {
+              core.warning('drafts-snapshot.json not found — snapshot step likely failed; no restore possible');
+            }
+
+      - name: Delete temporary v0.0.0-smoke tag
+        if: always()
+        run: |
+          git push --delete origin v0.0.0-smoke 2>/dev/null || true
