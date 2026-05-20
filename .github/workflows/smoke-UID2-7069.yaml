@@ -1,0 +1,101 @@
+name: TEMP smoke - UID2-7069 (delete after capture)
+
+# Throwaway smoke harness for PR #233. Verifies on a real Linux runner:
+#   1. shared_create_releases validation guard rejects an invalid publish_platform.
+#   2. shared_create_releases validation guard accepts each canonical platform.
+#   3. The composite's Prepare-changelog-template bash + jq pipeline produces
+#      valid configurationJson for every platform.
+#
+# Deliberately does NOT invoke the composite with is_release: 'true' because
+# delete_draft_releases (called inside the composite) deletes ALL draft
+# releases in the repo — would clobber any unreleased drafts sitting in
+# uid2-shared-actions. The standalone template-prep job (3) covers the
+# rendering on Linux without touching releases.
+#
+# Pattern matches UID2-7041 smoke commits: add, capture run, delete.
+
+on:
+  push:
+    branches: [jn-UID2-7069-harden-shared-create-releases]
+  workflow_dispatch:
+
+jobs:
+  validate_rejects_bad_platform:
+    name: Validation guard rejects invalid platform (expected to fail)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Composite with publish_platform=docker (lowercase, INVALID)
+        uses: ./actions/shared_create_releases
+        with:
+          is_release: 'false'
+          new_version: 0.0.0-smoke
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_platform: docker
+
+  validate_accepts_canonical_platforms:
+    name: Validation guard accepts ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [Docker, Maven, PyPI, NuGet, iOS]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Composite with publish_platform=${{ matrix.platform }} (is_release=false)
+        uses: ./actions/shared_create_releases
+        with:
+          is_release: 'false'
+          new_version: 0.0.0-smoke
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_platform: ${{ matrix.platform }}
+
+  render_template_on_linux:
+    name: Render template on Linux for ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [Docker, Maven, PyPI, NuGet, iOS]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract and run composite's template-prep block
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          REPO: smoke-pkg
+          VERSION: 0.0.0-smoke
+          TAGS: ghcr.io/smoke/img:0.0.0
+          IMAGE_TAG: ghcr.io/smoke/img@sha256:deadbeef
+        run: |
+          set -euo pipefail
+          # Pull the case-statement block live from action.yaml. awk grabs
+          # everything between `case "$PLATFORM" in` and the matching `esac`,
+          # then sed strips the 8-column YAML indent so the heredoc EOF
+          # markers sit at bash column 0.
+          awk '/^[[:space:]]*case "\$PLATFORM" in[[:space:]]*$/,/^[[:space:]]*esac[[:space:]]*$/' \
+            actions/shared_create_releases/action.yaml \
+            | sed 's/^        //' > /tmp/case.sh
+
+          # Compose the standalone script: the extracted case block, then the
+          # same placeholder substitution + jq invocation the composite uses.
+          {
+            echo 'set -euo pipefail'
+            cat /tmp/case.sh
+            cat <<'TAIL'
+          template="${template//__TAGS__/$TAGS}"
+          template="${template//__IMAGE_TAG__/$IMAGE_TAG}"
+          template="${template//__REPO__/$REPO}"
+          template="${template//__VERSION__/$VERSION}"
+          config=$(jq -nc --arg t "$template" --arg p ' - #{{TITLE}} - ( PR: ##{{NUMBER}} )' '{template: $t, pr_template: $p}')
+          echo "--- configurationJson ---"
+          echo "$config"
+          echo
+          echo "--- validity check ---"
+          echo "$config" | jq -e '.template | length > 0' >/dev/null && echo "OK: non-empty template, valid JSON"
+          echo
+          echo "--- decoded template ---"
+          echo "$config" | jq -r '.template'
+          TAIL
+          } > /tmp/run.sh
+          bash /tmp/run.sh
