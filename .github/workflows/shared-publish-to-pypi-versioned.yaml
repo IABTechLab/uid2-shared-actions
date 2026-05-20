@@ -102,7 +102,7 @@ jobs:
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
         run: |
           # PyPI package name comes from pyproject.toml, not the github repo name
-          # (e.g. uid2-client-python repo publishes the `uid2-client` package).
+          # (e.g. uid2-client-python repo publishes the `uid2_client` package).
           # Use tomllib so we correctly handle both single- and double-quoted
           # values, ignore unrelated `name =` keys in earlier tables (e.g.
           # dependency tables), and fail fast if [project].name is missing.
@@ -113,6 +113,13 @@ jobs:
           # currently ships Python 3.12, so this is safe today; if a caller
           # ever forks the workflow onto ubuntu-22.04 (Python 3.10), add an
           # actions/setup-python step before this one or fall back to `tomli`.
+          #
+          # Assumes PEP 621 layout — i.e. the package name lives at
+          # [project].name. Poetry-style projects with [tool.poetry] would
+          # need a different key path (e.g. ['tool']['poetry']['name']);
+          # the KeyError this would raise is loud but unhelpful. No current
+          # PyPI consumer uses Poetry, so leaving the PEP 621 assumption
+          # in place.
           name=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['name'])" "${{ inputs.working_dir }}/pyproject.toml")
           if [ -z "$name" ]; then
             echo "ERROR: could not extract [project].name from ${{ inputs.working_dir }}/pyproject.toml" >&2

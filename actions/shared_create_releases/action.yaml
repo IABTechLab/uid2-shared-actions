@@ -42,6 +42,10 @@ runs:
     # 'docker')` returns true, so the expression form silently lets the
     # exact typo we're trying to catch slip through. Bash `case` is
     # case-sensitive by default.
+    #
+    # Intentionally NOT gated on is_release — typos should be loud on
+    # Snapshot runs too, so they're caught before someone tries to cut
+    # a real release with the same misconfiguration.
     - name: Validate publish_platform
       shell: bash
       env:
@@ -74,6 +78,11 @@ runs:
         # Heredocs use quoted EOF so backticks and $ stay literal — no shell
         # expansion inside the template body. We then substitute the four
         # placeholders via bash parameter expansion.
+        #
+        # Heredoc body lines sit at YAML's common-prefix indent (8 spaces)
+        # so YAML's literal-block-scalar dedent leaves them flush-left in
+        # the actual bash script — that's what lets the closing EOF marker
+        # match. If you re-indent the heredoc body, the heredoc breaks.
         case "$PLATFORM" in
           Docker)
             template=$(cat <<'EOF'
@@ -155,6 +164,13 @@ runs:
             ;;
         esac
 
+        # Placeholder tokens (__TAGS__, __IMAGE_TAG__, __REPO__, __VERSION__)
+        # are reserved — no input value should contain them. Substitution is
+        # order-dependent: if e.g. $TAGS expanded to literal `__REPO__`, the
+        # next line would re-substitute it. All inputs currently come from
+        # trusted CI sources (docker/metadata-action outputs, semver), so
+        # this is theoretical. Keep the tokens unique-looking if you add
+        # more.
         template="${template//__TAGS__/$TAGS}"
         template="${template//__IMAGE_TAG__/$IMAGE_TAG}"
         template="${template//__REPO__/$REPO}"
