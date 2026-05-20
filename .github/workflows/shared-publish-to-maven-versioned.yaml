@@ -39,6 +39,11 @@ env:
 
 jobs:
   release:
+    # The release/pre-release boolean is inlined here (rather than referencing
+    # steps.checkRelease.outputs.is_release) because job-level expressions are
+    # evaluated before any step runs. Every other "is this a release?" check
+    # in this file uses steps.checkRelease.outputs.is_release — keep this in
+    # sync if the condition ever changes. See UID2-7069.
     name: ${{ ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) && 'Create Release' || 'Publish Pre-release' }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.merge_environment }}

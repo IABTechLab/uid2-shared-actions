@@ -103,11 +103,16 @@ jobs:
         run: |
           # PyPI package name comes from pyproject.toml, not the github repo name
           # (e.g. uid2-client-python repo publishes the `uid2-client` package).
-          # Use tomllib (stdlib, Python 3.11+) so we correctly handle both single-
-          # and double-quoted values, ignore unrelated `name =` keys in earlier
-          # tables (e.g. dependency tables), and fail fast if [project].name is
-          # missing. Gated on is_release to avoid running on Snapshot builds
-          # where shared_create_releases is a no-op.
+          # Use tomllib so we correctly handle both single- and double-quoted
+          # values, ignore unrelated `name =` keys in earlier tables (e.g.
+          # dependency tables), and fail fast if [project].name is missing.
+          # Gated on is_release to avoid running on Snapshot builds where
+          # shared_create_releases is a no-op.
+          #
+          # REQUIRES Python 3.11+ (tomllib is stdlib from 3.11). ubuntu-latest
+          # currently ships Python 3.12, so this is safe today; if a caller
+          # ever forks the workflow onto ubuntu-22.04 (Python 3.10), add an
+          # actions/setup-python step before this one or fall back to `tomli`.
           name=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['name'])" "${{ inputs.working_dir }}/pyproject.toml")
           if [ -z "$name" ]; then
             echo "ERROR: could not extract [project].name from ${{ inputs.working_dir }}/pyproject.toml" >&2

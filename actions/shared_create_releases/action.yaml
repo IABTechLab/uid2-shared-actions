@@ -46,7 +46,7 @@ runs:
     # replaces what used to be five near-identical Build X Changelog steps —
     # future changes (mikepenz SHA bump, template tweak) now happen in one
     # place. See UID2-7069.
-    - name: Build changelog config
+    - name: Prepare changelog template
       id: changelog_config
       if: ${{ inputs.is_release == 'true' }}
       shell: bash
@@ -69,7 +69,7 @@ runs:
         docker pull __TAGS__
         ```
 
-        ## Image reference to deploy:
+        ## Image reference to deploy: 
         ```
         __IMAGE_TAG__
         ```
@@ -155,7 +155,7 @@ runs:
 
         echo "json=$config" >> "$GITHUB_OUTPUT"
 
-    - name: Build Changelog
+    - name: Build changelog
       id: changelog
       if: ${{ inputs.is_release == 'true' }}
       uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
