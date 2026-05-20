@@ -107,6 +107,10 @@ jobs:
           tag: v${{ steps.version.outputs.new_version }}
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
+      - name: Install xmllint
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils
+
       - name: Extract NuGet package id
         id: package_name
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
@@ -117,10 +121,8 @@ jobs:
           # use an `id` attribute (<dependency id="..."/>), not an <id>
           # element, so this XPath matches only the package id.
           #
-          # REQUIRES xmllint, provided by libxml2-utils — preinstalled on
-          # ubuntu-latest. If a caller forks the workflow onto a minimal
-          # runner, add `sudo apt-get install -y libxml2-utils` before this
-          # step.
+          # xmllint (libxml2-utils) is NOT preinstalled on ubuntu-latest as
+          # of 2026 — installed explicitly in the previous step.
           #
           # NOTE: the .nuspec file path itself is still hardcoded throughout
           # this workflow (UID2.Client.nuspec). Fixing the package id only

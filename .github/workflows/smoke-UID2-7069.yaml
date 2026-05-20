@@ -115,6 +115,8 @@ jobs:
           repository: IABTechLab/uid2-client-net
           ref: main
           path: fixture
+      - name: Install xmllint (libxml2-utils not preinstalled on ubuntu-latest)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils
       - name: Run the new xmllint-based NuGet id extraction
         run: |
           set -euo pipefail
