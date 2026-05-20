@@ -35,12 +35,26 @@ runs:
     # value (e.g. 'docker' lowercase) silently skips every Build Changelog
     # step, lets Delete Draft Releases run, and creates a draft release with
     # an empty body. See UID2-7069.
+    #
+    # Validation is done in bash (case statement) rather than via
+    # `contains(fromJSON([...]), inputs.publish_platform)` because GitHub
+    # Actions' contains() is case-INSENSITIVE — `contains(['Docker',...],
+    # 'docker')` returns true, so the expression form silently lets the
+    # exact typo we're trying to catch slip through. Bash `case` is
+    # case-sensitive by default.
     - name: Validate publish_platform
-      if: ${{ !contains(fromJSON('["Docker","Maven","PyPI","NuGet","iOS"]'), inputs.publish_platform) }}
       shell: bash
+      env:
+        PLATFORM: ${{ inputs.publish_platform }}
       run: |
-        echo "::error::Unsupported publish_platform '${{ inputs.publish_platform }}'. Must be one of [Docker, Maven, PyPI, NuGet, iOS]."
-        exit 1
+        case "$PLATFORM" in
+          Docker|Maven|PyPI|NuGet|iOS)
+            ;;
+          *)
+            echo "::error::Unsupported publish_platform '$PLATFORM'. Must be one of [Docker, Maven, PyPI, NuGet, iOS]."
+            exit 1
+            ;;
+        esac
 
     # Build the mikepenz configurationJson for the chosen platform. One step
     # replaces what used to be five near-identical Build X Changelog steps —
