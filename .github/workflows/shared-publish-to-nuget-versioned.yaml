@@ -107,6 +107,37 @@ jobs:
           tag: v${{ steps.version.outputs.new_version }}
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
+      - name: Install xmllint
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils
+
+      - name: Extract NuGet package id
+        id: package_name
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
+        run: |
+          # NuGet package id comes from the <id> element in the .nuspec, not
+          # the github repo name. Use xmllint's local-name() XPath so we
+          # ignore the default xmlns the nuspec schema declares. Dependencies
+          # use an `id` attribute (<dependency id="..."/>), not an <id>
+          # element, so this XPath matches only the package id.
+          #
+          # xmllint (libxml2-utils) is NOT preinstalled on ubuntu-latest as
+          # of 2026 — installed explicitly in the previous step.
+          #
+          # NOTE: the .nuspec file path itself is still hardcoded throughout
+          # this workflow (UID2.Client.nuspec). Fixing the package id only
+          # solves half of the single-tenancy problem flagged in UID2-7069 —
+          # a follow-up should parameterise the .nuspec filename via a
+          # workflow input.
+          nuspec="${{ inputs.working_dir }}/UID2.Client.nuspec"
+          package_id=$(xmllint --xpath 'string(//*[local-name()="package"]/*[local-name()="metadata"]/*[local-name()="id"])' "$nuspec")
+          if [ -z "$package_id" ]; then
+            echo "ERROR: could not extract <id> from $nuspec" >&2
+            exit 1
+          fi
+          echo "Extracted NuGet package id: $package_id"
+          echo "name=$package_id" >> "$GITHUB_OUTPUT"
+
       - name: Create Release
         uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v3
         with:
@@ -114,4 +145,4 @@ jobs:
           new_version: ${{ steps.version.outputs.new_version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: NuGet
-          repo: UID2.Client
+          repo: ${{ steps.package_name.outputs.name }}

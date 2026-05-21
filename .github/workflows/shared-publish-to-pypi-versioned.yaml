@@ -99,14 +99,30 @@ jobs:
 
       - name: Extract PyPI package name
         id: package_name
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
         run: |
           # PyPI package name comes from pyproject.toml, not the github repo name
-          # (e.g. uid2-client-python repo publishes the `uid2-client` package).
-          # Read the top-level `name = "..."` field so release-notes install snippets
-          # match the real PyPI package, not the git repo.
-          name=$(grep -E '^\s*name\s*=' "${{ inputs.working_dir }}/pyproject.toml" | head -1 | cut -d '"' -f 2)
+          # (e.g. uid2-client-python repo publishes the `uid2_client` package).
+          # Use tomllib so we correctly handle both single- and double-quoted
+          # values, ignore unrelated `name =` keys in earlier tables (e.g.
+          # dependency tables), and fail fast if [project].name is missing.
+          # Gated on is_release to avoid running on Snapshot builds where
+          # shared_create_releases is a no-op.
+          #
+          # REQUIRES Python 3.11+ (tomllib is stdlib from 3.11). ubuntu-latest
+          # currently ships Python 3.12, so this is safe today; if a caller
+          # ever forks the workflow onto ubuntu-22.04 (Python 3.10), add an
+          # actions/setup-python step before this one or fall back to `tomli`.
+          #
+          # Assumes PEP 621 layout — i.e. the package name lives at
+          # [project].name. Poetry-style projects with [tool.poetry] would
+          # need a different key path (e.g. ['tool']['poetry']['name']);
+          # the KeyError this would raise is loud but unhelpful. No current
+          # PyPI consumer uses Poetry, so leaving the PEP 621 assumption
+          # in place.
+          name=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['name'])" "${{ inputs.working_dir }}/pyproject.toml")
           if [ -z "$name" ]; then
-            echo "ERROR: could not extract 'name' from ${{ inputs.working_dir }}/pyproject.toml" >&2
+            echo "ERROR: could not extract [project].name from ${{ inputs.working_dir }}/pyproject.toml" >&2
             exit 1
           fi
           echo "Extracted PyPI package name: $name"

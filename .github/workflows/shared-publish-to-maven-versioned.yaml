@@ -35,11 +35,15 @@ on:
         default: ''
  
 env:
-  IS_RELEASE: ${{ (inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name ) }}
   REPO: ${{ github.event.repository.name }}
 
 jobs:
   release:
+    # The release/pre-release boolean is inlined here (rather than referencing
+    # steps.checkRelease.outputs.is_release) because job-level expressions are
+    # evaluated before any step runs. Every other "is this a release?" check
+    # in this file uses steps.checkRelease.outputs.is_release — keep this in
+    # sync if the condition ever changes. See UID2-7069.
     name: ${{ ((inputs.release_type == 'Major' || inputs.release_type == 'Minor' || inputs.release_type == 'Patch') && (github.event.repository.default_branch == github.ref_name )) && 'Create Release' || 'Publish Pre-release' }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.merge_environment }}
@@ -161,12 +165,14 @@ jobs:
 
       - name: Extract Maven artifactId
         id: package_name
+        if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
         run: |
           # Maven artifactId comes from pom.xml, not the github repo name
           # (e.g. uid2-attestation-azure repo publishes the `attestation-azure`
           # artifact). Use `mvn help:evaluate` as the canonical source so
           # release-notes install snippets match what `mvn deploy` actually
-          # published.
+          # published. Gated on is_release to avoid running on Snapshot builds
+          # where shared_create_releases is a no-op.
           artifact_id=$(mvn -B -f "${{ inputs.working_dir }}/pom.xml" help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
           if [ -z "$artifact_id" ]; then
             echo "ERROR: could not extract artifactId from ${{ inputs.working_dir }}/pom.xml" >&2
@@ -178,7 +184,7 @@ jobs:
       - name: Create Release
         uses: IABTechLab/uid2-shared-actions/actions/shared_create_releases@v3
         with:
-          is_release: ${{ env.IS_RELEASE }}
+          is_release: ${{ steps.checkRelease.outputs.is_release }}
           new_version: ${{ steps.version.outputs.new_version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: Maven

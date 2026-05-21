@@ -31,78 +31,170 @@ runs:
   using: "composite"
 
   steps:
-    - name: Build Docker Changelog
-      id: github_release_docker
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Docker' }}
-      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
-      with:
-        toTag: v${{ inputs.new_version }}
-        fromTag: ${{ inputs.from_tag }}
-        configurationJson: |
-          {
-            "template": "#{{CHANGELOG}}\n## Installation\n```\ndocker pull ${{ inputs.tags }}\n```\n\n## Image reference to deploy: \n```\n${{ inputs.image_tag }}\n```\n\n## Changelog\n#{{UNCATEGORIZED}}",
-            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
-          }
+    # Fail fast on a typo in publish_platform. Without this guard, an unknown
+    # value (e.g. 'docker' lowercase) silently skips every Build Changelog
+    # step, lets Delete Draft Releases run, and creates a draft release with
+    # an empty body. See UID2-7069.
+    #
+    # Validation is done in bash (case statement) rather than via
+    # `contains(fromJSON([...]), inputs.publish_platform)` because GitHub
+    # Actions' contains() is case-INSENSITIVE — `contains(['Docker',...],
+    # 'docker')` returns true, so the expression form silently lets the
+    # exact typo we're trying to catch slip through. Bash `case` is
+    # case-sensitive by default.
+    #
+    # Intentionally NOT gated on is_release — typos should be loud on
+    # Snapshot runs too, so they're caught before someone tries to cut
+    # a real release with the same misconfiguration.
+    - name: Validate publish_platform
+      shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+        PLATFORM: ${{ inputs.publish_platform }}
+      run: |
+        case "$PLATFORM" in
+          Docker|Maven|PyPI|NuGet|iOS)
+            ;;
+          *)
+            echo "::error::Unsupported publish_platform '$PLATFORM'. Must be one of [Docker, Maven, PyPI, NuGet, iOS]."
+            exit 1
+            ;;
+        esac
 
-    - name: Build Maven Changelog
-      id: github_release_maven
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'Maven' }}
-      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
-      with:
-        toTag: v${{ inputs.new_version }}
-        fromTag: ${{ inputs.from_tag }}
-        configurationJson: |
-          {
-            "template": "#{{CHANGELOG}}\n## Maven\n```\n<dependency>\n    <groupId>com.uid2</groupId>\n    <artifactId>${{ inputs.repo }}</artifactId>\n    <version>${{ inputs.new_version }}</version>\n</dependency>\n```\n\n## Jar Files\n- [${{ inputs.repo }}-${{ inputs.new_version }}.jar](https://repo1.maven.org/maven2/com/uid2/${{ inputs.repo }}/${{ inputs.new_version }}/${{ inputs.repo }}-${{ inputs.new_version }}.jar)\n\n## Changelog\n#{{UNCATEGORIZED}}",
-            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
-          }
+    # Build the mikepenz configurationJson for the chosen platform. One step
+    # replaces what used to be five near-identical Build X Changelog steps —
+    # future changes (mikepenz SHA bump, template tweak) now happen in one
+    # place. See UID2-7069.
+    - name: Prepare changelog template
+      id: changelog_config
+      if: ${{ inputs.is_release == 'true' }}
+      shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
+        PLATFORM: ${{ inputs.publish_platform }}
+        REPO: ${{ inputs.repo }}
+        VERSION: ${{ inputs.new_version }}
+        TAGS: ${{ inputs.tags }}
+        IMAGE_TAG: ${{ inputs.image_tag }}
+      run: |
+        # Heredocs use quoted EOF so backticks and $ stay literal — no shell
+        # expansion inside the template body. We then substitute the four
+        # placeholders via bash parameter expansion.
+        #
+        # Heredoc body lines sit at YAML's common-prefix indent (8 spaces)
+        # so YAML's literal-block-scalar dedent leaves them flush-left in
+        # the actual bash script — that's what lets the closing EOF marker
+        # match. If you re-indent the heredoc body, the heredoc breaks.
+        case "$PLATFORM" in
+          Docker)
+            template=$(cat <<'EOF'
+        #{{CHANGELOG}}
+        ## Installation
+        ```
+        docker pull __TAGS__
+        ```
 
-    - name: Build PyPI Changelog
-      id: github_release_pypi
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'PyPI' }}
+        ## Image reference to deploy: 
+        ```
+        __IMAGE_TAG__
+        ```
+
+        ## Changelog
+        #{{UNCATEGORIZED}}
+        EOF
+        )
+            ;;
+          Maven)
+            template=$(cat <<'EOF'
+        #{{CHANGELOG}}
+        ## Maven
+        ```
+        <dependency>
+            <groupId>com.uid2</groupId>
+            <artifactId>__REPO__</artifactId>
+            <version>__VERSION__</version>
+        </dependency>
+        ```
+
+        ## Jar Files
+        - [__REPO__-__VERSION__.jar](https://repo1.maven.org/maven2/com/uid2/__REPO__/__VERSION__/__REPO__-__VERSION__.jar)
+
+        ## Changelog
+        #{{UNCATEGORIZED}}
+        EOF
+        )
+            ;;
+          PyPI)
+            template=$(cat <<'EOF'
+        #{{CHANGELOG}}
+        ## PyPI
+        ```
+        pip install __REPO__==__VERSION__
+        ```
+
+        ## PyPI page
+        - [__REPO__ __VERSION__](https://pypi.org/project/__REPO__/__VERSION__/)
+
+        ## Changelog
+        #{{UNCATEGORIZED}}
+        EOF
+        )
+            ;;
+          NuGet)
+            template=$(cat <<'EOF'
+        #{{CHANGELOG}}
+        ## NuGet
+        ```
+        dotnet add package __REPO__ --version __VERSION__
+        ```
+
+        ## NuGet page
+        - [__REPO__ __VERSION__](https://www.nuget.org/packages/__REPO__/__VERSION__)
+
+        ## Changelog
+        #{{UNCATEGORIZED}}
+        EOF
+        )
+            ;;
+          iOS)
+            template=$(cat <<'EOF'
+        #{{CHANGELOG}}
+        ## Changelog
+        #{{UNCATEGORIZED}}
+        EOF
+        )
+            ;;
+        esac
+
+        # Placeholder tokens (__TAGS__, __IMAGE_TAG__, __REPO__, __VERSION__)
+        # are reserved — no input value should contain them. Substitution is
+        # order-dependent: if e.g. $TAGS expanded to literal `__REPO__`, the
+        # next line would re-substitute it. All inputs currently come from
+        # trusted CI sources (docker/metadata-action outputs, semver), so
+        # this is theoretical. Keep the tokens unique-looking if you add
+        # more.
+        template="${template//__TAGS__/$TAGS}"
+        template="${template//__IMAGE_TAG__/$IMAGE_TAG}"
+        template="${template//__REPO__/$REPO}"
+        template="${template//__VERSION__/$VERSION}"
+
+        # Compact JSON (single line) keeps the step output value on one line —
+        # simpler to pass into mikepenz's configurationJson input via a
+        # GitHub Actions expression (no multi-line $GITHUB_OUTPUT delimiter
+        # needed downstream).
+        config=$(jq -nc \
+          --arg t "$template" \
+          --arg p ' - #{{TITLE}} - ( PR: ##{{NUMBER}} )' \
+          '{template: $t, pr_template: $p}')
+
+        echo "json=$config" >> "$GITHUB_OUTPUT"
+
+    - name: Build changelog
+      id: changelog
+      if: ${{ inputs.is_release == 'true' }}
       uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
       with:
         toTag: v${{ inputs.new_version }}
         fromTag: ${{ inputs.from_tag }}
-        configurationJson: |
-          {
-            "template": "#{{CHANGELOG}}\n## PyPI\n```\npip install ${{ inputs.repo }}==${{ inputs.new_version }}\n```\n\n## PyPI page\n- [${{ inputs.repo }} ${{ inputs.new_version }}](https://pypi.org/project/${{ inputs.repo }}/${{ inputs.new_version }}/)\n\n## Changelog\n#{{UNCATEGORIZED}}",
-            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
-          }
-      env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-
-    - name: Build NuGet Changelog
-      id: github_release_nuget
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'NuGet' }}
-      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
-      with:
-        toTag: v${{ inputs.new_version }}
-        fromTag: ${{ inputs.from_tag }}
-        configurationJson: |
-          {
-            "template": "#{{CHANGELOG}}\n## NuGet\n```\ndotnet add package ${{ inputs.repo }} --version ${{ inputs.new_version }}\n```\n\n## NuGet page\n- [${{ inputs.repo }} ${{ inputs.new_version }}](https://www.nuget.org/packages/${{ inputs.repo }}/${{ inputs.new_version }})\n\n## Changelog\n#{{UNCATEGORIZED}}",
-            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
-          }
-      env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-
-    - name: Build iOS Changelog
-      id: github_release_ios
-      if: ${{ inputs.is_release == 'true' && inputs.publish_platform == 'iOS' }}
-      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
-      with:
-        toTag: v${{ inputs.new_version }}
-        fromTag: ${{ inputs.from_tag }}
-        configurationJson: |
-          {
-            "template": "#{{CHANGELOG}}\n## Changelog\n#{{UNCATEGORIZED}}",
-            "pr_template": " - #{{TITLE}} - ( PR: ##{{NUMBER}} )"
-          }
+        configurationJson: ${{ steps.changelog_config.outputs.json }}
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
 
@@ -115,5 +207,5 @@ runs:
       uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
       with:
         name: v${{ inputs.new_version }}
-        body: ${{ inputs.publish_platform == 'Docker' && steps.github_release_docker.outputs.changelog || inputs.publish_platform == 'Maven' && steps.github_release_maven.outputs.changelog || inputs.publish_platform == 'PyPI' && steps.github_release_pypi.outputs.changelog || inputs.publish_platform == 'NuGet' && steps.github_release_nuget.outputs.changelog || steps.github_release_ios.outputs.changelog }}
+        body: ${{ steps.changelog.outputs.changelog }}
         draft: true
