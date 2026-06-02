@@ -44,10 +44,6 @@ jobs:
         with:
           release_type: ${{ inputs.release_type }}
       
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: Set version number
         id: version
         uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
@@ -65,6 +61,10 @@ jobs:
           jq --arg v "$new_version" ".version = \$v" "${{ inputs.working_dir }}/package.json" > tmp.json && mv tmp.json "${{ inputs.working_dir }}/package.json"
           echo "Version number updated from $current_version to $new_version"
           echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
 
       - name: Update ${{ inputs.working_dir }}/package-lock.json
         id: updatePackageLockJson
@@ -91,9 +91,7 @@ jobs:
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
       - name: Print outputs
-        uses: actions/github-script@v7
-        with:
-          script: |
-            console.log('Result', '${{ steps.commit-and-tag.outcome }}');
-            console.log('Commit and tag', '${{ steps.commit-and-tag.outputs.git_tag_or_hash }}');
-            console.log('No tag', '${{ steps.commit-without-tag.outputs.git_tag_or_hash }}');
+        run: |
+          echo "Result: ${{ steps.commit-and-tag.outcome }}"
+          echo "Commit and tag: ${{ steps.commit-and-tag.outputs.git_tag_or_hash }}"
+          echo "No tag: ${{ steps.commit-without-tag.outputs.git_tag_or_hash }}"
