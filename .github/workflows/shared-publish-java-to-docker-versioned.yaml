@@ -199,7 +199,7 @@ jobs:
           echo "value=${value}" >> "$GITHUB_OUTPUT"
 
       - name: Build and export to Docker
-        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: ${{inputs.working_dir}}
           load: true
@@ -220,7 +220,7 @@ jobs:
 
       - name: Push to Docker (by digest, untagged)
         id: push
-        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
         with:
           context: ${{inputs.working_dir}}
           labels: ${{ steps.meta.outputs.labels }}
