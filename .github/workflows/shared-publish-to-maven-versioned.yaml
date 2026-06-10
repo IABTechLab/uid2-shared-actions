@@ -63,7 +63,7 @@ jobs:
 
       - name: Check branch and release type
         id: checkRelease
-        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v2
+        uses: IABTechLab/uid2-shared-actions/actions/check_branch_and_release_type@v3
         with:
           release_type: ${{ inputs.release_type }}
     
@@ -86,7 +86,7 @@ jobs:
           java-version: ${{ inputs.java_version }}
 
       - name: Download key
-        uses: IABTechLab/uid2-shared-actions/actions/download_gpg_key@v2
+        uses: IABTechLab/uid2-shared-actions/actions/download_gpg_key@v3
         with:
           key: ${{ secrets.GPG_KEY }}
 
@@ -100,7 +100,7 @@ jobs:
 
       - name: Set version number
         id: version
-        uses: IABTechLab/uid2-shared-actions/actions/version_number@v2
+        uses: IABTechLab/uid2-shared-actions/actions/version_number@v3
         with:
           type: ${{ inputs.release_type }}
           branch_name: ${{ github.ref }}
