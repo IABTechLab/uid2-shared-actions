@@ -190,7 +190,7 @@ runs:
     - name: Build changelog
       id: changelog
       if: ${{ inputs.is_release == 'true' }}
-      uses: mikepenz/release-changelog-builder-action@32e3c96f29a6532607f638797455e9e98cfc703d # v4
+      uses: mikepenz/release-changelog-builder-action@348e88fab4c37338b1e803ceb2d4a7a5db6c0833 # v6.2.2
       with:
         toTag: v${{ inputs.new_version }}
         fromTag: ${{ inputs.from_tag }}
@@ -204,7 +204,7 @@ runs:
 
     - name: Create Release
       if: ${{ inputs.is_release == 'true' }}
-      uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+      uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
       with:
         name: v${{ inputs.new_version }}
         body: ${{ steps.changelog.outputs.changelog }}
