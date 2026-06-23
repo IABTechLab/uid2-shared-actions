@@ -146,3 +146,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: NuGet
           repo: ${{ steps.package_name.outputs.name }}
+          prerelease: 'false'

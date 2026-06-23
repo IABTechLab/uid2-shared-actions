@@ -1,5 +1,5 @@
 name: Create releases
-description: Build the release-notes changelog, delete stale draft releases, and create a draft GitHub Release for a published artifact. Canonical release-notes pipeline for this repo — every shared publish workflow should call this action rather than inlining mikepenz/release-changelog-builder. Decision and rationale documented in UID2-6762.
+description: Build the release-notes changelog, delete stale draft releases, and create a published GitHub Release (pre-release for services, full Latest for registry packages) for a published artifact. Canonical release-notes pipeline for this repo — every shared publish workflow should call this action rather than inlining mikepenz/release-changelog-builder. Decision and rationale documented in UID2-6762.
 
 inputs:
   is_release:
@@ -9,7 +9,7 @@ inputs:
     description: The new version number being released (without leading v).
     required: true
   github_token:
-    description: GitHub token used by mikepenz to read merged PRs and by softprops to create the draft release.
+    description: GitHub token used by mikepenz to read merged PRs, by softprops to create the release, and by gh to resolve the previous published tag.
     required: true
   publish_platform:
     description: Must be one of [Docker, Maven, PyPI, NuGet, iOS].
@@ -24,8 +24,11 @@ inputs:
     description: The image reference shown in the release notes as the deploy target (Docker only).
     default: ''
   from_tag:
-    description: Optional. Override mikepenz's auto-detection of the previous tag. Useful when auto-detection is confused by non-sequential tag names (e.g. when v3.7 and v3.70 coexist) or when manually backfilling notes for a specific tag range. Leave empty in normal release flows.
+    description: Optional. Explicit previous tag to build the changelog from. Wins over the computed previous-published tag. Useful when manually backfilling notes for a specific tag range, or when auto-detection is confused by non-sequential tag names (e.g. when v3.7 and v3.70 coexist). Leave empty in normal release flows — the action resolves the previous published release tag automatically.
     default: ''
+  prerelease:
+    description: 'If ''true'', the release is published as a pre-release (services: built now, deployed/GA later). If ''false'', it is published as a full Latest release (registry packages: GA on publish). Never a draft.'
+    default: 'false'
 
 runs:
   using: "composite"
@@ -187,13 +190,31 @@ runs:
 
         echo "json=$config" >> "$GITHUB_OUTPUT"
 
+    # Resolve the previous *published* release tag so the changelog spans from
+    # the last release that actually shipped — not just the last git tag. A run
+    # that tags but fails to publish leaves no release, so it's skipped here and
+    # the next run's changelog self-heals back over the gap. Skipped when
+    # from_tag is set (explicit override wins) or empty result (first-ever
+    # release) → mikepenz falls back to git-tag auto-detection. See UID2-7340.
+    - name: Resolve previous published tag
+      id: prev_published
+      if: ${{ inputs.is_release == 'true' && inputs.from_tag == '' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: |
+        # Most recent release with draft==false (pre-release OR Latest).
+        tag=$(gh api "repos/${{ github.repository }}/releases" --paginate \
+          --jq 'map(select(.draft==false)) | .[0].tag_name // ""')
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
     - name: Build changelog
       id: changelog
       if: ${{ inputs.is_release == 'true' }}
       uses: mikepenz/release-changelog-builder-action@348e88fab4c37338b1e803ceb2d4a7a5db6c0833 # v6.2.2
       with:
         toTag: v${{ inputs.new_version }}
-        fromTag: ${{ inputs.from_tag }}
+        fromTag: ${{ inputs.from_tag != '' && inputs.from_tag || steps.prev_published.outputs.tag }}
         configurationJson: ${{ steps.changelog_config.outputs.json }}
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
@@ -208,4 +229,5 @@ runs:
       with:
         name: v${{ inputs.new_version }}
         body: ${{ steps.changelog.outputs.changelog }}
-        draft: true
+        draft: false
+        prerelease: ${{ inputs.prerelease }}
