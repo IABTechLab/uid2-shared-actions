@@ -93,4 +93,5 @@ jobs:
           image_tag: ${{ inputs.docker_image_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: Docker
+          draft: 'false'
           prerelease: 'true'

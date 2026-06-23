@@ -14,10 +14,6 @@ on:
         description: GitHub Environment to use for accessing the merge token. Leave empty to use the default GITHUB_TOKEN.
         type: string
         default: ''
-      prerelease:
-        description: If true, publish the GitHub Release as a pre-release. Set true for genuine beta/rc cuts (e.g. v1.6.0-beta); leave false for normal full releases.
-        type: boolean
-        default: false
 
 env:
   REPO: ${{ github.event.repository.name }}
@@ -109,4 +105,3 @@ jobs:
           new_version: ${{ steps.version.outputs.new_version }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: iOS
-          prerelease: ${{ inputs.prerelease }}

@@ -258,4 +258,5 @@ jobs:
           image_tag: ${{ steps.updatePom.outputs.image_tag }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: Docker
+          draft: 'false'
           prerelease: 'true'

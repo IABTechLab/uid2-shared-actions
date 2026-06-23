@@ -136,4 +136,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: PyPI
           repo: ${{ steps.package_name.outputs.name }}
-          prerelease: 'false'

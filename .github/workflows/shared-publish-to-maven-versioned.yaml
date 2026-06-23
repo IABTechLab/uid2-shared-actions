@@ -189,4 +189,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_platform: Maven
           repo: ${{ steps.package_name.outputs.name }}
-          prerelease: 'false'
