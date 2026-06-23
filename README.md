@@ -11,10 +11,10 @@ All shared publish workflows generate release notes via the `actions/shared_crea
 - The native format hardcodes `* TITLE by @AUTHOR in #NUMBER`. Authors are noise to the public consumers of these releases; mikepenz's `pr_template` lets us emit `- TITLE - ( PR: #NUMBER )` instead.
 - The composite embeds a per-platform install snippet (`docker pull`, `pip install`, `dotnet add package`, Maven `<dependency>`) above the changelog.
 
-`shared_create_releases` supports `publish_platform` values `Docker`, `Maven`, `PyPI`, `NuGet`, `iOS`. It runs four steps internally: Resolve previous published tag (gh) → Build Changelog (mikepenz) → Delete Draft Releases → Create Release (softprops). The `prerelease` input (default `'false'`) controls the release type:
+`shared_create_releases` supports `publish_platform` values `Docker`, `Maven`, `PyPI`, `NuGet`, `iOS`. Internally it builds the changelog (mikepenz), deletes stale drafts, and creates the release (softprops); on the pre-release path it additionally resolves the previous published tag (gh) and verifies the `v<version>` tag exists before publishing. The `prerelease` input (default `'false'`) controls the release type:
 
 - omitted / `prerelease: 'false'` (default) — creates a **draft** release (the original behaviour, still requires a manual "Publish" click). The Maven/PyPI/NuGet/iOS (registry/SDK) workflows keep this default for now.
-- `prerelease: 'true'` — publishes a **pre-release** immediately (durable + fetchable by tag, without claiming GA). The shared docker workflows set this for deployed-service builds. `Latest` is never set automatically — it stays a deliberate manual promotion.
+- `prerelease: 'true'` — publishes a **pre-release** immediately (durable + fetchable by tag, without claiming GA). The shared docker workflows set this for deployed-service builds. `Latest` is never set automatically — it stays a deliberate manual promotion. The `v<version>` tag must already exist (pushed earlier by `commit_pr_and_merge`); the action verifies this and fails rather than letting softprops auto-create the tag at the wrong commit.
 
 When `is_release` is `false` (Snapshot/pre-release build) the action is a no-op, so callers can invoke it unconditionally.
 

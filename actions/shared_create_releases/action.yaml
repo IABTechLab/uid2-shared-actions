@@ -203,9 +203,19 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github_token }}
       run: |
+        set -euo pipefail
         # No --paginate: gh applies --jq per page and concatenates, so map(...)
-        # would emit one line per page and corrupt the output. One page of 100 is
-        # plenty to find the newest published (draft==false) release at the top.
+        # would emit one line per page and corrupt the output. GitHub returns
+        # releases sorted by created_at descending, so the newest published
+        # (draft==false) release is always on page 1 — .[0] picks it without
+        # paging. Note .[0] is newest-by-CREATION, not highest semver: a
+        # backfilled or re-created release shifts it; use from_tag to override.
+        #
+        # set -euo pipefail so a gh failure (auth/5xx/rate-limit) aborts the
+        # step rather than silently yielding "" and falling back to mikepenz
+        # auto-detection over the wrong window. A genuine empty result (no prior
+        # published release, e.g. the first cut) still yields "" with a zero
+        # exit and falls back as intended — the failure and empty cases differ.
         tag=$(gh api "repos/${{ github.repository }}/releases?per_page=100" \
           --jq 'map(select(.draft==false)) | .[0].tag_name // ""')
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
@@ -220,6 +230,30 @@ runs:
         configurationJson: ${{ steps.changelog_config.outputs.json }}
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    # A published (pre-)release must attach to a tag that already exists.
+    # softprops/action-gh-release otherwise CREATES the tag at the checked-out
+    # SHA, durably mis-tagging the release at the wrong commit. The v<version>
+    # tag is pushed earlier by commit_pr_and_merge (via
+    # shared-increase-version-number, or the java docker workflow), so every
+    # current consumer satisfies this. The guard turns a silent mis-tag into a
+    # loud failure if a caller ever wires the publish without that preceding
+    # tag step. Drafts don't materialise tags, so this only applies to the
+    # pre-release (published) path. See UID2-7340.
+    - name: Verify release tag exists
+      if: ${{ inputs.is_release == 'true' && inputs.prerelease == 'true' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+      run: |
+        set -uo pipefail
+        tag="v${{ inputs.new_version }}"
+        if gh api "repos/${{ github.repository }}/git/ref/tags/$tag" >/dev/null 2>&1; then
+          echo "Verified release tag $tag exists."
+        else
+          echo "::error::Release tag $tag does not exist (or could not be read). A pre-release must attach to a tag pushed before this step by commit_pr_and_merge. Refusing to publish and auto-create the tag at the wrong commit."
+          exit 1
+        fi
 
     - name: Delete Draft Releases
       if: ${{ inputs.is_release == 'true' }}
