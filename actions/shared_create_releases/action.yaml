@@ -203,8 +203,11 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github_token }}
       run: |
-        # Most recent release with draft==false (pre-release OR Latest).
-        tag=$(gh api "repos/${{ github.repository }}/releases" --paginate \
+        # Most recently created release with draft==false (pre-release OR Latest).
+        # No --paginate: gh applies --jq per page and concatenates, so map(...) would
+        # emit one line per page (>30 releases) and corrupt the output. One page of 100
+        # is plenty to find the newest published release at the top of the list.
+        tag=$(gh api "repos/${{ github.repository }}/releases?per_page=100" \
           --jq 'map(select(.draft==false)) | .[0].tag_name // ""')
         echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
