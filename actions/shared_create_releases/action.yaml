@@ -1,5 +1,5 @@
 name: Create releases
-description: Build the release-notes changelog, delete stale draft releases, and create a GitHub Release for a published artifact. By default creates a draft (legacy behaviour); deployed services set draft:false to publish a pre-release. Canonical release-notes pipeline for this repo — every shared publish workflow should call this action rather than inlining mikepenz/release-changelog-builder. Decision and rationale documented in UID2-6762.
+description: Build the release-notes changelog, delete stale draft releases, and create a GitHub Release for a published artifact. By default creates a draft (original behaviour); deployed services set prerelease:true to publish a pre-release instead. Canonical release-notes pipeline for this repo — every shared publish workflow should call this action rather than inlining mikepenz/release-changelog-builder. Decision and rationale documented in UID2-6762.
 
 inputs:
   is_release:
@@ -26,9 +26,9 @@ inputs:
   from_tag:
     description: Optional. Explicit previous tag to build the changelog from. Wins over the computed previous-published tag. Useful when manually backfilling notes for a specific tag range, or when auto-detection is confused by non-sequential tag names (e.g. when v3.7 and v3.70 coexist). Leave empty in normal release flows — the action resolves the previous published release tag automatically.
     default: ''
-  draft:
-    description: 'If ''true'' (default), create a draft release — the legacy behaviour, kept for registry/SDK packages for now (they still publish the draft manually). Deployed services set ''false'' to publish a pre-release immediately.'
-    default: 'true'
+  prerelease:
+    description: 'If ''true'', publish the release as a pre-release (deployed services: built now, deployed/GA later). If omitted/''false'', create a draft — the original behaviour, kept for registry/SDK packages for now (they still publish the draft manually). Latest is never set automatically.'
+    default: 'false'
 
 runs:
   using: "composite"
@@ -193,11 +193,12 @@ runs:
     # Resolve the previous *published* release tag so the changelog spans from
     # the last release that actually shipped: a run that tags but fails to
     # publish leaves no release, so it's skipped and the next run self-heals over
-    # the gap. Skipped for drafts and when from_tag is set; an empty result lets
-    # mikepenz fall back to git-tag auto-detection. See UID2-7340.
+    # the gap. Only runs for pre-release (published) cuts and when from_tag is
+    # unset; drafts and an empty result fall back to mikepenz's git-tag
+    # auto-detection. See UID2-7340.
     - name: Resolve previous published tag
       id: prev_published
-      if: ${{ inputs.is_release == 'true' && inputs.from_tag == '' && inputs.draft != 'true' }}
+      if: ${{ inputs.is_release == 'true' && inputs.from_tag == '' && inputs.prerelease == 'true' }}
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
@@ -234,7 +235,7 @@ runs:
         tag_name: v${{ inputs.new_version }}
         name: v${{ inputs.new_version }}
         body: ${{ steps.changelog.outputs.changelog }}
-        # A published release (services) is always a pre-release; Latest is only
-        # ever set by manual promotion. Drafts keep their default (not flagged).
-        draft: ${{ inputs.draft }}
-        prerelease: ${{ inputs.draft == 'false' }}
+        # prerelease:'true' publishes a pre-release (services); otherwise a draft
+        # (original behaviour). Latest is only ever set by manual promotion.
+        draft: ${{ inputs.prerelease != 'true' }}
+        prerelease: ${{ inputs.prerelease }}
