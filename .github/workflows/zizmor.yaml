@@ -1,0 +1,16 @@
+name: Zizmor Scan
+
+on:
+  pull_request:
+    paths:
+      - '.github/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    uses: ./.github/workflows/shared-zizmor-scan.yaml
+    with:
+      fail_severity: never   # report-only for now; set to `high` later to gate on High-severity

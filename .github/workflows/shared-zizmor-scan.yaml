@@ -1,0 +1,148 @@
+name: Shared Zizmor Scan
+
+# Reusable workflow that runs zizmor (https://docs.zizmor.sh) over a repo's GitHub
+# Actions workflows to surface workflow-security issues.
+
+on:
+  workflow_call:
+    inputs:
+      min_severity:
+        description: >-
+          Lowest zizmor severity to report (informational|low|medium|high).
+          Defaults to `low`, which drops informational-only noise.
+        type: string
+        default: 'low'
+      min_confidence:
+        description: >-
+          Lowest zizmor confidence to report (low|medium|high). Keep at `low`:
+          `artipacked` is reported at LOW confidence for every finding, so a higher
+          floor silently drops the whole rule.
+        type: string
+        default: 'low'
+      fail_severity:
+        description: >-
+          Block (fail the job) on findings at or above this severity:
+          never|informational|low|medium|high. Independent of the report floor.
+          Defaults to `never` (non-blocking). Set to `high` to gate on High only.
+        type: string
+        default: 'never'
+      config:
+        description: >-
+          Path to a zizmor config file in the calling repo. If empty, a default
+          config is used that disables `unpinned-uses` and `secrets-inherit`.
+        type: string
+        default: ''
+      scan_paths:
+        description: Space-separated paths zizmor should audit.
+        type: string
+        default: '.github/workflows'
+      zizmor_version:
+        description: Pinned zizmor version to install, for reproducible runs.
+        type: string
+        default: '1.26.1'
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # We never push from this job; don't leave the token in .git/config
+          # (this is the artipacked finding we're helping repos fix).
+          persist-credentials: false
+
+      - name: Install uv
+        # uv isn't preinstalled on ubuntu-latest (unlike pipx); set it up so we can
+        # run zizmor via uvx. Same approach Grafana and OpenPass use.
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+
+      - name: Run zizmor
+        env:
+          ZIZMOR_VERSION: ${{ inputs.zizmor_version }}
+          SCAN_PATHS: ${{ inputs.scan_paths }}
+          MIN_SEVERITY: ${{ inputs.min_severity }}
+          MIN_CONFIDENCE: ${{ inputs.min_confidence }}
+          FAIL_SEVERITY: ${{ inputs.fail_severity }}
+          CONFIG: ${{ inputs.config }}
+        run: |
+          set -euo pipefail
+
+          # Use the caller's config if given, else write our default that disables
+          # the rules UID2 has ruled out. (Inline `# zizmor: ignore[rule]` comments
+          # in a repo still work regardless of which config is loaded.)
+          config="${CONFIG}"
+          if [ -z "${config}" ]; then
+            config="${RUNNER_TEMP}/zizmor-default.yml"
+            cat > "${config}" <<'YAML'
+          rules:
+            unpinned-uses:
+              disable: true
+            secrets-inherit:
+              disable: true
+          YAML
+          fi
+
+          # Run zizmor.
+          #   0 = clean, 1 = zizmor crashed, 11-14 = findings by max severity
+          #   (11 informational, 12 low, 13 medium, 14 high).
+          set +e
+          NO_COLOR=1 uvx "zizmor@${ZIZMOR_VERSION}" \
+            --offline \
+            --config "${config}" \
+            --min-severity "${MIN_SEVERITY}" \
+            --min-confidence "${MIN_CONFIDENCE}" \
+            --format plain \
+            ${SCAN_PATHS} > report.txt 2> zizmor.log
+          code=$?
+          set -e
+
+          # A real tool failure must always fail CI.
+          if [ "${code}" -eq 1 ]; then
+            echo "zizmor failed to run:"; cat zizmor.log report.txt
+            exit 1
+          fi
+
+          # Job summary: status line + the full report (collapsed if there are findings).
+          case "${code}" in
+            0)  status="✅ no findings at or above '${MIN_SEVERITY}'." ;;
+            14) status="findings present — highest severity: High." ;;
+            13) status="findings present — highest severity: Medium." ;;
+            12) status="findings present — highest severity: Low." ;;
+            *)  status="findings present." ;;
+          esac
+          {
+            echo "## 🌈 zizmor — GitHub Actions security scan"
+            echo ""
+            echo "${status}"
+            echo ""
+            echo "Gate: $([ "${FAIL_SEVERITY}" = "never" ] && echo "report-only" || echo "block on \`${FAIL_SEVERITY}\`+"). Full details below and in the job log."
+            if [ "${code}" -ne 0 ]; then
+              echo ""
+              echo "<details><summary>Full zizmor report</summary>"
+              echo ""
+              echo '```'
+              cat report.txt
+              echo '```'
+              echo ""
+              echo "</details>"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          # Blocking gate: fail only when the highest finding meets fail_severity.
+          if [ "${FAIL_SEVERITY}" != "never" ]; then
+            case "${FAIL_SEVERITY}" in
+              informational) threshold=11 ;;
+              low)           threshold=12 ;;
+              medium)        threshold=13 ;;
+              high)          threshold=14 ;;
+              *) echo "Invalid fail_severity: ${FAIL_SEVERITY}"; exit 1 ;;
+            esac
+            if [ "${code}" -ge "${threshold}" ]; then
+              echo "Failing: findings at or above '${FAIL_SEVERITY}' severity."
+              exit 1
+            fi
+          fi
