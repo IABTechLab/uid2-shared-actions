@@ -106,9 +106,6 @@ jobs:
             exit 1
           fi
 
-          # Echo the report to the step log (the job summary also gets it, formatted).
-          cat report.txt
-
           # Job summary: status line + the full report (collapsed if there are findings).
           case "${code}" in
             0)  status="✅ no findings at or above '${MIN_SEVERITY}'." ;;
