@@ -95,14 +95,14 @@ jobs:
             --config "${config}" \
             --min-severity "${MIN_SEVERITY}" \
             --min-confidence "${MIN_CONFIDENCE}" \
-            --format plain \
-            ${SCAN_PATHS} > report.txt 2> zizmor.log
+            --format json \
+            ${SCAN_PATHS} > findings.json 2> zizmor.log
           code=$?
           set -e
 
           # A real tool failure must always fail CI.
           if [ "${code}" -eq 1 ]; then
-            echo "zizmor failed to run:"; cat zizmor.log report.txt
+            echo "zizmor failed to run:"; cat zizmor.log
             exit 1
           fi
 
@@ -119,16 +119,17 @@ jobs:
             echo ""
             echo "${status}"
             echo ""
-            echo "Gate: $([ "${FAIL_SEVERITY}" = "never" ] && echo "report-only" || echo "block on \`${FAIL_SEVERITY}\`+"). Full details below and in the job log."
+            echo "Gate: $([ "${FAIL_SEVERITY}" = "never" ] && echo "report-only" || echo "block on \`${FAIL_SEVERITY}\`+")."
             if [ "${code}" -ne 0 ]; then
               echo ""
-              echo "<details><summary>Full zizmor report</summary>"
-              echo ""
-              echo '```'
-              cat report.txt
-              echo '```'
-              echo ""
-              echo "</details>"
+              echo "| Severity | Confidence | Rule | Location |"
+              echo "| --- | --- | --- | --- |"
+              jq -r '
+                {Informational:0, Low:1, Medium:2, High:3} as $rank
+                | sort_by([ -($rank[.determinations.severity]), .locations[0].symbolic.key.Local.given_path ])
+                | .[]
+                | "| \(.determinations.severity) | \(.determinations.confidence) | [\(.ident)](\(.url)) | \(.locations[0].symbolic.key.Local.given_path | sub("^\\./";"")):\(.locations[0].concrete.location.start_point.row + 1) |"
+              ' findings.json
             fi
           } >> "${GITHUB_STEP_SUMMARY}"
 
