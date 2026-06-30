@@ -54,9 +54,9 @@ Design decisions (the *why*, so we don't relitigate them):
   integration) requires a paid **GitHub Code Security** licence on private repos, which
   UnifiedID2 does not have. Inline annotations (`--format github`) are also skipped:
   GitHub renders at most 10 per step, and avoiding them keeps the scan to a single
-  zizmor run. Instead the **job summary** carries a table of findings (from
-  `--format json`), sorted by severity, with Severity/Confidence columns and
-  rule→docs links. Free on public *and* private repos; the workflow needs only
+  zizmor run. Instead the **job summary** carries the full `--format plain` report —
+  source snippets (with the offending span underlined), severity, confidence, and fix
+  hints per finding. Free on public *and* private repos; the workflow needs only
   `contents: read`.
 - **All rules on, minus a couple disabled in config.** zizmor runs every offline rule;
   by default the workflow writes a config that **`disable`s** the two rules UID2 has
