@@ -25,7 +25,7 @@ When adding a new publish workflow, call `IABTechLab/uid2-shared-actions/actions
 ## Zizmor workflow-security scanning
 
 `shared-zizmor-scan.yaml` runs [zizmor](https://docs.zizmor.sh) over a repo's GitHub
-Actions workflows to catch workflow-security issues. It backs [UID2-7011](https://thetradedesk.atlassian.net/browse/UID2-7011).
+Actions workflows to catch workflow-security issues.
 By default it enables **all** offline zizmor rules except the ones UID2 has
 deliberately ruled out (see below), reporting them non-blocking.
 
@@ -59,7 +59,7 @@ Design decisions (the *why*, so we don't relitigate them):
   *and* private repos; the workflow needs only `contents: read`.
 - **All rules on, minus a couple disabled in config.** zizmor runs every offline rule;
   by default the workflow writes a config that **`disable`s** the two rules UID2 has
-  ruled out — `unpinned-uses` (SHA-pinning, declined: [UID2-6912](https://thetradedesk.atlassian.net/browse/UID2-6912))
+  ruled out — `unpinned-uses` (SHA-pinning, declined)
   and `secrets-inherit` (our intentional reusable-workflow convention; together ~640
   findings of pure noise). To customise, pass `config:` pointing at your own zizmor
   config in the repo. For one-off false positives, add an inline
