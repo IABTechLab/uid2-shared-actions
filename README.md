@@ -26,8 +26,8 @@ When adding a new publish workflow, call `IABTechLab/uid2-shared-actions/actions
 
 `shared-zizmor-scan.yaml` runs [zizmor](https://docs.zizmor.sh) over a repo's GitHub
 Actions workflows to catch workflow-security issues.
-By default it enables **all** offline zizmor rules except the ones UID2 has
-deliberately ruled out (see below), reporting them non-blocking.
+By default it enables all offline zizmor rules except `unpinned-uses` and
+`secrets-inherit` (disabled in config), reporting them non-blocking.
 
 Adopt it by adding a small caller workflow to the target repo:
 
@@ -48,35 +48,9 @@ jobs:
       fail_severity: never   # report-only; set to `high` to block PRs on High-severity findings
 ```
 
-Design decisions (the *why*, so we don't relitigate them):
-
-- **No SARIF upload, no annotations.** GitHub code scanning (the Security-tab/SARIF
-  integration) requires a paid **GitHub Code Security** licence on private repos, which
-  UnifiedID2 does not have. Inline annotations (`--format github`) are also skipped:
-  GitHub renders at most 10 per step, and avoiding them keeps the scan to a single
-  zizmor run. Instead the **job summary** carries the full `--format plain` report —
-  source snippets (with the offending span underlined), severity, confidence, and fix
-  hints per finding. Free on public *and* private repos; the workflow needs only
-  `contents: read`.
-- **All rules on, minus a couple disabled in config.** zizmor runs every offline rule;
-  by default the workflow writes a config that **`disable`s** the two rules UID2 has
-  ruled out — `unpinned-uses` (SHA-pinning, declined)
-  and `secrets-inherit` (our intentional reusable-workflow convention; together ~640
-  findings of pure noise). To customise, pass `config:` pointing at your own zizmor
-  config in the repo. For one-off false positives, add an inline
-  `# zizmor: ignore[<rule>]` comment on the offending line.
-- **`min_severity` defaults to `low`**, dropping informational-only findings.
-- **`min_confidence` defaults to `low`** and should stay there for this report:
-  `artipacked` is reported at **low confidence for every finding**, so a `medium`+
-  floor silently erases the whole rule.
-- **Reporting and blocking are independent** (Grafana's model). The report shows
-  everything down to `min_severity`/`min_confidence`; **`fail_severity`** (default
-  `never`) decides what *blocks*. Set `fail_severity: high` to fail PRs only on
-  High-severity findings while still reporting Medium/Low — so e.g. `artipacked`
-  (Medium) stays visible but never blocks. There is no requirement to make any repo
-  blocking.
-- **zizmor runs offline** (`--offline`) so there is no GitHub API rate-limit exposure;
-  the online rules (`known-vulnerable-actions`, `impostor-commit`, …) are out of scope.
+For one-off false positives in a consuming repo, add an inline
+`# zizmor: ignore[<rule>]` comment on the offending line. See the workflow's input
+descriptions for `min_severity`, `min_confidence`, `fail_severity`, and `config`.
 
 ## Tips and tricks
 
