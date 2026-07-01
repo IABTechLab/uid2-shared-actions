@@ -8,7 +8,7 @@
 #
 # Exit 0 = allowed; exit 1 = blocked. Format-check only — no live Jira call, so
 # no token dependency. A CRITICAL-only floor waives HIGH gating, so it is recorded
-# to the job summary + a ::notice:: as durable SOC2 change-testing evidence.
+# to the job summary + a ::notice:: as a durable audit trail.
 set -euo pipefail
 
 # Normalize: strip ALL whitespace and uppercase. Trivy severities are uppercase;
@@ -51,7 +51,7 @@ if [[ ! "$ticket" =~ $ticket_re ]]; then
   exit 1
 fi
 
-# Allowed exception — leave a durable audit trail (SOC2 rows 8/9).
+# Allowed exception — leave a durable audit trail.
 echo "::notice::Vulnerability floor 'CRITICAL' (HIGH gating waived) justified by exception ticket ${ticket}."
 {
   echo "### ⚠️ Vulnerability floor exception"
