@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Validates the Docker publish vulnerability-scan floor and its exception-ticket
-# policy (UID2-6767), before any build/push so a misconfigured floor fails fast.
+# policy, before any build/push so a misconfigured floor fails fast.
 #
 # Env:
 #   FAILURE_SEVERITY  - Trivy failure floor. Must be one of the allowlist below.
@@ -54,7 +54,7 @@ fi
 # Allowed exception — leave a durable audit trail (SOC2 rows 8/9).
 echo "::notice::Vulnerability floor 'CRITICAL' (HIGH gating waived) justified by exception ticket ${ticket}."
 {
-  echo "### ⚠️ Vulnerability floor exception (UID2-6767)"
+  echo "### ⚠️ Vulnerability floor exception"
   echo ""
   echo "- Failure floor: \`CRITICAL\` — HIGH severity gating **waived**"
   echo "- Exception ticket: ${ticket}"
