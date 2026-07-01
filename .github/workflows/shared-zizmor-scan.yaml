@@ -9,9 +9,11 @@ on:
       min_severity:
         description: >-
           Lowest zizmor severity to report (informational|low|medium|high).
-          Defaults to `low`, which drops informational-only noise.
+          Defaults to `high` — the tier that maps to genuinely exploitable findings
+          in our estate (e.g. attacker-controllable template-injection). Lower to
+          `low`/`medium` to also surface defense-in-depth/hardening findings.
         type: string
-        default: 'low'
+        default: 'high'
       min_confidence:
         description: >-
           Lowest zizmor confidence to report (low|medium|high). Keep at `low`:

@@ -26,8 +26,9 @@ When adding a new publish workflow, call `IABTechLab/uid2-shared-actions/actions
 
 `shared-zizmor-scan.yaml` runs [zizmor](https://docs.zizmor.sh) over a repo's GitHub
 Actions workflows to catch workflow-security issues.
-By default it enables all offline zizmor rules except `unpinned-uses` and
-`secrets-inherit` (disabled in config), reporting them non-blocking.
+By default it runs all offline zizmor rules except `unpinned-uses` and
+`secrets-inherit` (disabled in config), reports **High-severity** findings
+(`min_severity`), and is non-blocking (`fail_severity: never`).
 
 Adopt it by adding a small caller workflow to the target repo:
 
