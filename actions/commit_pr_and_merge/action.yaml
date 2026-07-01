@@ -74,6 +74,14 @@ runs:
         # these commits are automated and have no Jira key, so they carry a
         # reasoned opt-out instead. Reused for the branch commit and, on
         # protected branches, the merge commit (see the Merge PR step).
+        #
+        # Fail fast on an empty/whitespace reason: the ruleset requires a
+        # non-empty reason (\S), so "[no-jira - reason: ]" would otherwise be
+        # rejected at merge - far from the cause. Turn that into a clear error.
+        if [[ -z "${NO_JIRA_REASON//[[:space:]]/}" ]]; then
+          echo "::error::no_jira_reason must be non-empty"
+          exit 1
+        fi
         echo "message=[CI Pipeline] ${MESSAGE} [no-jira - reason: ${NO_JIRA_REASON}]" >> "$GITHUB_OUTPUT"
 
     - name: Commit to new branch
