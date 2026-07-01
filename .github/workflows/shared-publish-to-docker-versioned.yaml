@@ -56,7 +56,7 @@ on:
       vulnerability_exception_ticket:
         description: >
           Jira ticket link justifying a CRITICAL-only vulnerability_severity (required only
-          when it is 'CRITICAL', i.e. HIGH dropped). Format: https://thetradedesk.atlassian.net/browse/UID2-1234 or EUID-….
+          when it is 'CRITICAL', i.e. HIGH dropped). Format: https://thetradedesk.atlassian.net/browse/UID2-1234.
         type: string
         default: ''
 jobs:
