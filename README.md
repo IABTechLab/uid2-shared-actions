@@ -26,7 +26,7 @@ When adding a new publish workflow, call `IABTechLab/uid2-shared-actions/actions
 
 In-scope UID2/EUID repos enforce a GitHub `commit_message_pattern` ruleset (`require_jira_key`, UID2-7312) on the default branch: every commit must contain a `UID2-<n>` key or a reasoned opt-out `[no-jira - reason: <reason>]`. The ruleset has **no bypass actors**, so the release service account is subject to it like any human author.
 
-The automated release / version-bump commits produced by `actions/commit_pr_and_merge` (`[CI Pipeline] Released <type> version: X.Y.Z`) carry no Jira key, so the action appends a reasoned opt-out marker — `[no-jira - reason: automated release]` — to keep the merge recorded in history (the `uid2-github-alerts` archiver captures it) rather than granting a silent bypass (UID2-7400). Override the reason per call via the `no_jira_reason` input; it must be non-empty.
+The automated release / version-bump commits produced by `actions/commit_pr_and_merge` (`[CI Pipeline] Released <type> version: X.Y.Z`) carry no Jira key, so the action appends a reasoned opt-out marker — `[no-jira - reason: automated release v1.2.3]` — to keep the merge recorded in history (the `uid2-github-alerts` archiver captures it) rather than granting a silent bypass (UID2-7400). The release `tag` (when set) is woven into the reason so each marker is self-describing; override the reason per call via the `no_jira_reason` input (must be non-empty). The composed message is asserted against the ruleset regex at compose time, so a format drift fails the release run early rather than only at merge.
 
 The marker is applied in **two** places because the ruleset evaluates *every* commit a push introduces to the default branch, not just one:
 
