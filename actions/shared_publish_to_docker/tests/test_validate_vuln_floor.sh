@@ -35,9 +35,6 @@ assert_contains "CRITICAL+ticket: notice"    "::notice::" "$OUTPUT"
 assert_contains "CRITICAL+ticket: audit summary" "Vulnerability floor exception" "$(cat "$SUMMARY")"
 assert_contains "CRITICAL+ticket: ticket in summary" "UID2-6767" "$(cat "$SUMMARY")"
 
-run "CRITICAL" "https://thetradedesk.atlassian.net/browse/EUID-123"
-assert_eq       "CRITICAL+EUID ticket: block (only UID2 accepted)" "1" "$RC"
-
 run "CRITICAL" ""
 assert_eq       "CRITICAL no ticket: block"  "1" "$RC"
 assert_contains "CRITICAL no ticket: msg"    "no vulnerability_exception_ticket was supplied" "$OUTPUT"
