@@ -40,7 +40,7 @@ inputs:
       Trivy severities that fail the build and block the push. Must be one of
       'CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM' (no spaces), matching
       the Java publish path. Defaults to CRITICAL,HIGH. DO NOT drop HIGH (i.e. set
-      'CRITICAL') unless a vulnerability_exception_ticket is supplied (UID2-6767).
+      'CRITICAL') unless a vulnerability_exception_ticket is supplied.
     default: CRITICAL,HIGH
   vulnerability_exception_ticket:
     description: >
