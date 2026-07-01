@@ -6,6 +6,15 @@ inputs:
     description: Message for commit and PR title
     required: false
     default: Automated update
+  no_jira_reason:
+    description: >-
+      Reason recorded in the [no-jira - reason: <reason>] marker appended to the
+      commit message. These commits are automated and carry no Jira key, so the
+      marker is a reasoned opt-out that satisfies the require_jira_key ruleset on
+      the default branch (UID2-7400 / UID2-7312). Override to give a more
+      specific reason; must be non-empty.
+    required: false
+    default: automated release
   tag:
     description: If provided, this tag is applied to the commit
     required: false
@@ -52,12 +61,27 @@ runs:
       shell: bash
       run: echo "name=ci-${{ github.sha }}-${RANDOM}" >> $GITHUB_OUTPUT
 
+    - name: Compose commit message
+      id: compose
+      shell: bash
+      env:
+        MESSAGE: ${{ inputs.message }}
+        NO_JIRA_REASON: ${{ inputs.no_jira_reason }}
+      run: |
+        # Single source of truth for the CI commit message. The trailing
+        # [no-jira - reason: <reason>] marker satisfies the require_jira_key
+        # commit-message ruleset on the default branch (UID2-7400 / UID2-7312):
+        # these commits are automated and have no Jira key, so they carry a
+        # reasoned opt-out instead. Reused for the branch commit and, on
+        # protected branches, the merge commit (see the Merge PR step).
+        echo "message=[CI Pipeline] ${MESSAGE} [no-jira - reason: ${NO_JIRA_REASON}]" >> "$GITHUB_OUTPUT"
+
     - name: Commit to new branch
       uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10.0.0
       if: steps.changes.outputs.changes_exist == 'true'
       id: create-branch-and-commit
       with:
-        message: '[CI Pipeline] ${{ inputs.message }}'
+        message: ${{ steps.compose.outputs.message }}
         author_name: Release Workflow
         author_email: unifiedid-admin+release@thetradedesk.com
         new_branch: ${{ steps.branch.outputs.name }}
@@ -88,11 +112,26 @@ runs:
         PR_NUMBER: ${{ steps.create-pr.outputs.pull-request-number }}
         BRANCH: ${{ steps.branch.outputs.name }}
         MERGE_METHOD: ${{ github.ref_protected == 'true' && 'merge' || 'rebase' }}
+        COMMIT_MESSAGE: ${{ steps.compose.outputs.message }}
       run: |
-        # Merge the PR
-        gh api --method PUT \
-          "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" \
-          -f merge_method="$MERGE_METHOD"
+        # Merge the PR.
+        #
+        # On protected branches this merges with merge_method=merge, which
+        # creates an extra merge commit. The require_jira_key ruleset
+        # (UID2-7400 / UID2-7312) evaluates *every* commit a push adds to the
+        # default branch - both the branch commit and this merge commit - and
+        # the default "Merge pull request #N ..." message carries no Jira key or
+        # opt-out marker, so the merge would be rejected. Set the merge commit
+        # message explicitly so it also complies.
+        #
+        # rebase merges (unprotected branches) replay the branch commit, which
+        # already carries the marker, and create no merge commit - so these
+        # fields are only sent for merge_method=merge.
+        merge_args=(--method PUT "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" -f merge_method="$MERGE_METHOD")
+        if [[ "$MERGE_METHOD" == "merge" ]]; then
+          merge_args+=(-f commit_title="$COMMIT_MESSAGE" -f commit_message="Automated release merge (PR #$PR_NUMBER).")
+        fi
+        gh api "${merge_args[@]}"
 
         # Delete the branch
         # || true - so the step doesn't fail if the branch is already deleted
