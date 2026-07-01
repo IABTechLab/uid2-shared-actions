@@ -45,7 +45,7 @@ inputs:
   vulnerability_exception_ticket:
     description: >
       Jira ticket link justifying a CRITICAL-only failure_severity, e.g.
-      https://thetradedesk.atlassian.net/browse/UID2-1234 (UID2 or EUID). Required
+      https://thetradedesk.atlassian.net/browse/UID2-1234. Required
       and format-validated only when failure_severity is 'CRITICAL' (HIGH dropped);
       the default CRITICAL,HIGH floor ignores it. Format-check only — no live Jira call.
     default: ''

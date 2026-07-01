@@ -40,13 +40,13 @@ if [[ "$ticket" == *$'\n'* ]]; then
   exit 1
 fi
 
-ticket_re='^https://thetradedesk\.atlassian\.net/browse/(UID2|EUID)-[0-9]+$'
+ticket_re='^https://thetradedesk\.atlassian\.net/browse/UID2-[0-9]+$'
 if [[ ! "$ticket" =~ $ticket_re ]]; then
   if [[ -z "$ticket" ]]; then
-    echo "::error::Vulnerability floor 'CRITICAL' drops HIGH but no vulnerability_exception_ticket was supplied. Provide a Jira link (https://thetradedesk.atlassian.net/browse/UID2-1234, UID2 or EUID) or raise the floor to CRITICAL,HIGH."
+    echo "::error::Vulnerability floor 'CRITICAL' drops HIGH but no vulnerability_exception_ticket was supplied. Provide a Jira link (https://thetradedesk.atlassian.net/browse/UID2-1234) or raise the floor to CRITICAL,HIGH."
   else
     # Single-line (newline already rejected) — cannot start a workflow command mid-line.
-    echo "::error::vulnerability_exception_ticket '${ticket}' is malformed. Expected https://thetradedesk.atlassian.net/browse/UID2-1234 (UID2 or EUID)."
+    echo "::error::vulnerability_exception_ticket '${ticket}' is malformed. Expected https://thetradedesk.atlassian.net/browse/UID2-1234."
   fi
   exit 1
 fi
