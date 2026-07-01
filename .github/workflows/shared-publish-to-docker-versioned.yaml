@@ -46,6 +46,19 @@ on:
         description: If false, skips SLSA build-provenance attestation + verification. Defaults to true.
         type: boolean
         default: true
+      vulnerability_severity:
+        description: >
+          The severity to fail the workflow if such vulnerability is detected. DO NOT
+          override it unless a Jira ticket is raised. Must be one of ['CRITICAL',
+          'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM'] (without space in between). (UID2-6767)
+        type: string
+        default: 'CRITICAL,HIGH'
+      vulnerability_exception_ticket:
+        description: >
+          Jira ticket link justifying a CRITICAL-only vulnerability_severity (required only
+          when it is 'CRITICAL', i.e. HIGH dropped). Format: https://thetradedesk.atlassian.net/browse/UID2-1234 or EUID-….
+        type: string
+        default: ''
 jobs:
   buildImage:
     name: Build Image
@@ -82,6 +95,8 @@ jobs:
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           scan_type: image
           attestation_enabled: ${{ inputs.attestation_enabled }}
+          failure_severity: ${{ inputs.vulnerability_severity }}
+          vulnerability_exception_ticket: ${{ inputs.vulnerability_exception_ticket }}
 
       - name: Create Release
         id: github_release

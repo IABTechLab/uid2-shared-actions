@@ -35,6 +35,20 @@ inputs:
   attestation_enabled:
     description: Set to 'false' to skip SLSA build-provenance attestation + verification. Default 'true'.
     default: 'true'
+  failure_severity:
+    description: >
+      Trivy severities that fail the build and block the push. Must be one of
+      'CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM' (no spaces), matching
+      the Java publish path. Defaults to CRITICAL,HIGH. DO NOT drop HIGH (i.e. set
+      'CRITICAL') unless a vulnerability_exception_ticket is supplied (UID2-6767).
+    default: CRITICAL,HIGH
+  vulnerability_exception_ticket:
+    description: >
+      Jira ticket link justifying a CRITICAL-only failure_severity, e.g.
+      https://thetradedesk.atlassian.net/browse/UID2-1234 (UID2 or EUID). Required
+      and format-validated only when failure_severity is 'CRITICAL' (HIGH dropped);
+      the default CRITICAL,HIGH floor ignores it. Format-check only — no live Jira call.
+    default: ''
 
 outputs:
   tags:
@@ -42,9 +56,19 @@ outputs:
     value: ${{ steps.meta.outputs.tags }}
 
 runs:
-  using: "composite" 
+  using: "composite"
 
   steps:
+    # Fail fast (before the build) if this publish drops HIGH from the vuln floor
+    # without a tracked Jira exception. Logic + tests live in the script so it is
+    # unit-testable; inputs go via env, never interpolated into run:.
+    - name: Validate vulnerability floor + exception ticket
+      shell: bash
+      env:
+        FAILURE_SEVERITY: ${{ inputs.failure_severity }}
+        EXCEPTION_TICKET: ${{ inputs.vulnerability_exception_ticket }}
+      run: bash "${{ github.action_path }}/validate_vuln_floor.sh"
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
 
@@ -94,7 +118,7 @@ runs:
       uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
       with:
         publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
-        failure_severity: CRITICAL
+        failure_severity: ${{ inputs.failure_severity }}
         scan_severity: CRITICAL,HIGH
         image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
         scan_type: ${{ inputs.scan_type }}
