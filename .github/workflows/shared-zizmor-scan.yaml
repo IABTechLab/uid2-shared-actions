@@ -134,7 +134,16 @@ jobs:
               ;;
           esac
 
-          # Job summary: status line + the full report (collapsed if there are findings).
+          # Evidence so a green run is falsifiable: how many inputs zizmor actually
+          # audited (it logs "completed <path>" to stderr per input) and the config used.
+          audited=$(grep -c 'completed' zizmor.log 2>/dev/null || true)
+          if [ -n "${CONFIG}" ]; then
+            config_desc="custom (\`${CONFIG}\`)"
+          else
+            config_desc="default"
+          fi
+
+          # Job summary: status line + scan evidence + report/log (collapsed).
           case "${code}" in
             0)  status="✅ no findings at or above '${MIN_SEVERITY}'." ;;
             14) status="findings present — highest severity: High." ;;
@@ -147,10 +156,18 @@ jobs:
             echo ""
             echo "${status}"
             echo ""
-            echo "Gate: $([ "${FAIL_SEVERITY}" = "never" ] && echo "report-only" || echo "block on \`${FAIL_SEVERITY}\`+")."
+            echo "| scan | |"
+            echo "| --- | --- |"
+            echo "| zizmor version | \`${ZIZMOR_VERSION}\` |"
+            echo "| scan paths | \`${SCAN_PATHS}\` |"
+            echo "| inputs audited | ${audited:-0} |"
+            echo "| severity floor | \`${MIN_SEVERITY}\` |"
+            echo "| confidence floor | \`${MIN_CONFIDENCE}\` |"
+            echo "| rule config | ${config_desc} |"
+            echo "| gate | $([ "${FAIL_SEVERITY}" = "never" ] && echo "report-only" || echo "block on \`${FAIL_SEVERITY}\`+") |"
             if [ "${code}" -ne 0 ]; then
               echo ""
-              echo "<details><summary>Full zizmor report</summary>"
+              echo "<details><summary>Findings</summary>"
               echo ""
               echo '```'
               cat report.txt
@@ -158,6 +175,16 @@ jobs:
               echo ""
               echo "</details>"
             fi
+            # Always surface the scan log (stderr): the list of audited inputs plus any
+            # warnings (skipped/unparseable files) that don't fail the run but matter.
+            echo ""
+            echo "<details><summary>Scan log</summary>"
+            echo ""
+            echo '```'
+            cat zizmor.log
+            echo '```'
+            echo ""
+            echo "</details>"
           } >> "${GITHUB_STEP_SUMMARY}"
 
           # Blocking gate: fail only when the highest finding meets fail_severity.
