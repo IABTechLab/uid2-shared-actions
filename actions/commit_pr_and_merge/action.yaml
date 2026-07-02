@@ -6,6 +6,17 @@ inputs:
     description: Message for commit and PR title
     required: false
     default: Automated update
+  no_jira_reason:
+    description: >-
+      Reason recorded in the [no-jira - reason: <reason>] marker appended to the
+      commit message. These commits are automated and carry no Jira key, so the
+      marker is a reasoned opt-out that satisfies the require_jira_key ruleset on
+      the default branch (UID2-7400 / UID2-7312). When `tag` is set it is
+      appended to the reason (e.g. "automated release v1.2.3") so the marker is
+      self-describing. Override to give a more specific reason; must be
+      non-empty.
+    required: false
+    default: automated release
   tag:
     description: If provided, this tag is applied to the commit
     required: false
@@ -52,12 +63,67 @@ runs:
       shell: bash
       run: echo "name=ci-${{ github.sha }}-${RANDOM}" >> $GITHUB_OUTPUT
 
+    - name: Compose commit message
+      id: compose
+      shell: bash
+      env:
+        MESSAGE: ${{ inputs.message }}
+        NO_JIRA_REASON: ${{ inputs.no_jira_reason }}
+        TAG: ${{ inputs.tag }}
+      run: |
+        # Single source of truth for the CI commit message. The trailing
+        # [no-jira - reason: <reason>] marker satisfies the require_jira_key
+        # commit-message ruleset on the default branch (UID2-7400 / UID2-7312):
+        # these commits are automated and have no Jira key, so they carry a
+        # reasoned opt-out instead. Reused for the branch commit and, on
+        # protected branches, the merge commit (see the Merge PR step).
+        #
+        # Fail fast on an empty/whitespace reason: the ruleset requires a
+        # non-empty reason (\S), so "[no-jira - reason: ]" would otherwise be
+        # rejected at merge - far from the cause. Turn that into a clear error.
+        if [[ -z "${NO_JIRA_REASON//[[:space:]]/}" ]]; then
+          echo "::error::no_jira_reason must be non-empty"
+          exit 1
+        fi
+
+        # Weave the release tag (e.g. v1.2.3) into the reason when present, so
+        # the marker is self-describing in the audit archive - UID2-7400 asks
+        # for "automated release vX.Y.Z". Non-release commits (pre-release /
+        # snapshot) pass no tag and keep the bare reason.
+        reason="$NO_JIRA_REASON"
+        if [[ -n "$TAG" ]]; then
+          reason="$reason $TAG"
+        fi
+
+        message="[CI Pipeline] ${MESSAGE} [no-jira - reason: ${reason}]"
+
+        # Guard the core invariant before it ships: the composed message must
+        # match the require_jira_key ruleset regex, which is enforced in a
+        # separate repo (uid2-okta-configuration). A drift here - spacing, the
+        # dash, a bracket - passes YAML/bash checks but would only surface as a
+        # merge rejection across every @v3 consumer ("all releases blocked").
+        # Assert against the exact pattern so drift fails here instead. Pin a
+        # UTF-8 locale: grep -P (PCRE) errors under a non-UTF-8 locale.
+        if ! printf '%s' "$message" | LC_ALL=C.UTF-8 grep -Pq 'UID2-[0-9]+|\[no-jira - reason:\s*\S[^\]]*\]'; then
+          echo "::error::composed commit message does not satisfy the require_jira_key ruleset: ${message}"
+          exit 1
+        fi
+
+        # Use the heredoc delimiter form (not single-line key=value): a message
+        # containing a newline would otherwise be truncated at the first \n,
+        # silently dropping the trailing marker.
+        {
+          echo "message<<__COMMIT_MSG_EOF__"
+          echo "$message"
+          echo "__COMMIT_MSG_EOF__"
+        } >> "$GITHUB_OUTPUT"
+
     - name: Commit to new branch
       uses: EndBug/add-and-commit@290ea2c423ad77ca9c62ae0f5b224379612c0321 # v10.0.0
       if: steps.changes.outputs.changes_exist == 'true'
       id: create-branch-and-commit
       with:
-        message: '[CI Pipeline] ${{ inputs.message }}'
+        message: ${{ steps.compose.outputs.message }}
         author_name: Release Workflow
         author_email: unifiedid-admin+release@thetradedesk.com
         new_branch: ${{ steps.branch.outputs.name }}
@@ -88,11 +154,26 @@ runs:
         PR_NUMBER: ${{ steps.create-pr.outputs.pull-request-number }}
         BRANCH: ${{ steps.branch.outputs.name }}
         MERGE_METHOD: ${{ github.ref_protected == 'true' && 'merge' || 'rebase' }}
+        COMMIT_MESSAGE: ${{ steps.compose.outputs.message }}
       run: |
-        # Merge the PR
-        gh api --method PUT \
-          "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" \
-          -f merge_method="$MERGE_METHOD"
+        # Merge the PR.
+        #
+        # On protected branches this merges with merge_method=merge, which
+        # creates an extra merge commit. The require_jira_key ruleset
+        # (UID2-7400 / UID2-7312) evaluates *every* commit a push adds to the
+        # default branch - both the branch commit and this merge commit - and
+        # the default "Merge pull request #N ..." message carries no Jira key or
+        # opt-out marker, so the merge would be rejected. Set the merge commit
+        # message explicitly so it also complies.
+        #
+        # rebase merges (unprotected branches) replay the branch commit, which
+        # already carries the marker, and create no merge commit - so these
+        # fields are only sent for merge_method=merge.
+        merge_args=(--method PUT "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" -f merge_method="$MERGE_METHOD")
+        if [[ "$MERGE_METHOD" == "merge" ]]; then
+          merge_args+=(-f commit_title="$COMMIT_MESSAGE" -f commit_message="Automated release merge (PR #$PR_NUMBER).")
+        fi
+        gh api "${merge_args[@]}"
 
         # Delete the branch
         # || true - so the step doesn't fail if the branch is already deleted
