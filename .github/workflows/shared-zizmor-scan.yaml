@@ -102,6 +102,13 @@ jobs:
           #   0 = clean; 11/12/13/14 = findings, highest severity info/low/medium/high.
           #   1 = audit error, 2 = bad args, 3 = no inputs collected. A failed uvx
           #   install / network error surfaces here too (non-zero, not 0/11-14).
+          # Split scan_paths (space-separated) into an array: intended word-splitting,
+          # but no globbing, and an empty value fails loudly instead of letting zizmor
+          # fall back to the cwd.
+          read -ra scan_paths <<< "${SCAN_PATHS}"
+          if [ "${#scan_paths[@]}" -eq 0 ]; then
+            echo "scan_paths is empty; nothing to scan."; exit 1
+          fi
           set +e
           NO_COLOR=1 uvx "zizmor@${ZIZMOR_VERSION}" \
             --offline \
@@ -109,7 +116,7 @@ jobs:
             --min-severity "${MIN_SEVERITY}" \
             --min-confidence "${MIN_CONFIDENCE}" \
             --format plain \
-            ${SCAN_PATHS} > report.txt 2> zizmor.log
+            "${scan_paths[@]}" > report.txt 2> zizmor.log
           code=$?
           set -e
 
