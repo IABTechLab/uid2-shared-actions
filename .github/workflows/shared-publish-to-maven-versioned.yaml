@@ -107,14 +107,20 @@ jobs:
           working_dir: ${{ inputs.working_dir }}
 
       - name: Update pom.xml
+        env:
+          # Passed via env rather than expanded into the script: caller-controlled
+          # input, expanding it inline is shell injection (zizmor: template-injection).
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
-          current_version=$(grep -o '<version>.*</version>' ${{ inputs.working_dir }}/pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
-          new_version=${{ steps.version.outputs.new_version }} 
-          sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/pom.xml
+          current_version=$(grep -o '<version>.*</version>' "${WORKING_DIR}/pom.xml" | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
+          new_version=${{ steps.version.outputs.new_version }}
+          sed -i "s/$current_version/$new_version/g" "${WORKING_DIR}/pom.xml"
           echo "Version number updated from $current_version to $new_version"
       - name: Create Maven Settings
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
-          cd ./${{ inputs.working_dir }}
+          cd "./${WORKING_DIR}"
           echo "<settings>
                     <servers>
                         <server>
@@ -128,22 +134,27 @@ jobs:
 
       - name: Publish
         if: ${{ inputs.publish_to_maven }}
-        run: | 
-          cd ./${{ inputs.working_dir }}
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
+        run: |
+          cd "./${WORKING_DIR}"
           mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean deploy
 
       - name: Compile
         if: ${{ inputs.publish_to_maven != true && inputs.skip_tests == false }}
         env:
           EXTRA_FLAGS: "-s settings.xml -Dgpg.passphrase=\"${{ secrets.GPG_PASSPHRASE }}\""
-        run: | 
-          cd ./${{ inputs.working_dir }}
+          WORKING_DIR: ${{ inputs.working_dir }}
+        run: |
+          cd "./${WORKING_DIR}"
           bash uid2-shared-actions/scripts/compile_java_test_and_verify.sh -s settings.xml -D gpg.passphrase="${{ secrets.GPG_PASSPHRASE }}"
 
       - name: Compile with no tests
         if: ${{ inputs.publish_to_maven != true && inputs.skip_tests == true }}
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
-          cd ./${{ inputs.working_dir }}
+          cd "./${WORKING_DIR}"
           mvn -B -s settings.xml -Dgpg.passphrase="${{ secrets.GPG_PASSPHRASE }}" clean compile -DskipTests
 
       - name: Commit pom.xml and version.json
@@ -166,6 +177,8 @@ jobs:
       - name: Extract Maven artifactId
         id: package_name
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
           # Maven artifactId comes from pom.xml, not the github repo name
           # (e.g. uid2-attestation-azure repo publishes the `attestation-azure`
@@ -173,9 +186,9 @@ jobs:
           # release-notes install snippets match what `mvn deploy` actually
           # published. Gated on is_release to avoid running on Snapshot builds
           # where shared_create_releases is a no-op.
-          artifact_id=$(mvn -B -f "${{ inputs.working_dir }}/pom.xml" help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+          artifact_id=$(mvn -B -f "${WORKING_DIR}/pom.xml" help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
           if [ -z "$artifact_id" ]; then
-            echo "ERROR: could not extract artifactId from ${{ inputs.working_dir }}/pom.xml" >&2
+            echo "ERROR: could not extract artifactId from ${WORKING_DIR}/pom.xml" >&2
             exit 1
           fi
           echo "Extracted Maven artifactId: $artifact_id"

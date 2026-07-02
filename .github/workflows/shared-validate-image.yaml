@@ -61,11 +61,15 @@ jobs:
       - name: Package JAR
         id: package
         shell: bash
+        env:
+          # Passed via env rather than expanded into the script: caller-controlled
+          # input, expanding it inline is shell injection (zizmor: template-injection).
+          CLOUD_PROVIDER: ${{ inputs.cloud_provider }}
         run: |
           if [[ "${{ inputs.skip_tests }}" == "false" ]]; then
-            mvn -B package -P ${{ inputs.cloud_provider }}
+            mvn -B package -P "${CLOUD_PROVIDER}"
           else
-            mvn -B package -P ${{ inputs.cloud_provider }} -DskipTests
+            mvn -B package -P "${CLOUD_PROVIDER}" -DskipTests
           fi
           echo "jar_version=$(mvn help:evaluate -Dexpression=project.version | grep -e '^[1-9][^\[]')" >> $GITHUB_OUTPUT
           echo "git_commit=$(git show --format="%h" --no-patch)" >> $GITHUB_OUTPUT

@@ -55,10 +55,14 @@ jobs:
 
       - name: Update ${{ inputs.working_dir }}/package.json
         id: updatePackageJson
+        env:
+          # Passed via env rather than expanded into the script: caller-controlled
+          # input, expanding it inline is shell injection (zizmor: template-injection).
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
           current_version=$(jq -r '.version')
           new_version=${{ steps.version.outputs.new_version }}
-          jq --arg v "$new_version" ".version = \$v" "${{ inputs.working_dir }}/package.json" > tmp.json && mv tmp.json "${{ inputs.working_dir }}/package.json"
+          jq --arg v "$new_version" ".version = \$v" "${WORKING_DIR}/package.json" > tmp.json && mv tmp.json "${WORKING_DIR}/package.json"
           echo "Version number updated from $current_version to $new_version"
           echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
 

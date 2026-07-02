@@ -72,11 +72,15 @@ jobs:
           working_dir: ${{ inputs.working_dir }}
 
       - name: Update pyproject.toml
+        env:
+          # Passed via env rather than expanded into the script: caller-controlled
+          # input, expanding it inline is shell injection (zizmor: template-injection).
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
-          OLD_VERSION=`cat ${{ inputs.working_dir }}/pyproject.toml | grep ^version | cut -d '"' -f 2`
+          OLD_VERSION=`cat "${WORKING_DIR}/pyproject.toml" | grep ^version | cut -d '"' -f 2`
           OLD_VERSION="\"$OLD_VERSION\""
           NEW_VERSION="\"${{ steps.version.outputs.new_version }}\""
-          sed -i "s+version = $OLD_VERSION+version = $NEW_VERSION+g" ${{ inputs.working_dir }}/pyproject.toml
+          sed -i "s+version = $OLD_VERSION+version = $NEW_VERSION+g" "${WORKING_DIR}/pyproject.toml"
 
       - name: Build
         run: |
@@ -100,6 +104,8 @@ jobs:
       - name: Extract PyPI package name
         id: package_name
         if: ${{ steps.checkRelease.outputs.is_release == 'true' }}
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
           # PyPI package name comes from pyproject.toml, not the github repo name
           # (e.g. uid2-client-python repo publishes the `uid2_client` package).
@@ -120,9 +126,9 @@ jobs:
           # the KeyError this would raise is loud but unhelpful. No current
           # PyPI consumer uses Poetry, so leaving the PEP 621 assumption
           # in place.
-          name=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['name'])" "${{ inputs.working_dir }}/pyproject.toml")
+          name=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['name'])" "${WORKING_DIR}/pyproject.toml")
           if [ -z "$name" ]; then
-            echo "ERROR: could not extract [project].name from ${{ inputs.working_dir }}/pyproject.toml" >&2
+            echo "ERROR: could not extract [project].name from ${WORKING_DIR}/pyproject.toml" >&2
             exit 1
           fi
           echo "Extracted PyPI package name: $name"
