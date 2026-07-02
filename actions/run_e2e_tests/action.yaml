@@ -48,24 +48,42 @@ runs:
   steps:
     - name: Pull E2E image
       shell: bash
+      env:
+        # Inputs are passed via env rather than expanded into the scripts below:
+        # they are caller-controlled strings, and template expansion inside a run
+        # block is shell injection (zizmor: template-injection).
+        E2E_IMAGE_VERSION: ${{ inputs.e2e_image_version }}
       run: |
-        docker pull ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
+        docker pull "ghcr.io/iabtechlab/uid2-e2e:${E2E_IMAGE_VERSION}"
         docker images
 
     - name: Run mock E2E tests
       if: ${{ inputs.e2e_env == 'github-test-pipeline-local' }}
       shell: bash
+      env:
+        E2E_IMAGE_VERSION: ${{ inputs.e2e_image_version }}
+        E2E_SUITES: ${{ inputs.e2e_suites }}
+        E2E_ENV: ${{ inputs.e2e_env }}
+        E2E_IDENTITY_SCOPE: ${{ inputs.e2e_identity_scope }}
+        E2E_PHONE_SUPPORT: ${{ inputs.e2e_phone_support }}
+        UID2_CORE_E2E_CORE_URL: ${{ inputs.uid2_core_e2e_core_url }}
+        UID2_CORE_E2E_OPTOUT_URL: ${{ inputs.uid2_core_e2e_optout_url }}
+        UID2_PIPELINE_E2E_CORE_URL: ${{ inputs.uid2_pipeline_e2e_core_url }}
+        UID2_PIPELINE_E2E_OPERATOR_URL: ${{ inputs.uid2_pipeline_e2e_operator_url }}
+        UID2_PIPELINE_E2E_OPERATOR_TYPE: ${{ inputs.uid2_pipeline_e2e_operator_type }}
+        UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER: ${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}
+        E2E_NETWORK: ${{ inputs.e2e_network }}
       run: |
         docker run \
-        --env E2E_SUITES=${{ inputs.e2e_suites }} \
-        --env E2E_ENV=${{ inputs.e2e_env }} \
-        --env E2E_IDENTITY_SCOPE='${{ inputs.e2e_identity_scope }}' \
-        --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
+        --env E2E_SUITES="${E2E_SUITES}" \
+        --env E2E_ENV="${E2E_ENV}" \
+        --env E2E_IDENTITY_SCOPE="${E2E_IDENTITY_SCOPE}" \
+        --env E2E_PHONE_SUPPORT="${E2E_PHONE_SUPPORT}" \
         --env UID2_CORE_E2E_OPERATOR_API_KEY='UID2-O-L-999-dp9Dt0.JVoGpynN4J8nMA7FxmzsavxJa8B9H74y9xdEE=' \
         --env UID2_CORE_E2E_OPTOUT_API_KEY='UID2-O-L-127-pDqphU.6FuXzThQMY8YEsCA8crqvAlzyGrjcF8P6XO84=' \
         --env UID2_CORE_E2E_OPTOUT_INTERNAL_API_KEY='test-optout-internal-key' \
-        --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
-        --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
+        --env UID2_CORE_E2E_CORE_URL="${UID2_CORE_E2E_CORE_URL}" \
+        --env UID2_CORE_E2E_OPTOUT_URL="${UID2_CORE_E2E_OPTOUT_URL}" \
         --env UID2_OPERATOR_E2E_CLIENT_SITE_ID='999' \
         --env UID2_OPERATOR_E2E_CLIENT_API_KEY='UID2-C-L-999-fCXrMM.fsR3mDqAXELtWWMS+xG1s7RdgRTMqdOH2qaAo=' \
         --env UID2_OPERATOR_E2E_CLIENT_API_SECRET='DzBzbjTJcYL0swDtFs2krRNu+g1Eokm2tBU4dEuD0Wk=' \
@@ -77,28 +95,42 @@ runs:
         --env UID2_OPERATOR_E2E_CSTG_SERVER_PUBLIC_KEY='UID2-X-L-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEWyCP9O/6ppffj8f5PUWsEhAoMNdTBnpnkiOPZBkVnLkxOyTjPsKzf5J3ApPHzutAGNGgKAzFc6TuCfo+BWsZtQ==' \
         --env UID2_OPERATOR_E2E_CSTG_ORIGIN='https://example.com' \
         --env UID2_OPERATOR_E2E_CSTG_INVALID_ORIGIN='https://example.org' \
-        --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
-        --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
-        --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
-        --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}' \
-        --network '${{ inputs.e2e_network }}' \
-        ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
+        --env UID2_PIPELINE_E2E_CORE_URL="${UID2_PIPELINE_E2E_CORE_URL}" \
+        --env UID2_PIPELINE_E2E_OPERATOR_URL="${UID2_PIPELINE_E2E_OPERATOR_URL}" \
+        --env UID2_PIPELINE_E2E_OPERATOR_TYPE="${UID2_PIPELINE_E2E_OPERATOR_TYPE}" \
+        --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER="${UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER}" \
+        --network "${E2E_NETWORK}" \
+        "ghcr.io/iabtechlab/uid2-e2e:${E2E_IMAGE_VERSION}"
 
     - name: Run real E2E tests
       if: ${{ inputs.e2e_env == 'github-test-pipeline' }}
       shell: bash
+      env:
+        E2E_IMAGE_VERSION: ${{ inputs.e2e_image_version }}
+        E2E_SUITES: ${{ inputs.e2e_suites }}
+        E2E_ARGS_JSON: ${{ inputs.e2e_args_json }}
+        E2E_ENV: ${{ inputs.e2e_env }}
+        E2E_IDENTITY_SCOPE: ${{ inputs.e2e_identity_scope }}
+        E2E_PHONE_SUPPORT: ${{ inputs.e2e_phone_support }}
+        UID2_CORE_E2E_CORE_URL: ${{ inputs.uid2_core_e2e_core_url }}
+        UID2_CORE_E2E_OPTOUT_URL: ${{ inputs.uid2_core_e2e_optout_url }}
+        UID2_PIPELINE_E2E_CORE_URL: ${{ inputs.uid2_pipeline_e2e_core_url }}
+        UID2_PIPELINE_E2E_OPERATOR_URL: ${{ inputs.uid2_pipeline_e2e_operator_url }}
+        UID2_PIPELINE_E2E_OPERATOR_TYPE: ${{ inputs.uid2_pipeline_e2e_operator_type }}
+        UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER: ${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}
+        E2E_NETWORK: ${{ inputs.e2e_network }}
       run: |
         docker run \
-        --env E2E_SUITES='${{ inputs.e2e_suites }}' \
-        --env E2E_ARGS_JSON='${{ inputs.e2e_args_json }}' \
-        --env E2E_ENV='${{ inputs.e2e_env }}' \
-        --env E2E_IDENTITY_SCOPE='${{ inputs.e2e_identity_scope }}' \
-        --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
-        --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
-        --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
-        --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
-        --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
-        --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
-        --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}' \
-        --network '${{ inputs.e2e_network }}' \
-        ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
+        --env E2E_SUITES="${E2E_SUITES}" \
+        --env E2E_ARGS_JSON="${E2E_ARGS_JSON}" \
+        --env E2E_ENV="${E2E_ENV}" \
+        --env E2E_IDENTITY_SCOPE="${E2E_IDENTITY_SCOPE}" \
+        --env E2E_PHONE_SUPPORT="${E2E_PHONE_SUPPORT}" \
+        --env UID2_CORE_E2E_CORE_URL="${UID2_CORE_E2E_CORE_URL}" \
+        --env UID2_CORE_E2E_OPTOUT_URL="${UID2_CORE_E2E_OPTOUT_URL}" \
+        --env UID2_PIPELINE_E2E_CORE_URL="${UID2_PIPELINE_E2E_CORE_URL}" \
+        --env UID2_PIPELINE_E2E_OPERATOR_URL="${UID2_PIPELINE_E2E_OPERATOR_URL}" \
+        --env UID2_PIPELINE_E2E_OPERATOR_TYPE="${UID2_PIPELINE_E2E_OPERATOR_TYPE}" \
+        --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER="${UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER}" \
+        --network "${E2E_NETWORK}" \
+        "ghcr.io/iabtechlab/uid2-e2e:${E2E_IMAGE_VERSION}"
