@@ -30,8 +30,12 @@ on:
         default: 'never'
       config:
         description: >-
-          Path to a zizmor config file in the calling repo. If empty, a default
-          config is used that disables `unpinned-uses` and `secrets-inherit`.
+          Path to a zizmor config file in the calling repo. NOTE: this FULLY
+          REPLACES the built-in default (zizmor loads a single config; it does not
+          merge). The default disables `unpinned-uses` and `secrets-inherit`, so if
+          you pass your own config you must re-include those `disable`s or those two
+          rules will start firing. Prefer inline `# zizmor: ignore[<rule>]` comments
+          for one-off suppressions and leave this unset.
         type: string
         default: ''
       scan_paths:
@@ -73,7 +77,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Use the caller's config if given, else write our default that disables
+          # Use the caller's config if given (it FULLY REPLACES the default — zizmor
+          # loads a single config, no merge), else write our default that disables
           # the rules UID2 has ruled out. (Inline `# zizmor: ignore[rule]` comments
           # in a repo still work regardless of which config is loaded.)
           config="${CONFIG}"
