@@ -88,9 +88,10 @@ jobs:
           YAML
           fi
 
-          # Run zizmor.
-          #   0 = clean, 1 = zizmor crashed, 11-14 = findings by max severity
-          #   (11 informational, 12 low, 13 medium, 14 high).
+          # Run zizmor. Exit codes (https://docs.zizmor.sh/usage/#exit-codes):
+          #   0 = clean; 11/12/13/14 = findings, highest severity info/low/medium/high.
+          #   1 = audit error, 2 = bad args, 3 = no inputs collected. A failed uvx
+          #   install / network error surfaces here too (non-zero, not 0/11-14).
           set +e
           NO_COLOR=1 uvx "zizmor@${ZIZMOR_VERSION}" \
             --offline \
@@ -102,11 +103,19 @@ jobs:
           code=$?
           set -e
 
-          # A real tool failure must always fail CI.
-          if [ "${code}" -eq 1 ]; then
-            echo "zizmor failed to run:"; cat zizmor.log report.txt
-            exit 1
-          fi
+          # Fail hard on anything that isn't a clean run (0) or a findings run
+          # (11-14). An errored or empty scan (bad scan_paths, install failure, arg
+          # error) must NOT pass silently under fail_severity: never — for a security
+          # control, fail-open is the worst outcome. Dump both streams so the real
+          # cause is visible.
+          case "${code}" in
+            0|11|12|13|14) : ;;
+            *)
+              echo "zizmor did not complete a scan (exit ${code}); failing."
+              cat zizmor.log report.txt
+              exit 1
+              ;;
+          esac
 
           # Job summary: status line + the full report (collapsed if there are findings).
           case "${code}" in
@@ -114,7 +123,7 @@ jobs:
             14) status="findings present — highest severity: High." ;;
             13) status="findings present — highest severity: Medium." ;;
             12) status="findings present — highest severity: Low." ;;
-            *)  status="findings present." ;;
+            11) status="findings present — highest severity: Informational." ;;
           esac
           {
             echo "## 🌈 zizmor — GitHub Actions security scan"
