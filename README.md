@@ -51,7 +51,10 @@ name: Zizmor Scan
 on:
   pull_request:
     paths:
-      - '.github/**'   # only run when workflow/action files change
+      - '.github/**'   # workflows + composite actions under .github/actions/
+      # If your repo keeps composite actions elsewhere (e.g. top-level actions/),
+      # add those paths too — the scan covers the whole repo, so the trigger must
+      # fire on every scannable location or changes there slip through.
   workflow_dispatch:
 permissions:
   contents: read

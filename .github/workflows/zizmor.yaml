@@ -2,8 +2,11 @@ name: Zizmor Scan
 
 on:
   pull_request:
+    # Trigger on changes to anything zizmor scans: workflows under .github/ and the
+    # composite actions this repo ships under actions/. Keep in sync with scan_paths.
     paths:
       - '.github/**'
+      - 'actions/**'
   workflow_dispatch:
 
 permissions:

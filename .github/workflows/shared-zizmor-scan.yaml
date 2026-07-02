@@ -39,9 +39,14 @@ on:
         type: string
         default: ''
       scan_paths:
-        description: Space-separated paths zizmor should audit.
+        description: >-
+          Space-separated paths zizmor should audit. Defaults to `.` (the whole
+          repo, zizmor's own default) so composite actions (`action.yml`, wherever
+          they live) are covered too — not just `.github/workflows`. zizmor honors
+          `.gitignore` when collecting inputs. Ensure the caller's trigger `paths`
+          cover everywhere scannable files live, or changes can slip through.
         type: string
-        default: '.github/workflows'
+        default: '.'
       zizmor_version:
         description: Pinned zizmor version to install, for reproducible runs.
         type: string

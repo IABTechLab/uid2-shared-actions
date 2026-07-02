@@ -1,0 +1,1232 @@
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-increase-version-number.yaml:61:59
+   |
+58 | ...   run: |
+   |       --- this run block
+...
+61 | ...     jq --arg v "$new_version" ".version = \$v" "${{ inputs.working_dir }}/package.json" > tmp.json && mv tmp.json "${{ inputs.wo...
+   |                                                         ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-increase-version-number.yaml:61:126
+   |
+58 | ...   run: |
+   |       --- this run block
+...
+61 | ...     jq --arg v "$new_version" ".version = \$v" "${{ inputs.working_dir }}/package.json" > tmp.json && mv tmp.json "${{ inputs.working_dir }}...
+   |                                                                                                                            ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-promote-auto-pr.yaml:12:28
+   |
+11 |         run: |
+   |         --- this run block
+12 |           echo "branch ${{ github.ref }} was pushed to"
+   |                            ^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-promote-auto-pr.yaml:13:20
+   |
+11 |         run: |
+   |         --- this run block
+12 |           echo "branch ${{ github.ref }} was pushed to"
+13 |           if [ ${{ github.ref }} == "refs/heads/main" ]; then
+   |                    ^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-promote-auto-pr.yaml:15:22
+   |
+11 |         run: |
+   |         --- this run block
+...
+15 |           elif [ ${{ github.ref }} == "refs/heads/test" ]; then
+   |                      ^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-promote-auto-pr.yaml:17:22
+   |
+11 |         run: |
+   |         --- this run block
+...
+17 |           elif [ ${{ github.ref }} == "refs/heads/integ" ]; then
+   |                      ^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-java-to-docker-versioned.yaml:131:21
+    |
+130 |         run: |
+    |         --- this run block
+131 |           pushd ${{ inputs.working_dir }}
+    |                     ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-java-to-docker-versioned.yaml:142:21
+    |
+141 |         run: |
+    |         --- this run block
+142 |           pushd ${{ inputs.working_dir }}
+    |                     ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-java-to-docker-versioned.yaml:198:78
+    |
+197 |         run: |
+    |         --- this run block
+198 |           value="$(printf '%s' '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}' | tr '[:upper:]' '[:lower...
+    |                                                                              ^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:73:71
+   |
+72 | ...   run: |
+   |       --- this run block
+73 | ...     formatted_current_version=$(grep -o '\d*,\s*\d*,\s*\d*' ${{ inputs.working_dir }}/Sources/UID2/Properties/UID2SDKProperties....
+   |                                                                     ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:77:84
+   |
+72 |         run: |
+   |         --- this run block
+...
+77 |           sed -i '' -e "s/$formatted_current_version/$formatted_new_version/g" ${{ inputs.working_dir }}/Sources/UID2/Properties/UID...
+   |                                                                                    ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:78:122
+   |
+72 | ...   run: |
+   |       --- this run block
+...
+78 | ...     jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}...
+   |                                                                                                                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:78:122
+   |
+72 | ...   run: |
+   |       --- this run block
+...
+78 | ...     jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}...
+   |                                                                                                                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:78:167
+   |
+72 | ...   run: |
+   |       --- this run block
+...
+78 | ...     jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}/UID2.podspec.json >${{ inputs.working_dir }}...
+   |                                                                                                                                                                     ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:78:221
+   |
+72 | ...   run: |
+   |       --- this run block
+...
+78 | ...     jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}/UID2.podspec.json >${{ inputs.working_dir }}/UID2.podspec.json.tmp && mv ${{ inputs.working_dir }}...
+   |                                                                                                                                                                                                                           ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:79:122
+   |
+72 | ...   run: |
+   |       --- this run block
+...
+79 | ...     jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}...
+   |                                                                                                                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:79:122
+   |
+72 | ...   run: |
+   |       --- this run block
+...
+79 | ...     jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}...
+   |                                                                                                                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:79:174
+   |
+72 | ...   run: |
+   |       --- this run block
+...
+79 | ...     jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}/UID2Prebid.podspec.json > ${{ inputs.working_dir }}...
+   |                                                                                                                                                                            ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:79:234
+   |
+72 | ...   run: |
+   |       --- this run block
+...
+79 | ...     jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}/UID2Prebid.podspec.json > ${{ inputs.working_dir }}/UID2Prebid.podspec.json.tmp && mv ${{ inputs.working_dir }}...
+   |                                                                                                                                                                                                                                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-ios-version.yaml:87:20
+   |
+86 |         run: | 
+   |         --- this run block
+87 |           cd ./${{ inputs.working_dir }}
+   |                    ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-maven-versioned.yaml:111:65
+    |
+110 | ...   run: |
+    |       --- this run block
+111 | ...     current_version=$(grep -o '<version>.*</version>' ${{ inputs.working_dir }}/pom.xml | head -1 | sed 's/<version>\(.*\)<\/ve...
+    |                                                               ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-maven-versioned.yaml:113:58
+    |
+110 |         run: |
+    |         --- this run block
+...
+113 |           sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/pom.xml
+    |                                                          ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-maven-versioned.yaml:117:20
+    |
+116 |         run: |
+    |         --- this run block
+117 |           cd ./${{ inputs.working_dir }}
+    |                    ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-maven-versioned.yaml:132:20
+    |
+131 |         run: | 
+    |         --- this run block
+132 |           cd ./${{ inputs.working_dir }}
+    |                    ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-maven-versioned.yaml:140:20
+    |
+139 |         run: | 
+    |         --- this run block
+140 |           cd ./${{ inputs.working_dir }}
+    |                    ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-maven-versioned.yaml:146:20
+    |
+145 |         run: |
+    |         --- this run block
+146 |           cd ./${{ inputs.working_dir }}
+    |                    ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-maven-versioned.yaml:176:40
+    |
+169 |         run: |
+    |         --- this run block
+...
+176 |           artifact_id=$(mvn -B -f "${{ inputs.working_dir }}/pom.xml" help:evaluate -Dexpression=project.artifactId -q -DforceStdout)
+    |                                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-maven-versioned.yaml:178:64
+    |
+169 |         run: |
+    |         --- this run block
+...
+178 |             echo "ERROR: could not extract artifactId from ${{ inputs.working_dir }}/pom.xml" >&2
+    |                                                                ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-nuget-versioned.yaml:76:65
+   |
+75 | ...   run: |
+   |       --- this run block
+76 | ...     current_version=$(grep -o '<version>.*</version>' ${{ inputs.working_dir }}/UID2.Client.nuspec | head -1 | sed 's/<version>\...
+   |                                                               ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-nuget-versioned.yaml:78:58
+   |
+75 |         run: |
+   |         --- this run block
+...
+78 |           sed -i "s/$current_version/$new_version/g" ${{ inputs.working_dir }}/UID2.Client.nuspec
+   |                                                          ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-nuget-versioned.yaml:83:20
+   |
+82 |         run: | 
+   |         --- this run block
+83 |           cd ./${{ inputs.working_dir }}
+   |                    ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-nuget-versioned.yaml:132:23
+    |
+117 |         run: |
+    |         --- this run block
+...
+132 |           nuspec="${{ inputs.working_dir }}/UID2.Client.nuspec"
+    |                       ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-pypi-versioned.yaml:76:32
+   |
+75 |         run: |
+   |         --- this run block
+76 |           OLD_VERSION=`cat ${{ inputs.working_dir }}/pyproject.toml | grep ^version | cut -d '"' -f 2`
+   |                                ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-publish-to-pypi-versioned.yaml:79:74
+   |
+75 |         run: |
+   |         --- this run block
+...
+79 |           sed -i "s+version = $OLD_VERSION+version = $NEW_VERSION+g" ${{ inputs.working_dir }}/pyproject.toml
+   |                                                                          ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-pypi-versioned.yaml:123:121
+    |
+103 | ...   run: |
+    |       --- this run block
+...
+123 | ...     name=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['name'])" "${{ inputs.working_dir }}...
+    |                                                                                                                       ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./.github/workflows/shared-publish-to-pypi-versioned.yaml:123:121
+    |
+103 | ...   run: |
+    |       --- this run block
+...
+123 | ...     name=$(python3 -c "import sys, tomllib; print(tomllib.load(open(sys.argv[1], 'rb'))['project']['name'])" "${{ inputs.working_dir }}...
+    |                                                                                                                       ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-validate-image.yaml:66:35
+   |
+64 |         run: |
+   |         --- this run block
+65 |           if [[ "${{ inputs.skip_tests }}" == "false" ]]; then
+66 |             mvn -B package -P ${{ inputs.cloud_provider }}
+   |                                   ^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-validate-image.yaml:68:35
+   |
+64 |         run: |
+   |         --- this run block
+...
+68 |             mvn -B package -P ${{ inputs.cloud_provider }} -DskipTests
+   |                                   ^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./.github/workflows/shared-vulnerability-scan-failure-notify.yaml:70:21
+   |
+69 |         run: |
+   |         --- this run block
+70 |           pushd ${{ inputs.working_dir }}
+   |                     ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/attest_image/action.yaml:22:35
+   |
+21 |       run: |
+   |       --- this run block
+22 |         value="$(printf '%s' '${{ inputs.subject_name }}' | tr '[:upper:]' '[:lower:]')"
+   |                                   ^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/attest_image/action.yaml:42:53
+   |
+39 |       run: |
+   |       --- this run block
+...
+42 |           "oci://${{ steps.ref.outputs.value }}@${{ inputs.subject_digest }}" \
+   |                                                     ^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/check_branch_and_release_type/action.yaml:47:107
+   |
+44 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+   |       -------------------------------------------------------------------- action accepts arbitrary code
+45 |       with:
+46 |           script: |
+   |           ------ via this input
+47 |             core.setFailed('Snapshot packages can not be created on the default branch. Release Type: ${{ inputs.release_type }}, Br...
+   |                                                                                                           ^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/check_branch_and_release_type/action.yaml:47:143
+   |
+44 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+   |       -------------------------------------------------------------------- action accepts arbitrary code
+45 |       with:
+46 |           script: |
+   |           ------ via this input
+47 |             core.setFailed('Snapshot packages can not be created on the default branch. Release Type: ${{ inputs.release_type }}, Branch: ${{ github.ref_name }}')
+   |                                                                                                                                               ^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/check_branch_and_release_type/action.yaml:54:115
+   |
+51 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+   |       -------------------------------------------------------------------- action accepts arbitrary code
+52 |       with:
+53 |           script: |
+   |           ------ via this input
+54 |             core.setFailed('Releases can only be created on a Default or release-yyyy-q branch. Release Type: ${{ inputs.release_type }}...
+   |                                                                                                                   ^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/check_branch_and_release_type/action.yaml:54:151
+   |
+51 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+   |       -------------------------------------------------------------------- action accepts arbitrary code
+52 |       with:
+53 |           script: |
+   |           ------ via this input
+54 |             core.setFailed('Releases can only be created on a Default or release-yyyy-q branch. Release Type: ${{ inputs.release_type }}, Branch: ${{ github.ref_name }}')
+   |                                                                                                                                                       ^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/commit_pr_and_merge/action.yaml:141:39
+    |
+133 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    |       -------------------------------------------------------------------- action accepts arbitrary code
+...
+137 |         script: |
+    |         ------ via this input
+...
+141 |             title: '[CI Pipeline] ${{ inputs.message }}',
+    |                                       ^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/commit_pr_and_merge/action.yaml:143:52
+    |
+133 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    |       -------------------------------------------------------------------- action accepts arbitrary code
+...
+137 |         script: |
+    |         ------ via this input
+...
+143 |             base: '${{ inputs.base_branch == '' && github.ref_name || inputs.base_branch }}',
+    |                                                    ^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/commit_pr_and_merge/action.yaml:143:24
+    |
+133 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    |       -------------------------------------------------------------------- action accepts arbitrary code
+...
+137 |         script: |
+    |         ------ via this input
+...
+143 |             base: '${{ inputs.base_branch == '' && github.ref_name || inputs.base_branch }}',
+    |                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/commit_pr_and_merge/action.yaml:194:51
+    |
+184 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    |       -------------------------------------------------------------------- action accepts arbitrary code
+...
+188 |         script: |
+    |         ------ via this input
+...
+194 |           console.log(`Creating tag refs/tags/${{ inputs.tag }} pointing at commit SHA ${pr.merge_commit_sha}`);
+    |                                                   ^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/commit_pr_and_merge/action.yaml:198:33
+    |
+184 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    |       -------------------------------------------------------------------- action accepts arbitrary code
+...
+188 |         script: |
+    |         ------ via this input
+...
+198 |             ref: 'refs/tags/${{ inputs.tag }}',
+    |                                 ^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/commit_pr_and_merge/action.yaml:198:33
+    |
+184 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+    |       -------------------------------------------------------------------- action accepts arbitrary code
+...
+188 |         script: |
+    |         ------ via this input
+...
+198 |             ref: 'refs/tags/${{ inputs.tag }}',
+    |                                 ^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/prepare_gcp_metadata/action.yaml:57:24
+   |
+55 |       run: |
+   |       --- this run block
+56 |         IMAGE_NAME="us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator"
+57 |         IMAGE_TAG="${{ inputs.operator_image_version }}"
+   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:52:53
+   |
+51 |       run: |
+   |       --- this run block
+52 |         docker pull ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
+   |                                                     ^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:60:30
+   |
+58 |       run: |
+   |       --- this run block
+59 |         docker run \
+60 |         --env E2E_SUITES=${{ inputs.e2e_suites }} \
+   |                              ^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:61:27
+   |
+58 |       run: |
+   |       --- this run block
+...
+61 |         --env E2E_ENV=${{ inputs.e2e_env }} \
+   |                           ^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:62:39
+   |
+58 |       run: |
+   |       --- this run block
+...
+62 |         --env E2E_IDENTITY_SCOPE='${{ inputs.e2e_identity_scope }}' \
+   |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:63:38
+   |
+58 |       run: |
+   |       --- this run block
+...
+63 |         --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
+   |                                      ^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:67:43
+   |
+58 |       run: |
+   |       --- this run block
+...
+67 |         --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:68:45
+   |
+58 |       run: |
+   |       --- this run block
+...
+68 |         --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
+   |                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:80:47
+   |
+58 |       run: |
+   |       --- this run block
+...
+80 |         --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
+   |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:81:51
+   |
+58 |       run: |
+   |       --- this run block
+...
+81 |         --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
+   |                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:82:52
+   |
+58 |       run: |
+   |       --- this run block
+...
+82 |         --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
+   |                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:83:62
+   |
+58 |       run: |
+   |       --- this run block
+...
+83 |         --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}' \
+   |                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:84:24
+   |
+58 |       run: |
+   |       --- this run block
+...
+84 |         --network '${{ inputs.e2e_network }}' \
+   |                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:85:41
+   |
+58 |       run: |
+   |       --- this run block
+...
+85 |         ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
+   |                                         ^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:92:31
+   |
+90 |       run: |
+   |       --- this run block
+91 |         docker run \
+92 |         --env E2E_SUITES='${{ inputs.e2e_suites }}' \
+   |                               ^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:93:34
+   |
+90 |       run: |
+   |       --- this run block
+...
+93 |         --env E2E_ARGS_JSON='${{ inputs.e2e_args_json }}' \
+   |                                  ^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:94:28
+   |
+90 |       run: |
+   |       --- this run block
+...
+94 |         --env E2E_ENV='${{ inputs.e2e_env }}' \
+   |                            ^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:95:39
+   |
+90 |       run: |
+   |       --- this run block
+...
+95 |         --env E2E_IDENTITY_SCOPE='${{ inputs.e2e_identity_scope }}' \
+   |                                       ^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:96:38
+   |
+90 |       run: |
+   |       --- this run block
+...
+96 |         --env E2E_PHONE_SUPPORT='${{ inputs.e2e_phone_support }}' \
+   |                                      ^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:97:43
+   |
+90 |       run: |
+   |       --- this run block
+...
+97 |         --env UID2_CORE_E2E_CORE_URL='${{ inputs.uid2_core_e2e_core_url }}' \
+   |                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:98:45
+   |
+90 |       run: |
+   |       --- this run block
+...
+98 |         --env UID2_CORE_E2E_OPTOUT_URL='${{ inputs.uid2_core_e2e_optout_url }}' \
+   |                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/run_e2e_tests/action.yaml:99:47
+   |
+90 |       run: |
+   |       --- this run block
+...
+99 |         --env UID2_PIPELINE_E2E_CORE_URL='${{ inputs.uid2_pipeline_e2e_core_url }}' \
+   |                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/run_e2e_tests/action.yaml:100:51
+    |
+ 90 |       run: |
+    |       --- this run block
+...
+100 |         --env UID2_PIPELINE_E2E_OPERATOR_URL='${{ inputs.uid2_pipeline_e2e_operator_url }}' \
+    |                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/run_e2e_tests/action.yaml:101:52
+    |
+ 90 |       run: |
+    |       --- this run block
+...
+101 |         --env UID2_PIPELINE_E2E_OPERATOR_TYPE='${{ inputs.uid2_pipeline_e2e_operator_type }}' \
+    |                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/run_e2e_tests/action.yaml:102:62
+    |
+ 90 |       run: |
+    |       --- this run block
+...
+102 |         --env UID2_PIPELINE_E2E_OPERATOR_CLOUD_PROVIDER='${{ inputs.uid2_pipeline_e2e_operator_cloud_provider }}' \
+    |                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/run_e2e_tests/action.yaml:103:24
+    |
+ 90 |       run: |
+    |       --- this run block
+...
+103 |         --network '${{ inputs.e2e_network }}' \
+    |                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/run_e2e_tests/action.yaml:104:41
+    |
+ 90 |       run: |
+    |       --- this run block
+...
+104 |         ghcr.io/iabtechlab/uid2-e2e:${{ inputs.e2e_image_version }}
+    |                                         ^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+   --> ./actions/shared_create_releases/action.yaml:239:19
+    |
+237 |       run: |
+    |       --- this run block
+238 |         set -uo pipefail
+239 |         tag="v${{ inputs.new_version }}"
+    |                   ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+    |
+    = note: audit confidence → High
+    = note: this finding has an auto-fix
+    = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/shared_publish_to_docker/action.yaml:78:35
+   |
+77 |       run: |
+   |       --- this run block
+78 |         value="$(printf '%s' '${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}' | tr '[:upper:]' '[:lower:]')"
+   |                                   ^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/shared_publish_to_docker/action.yaml:78:65
+   |
+77 |       run: |
+   |       --- this run block
+78 |         value="$(printf '%s' '${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}' | tr '[:upper:]' '[:lower:]')"
+   |                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/update-major-version-tag/action.yaml:22:37
+   |
+19 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+   |       -------------------------------------------------------------------- action accepts arbitrary code
+20 |       with:
+21 |         script: |
+   |         ------ via this input
+22 |           const inputVersion = `${{ inputs.version }}`;
+   |                                     ^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/update-major-version-tag/action.yaml:23:33
+   |
+19 |       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+   |       -------------------------------------------------------------------- action accepts arbitrary code
+20 |       with:
+21 |         script: |
+   |         ------ via this input
+22 |           const inputVersion = `${{ inputs.version }}`;
+23 |           const inputSha = `${{ inputs.sha }}`;
+   |                                 ^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:31:37
+   |
+30 |       run: |
+   |       --- this run block
+31 |         old_ver=$(jq '.version' ${{ inputs.working_dir }}/version.json | tr -d '"')
+   |                                     ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:36:43
+   |
+30 |       run: |
+   |       --- this run block
+...
+36 |         echo $(jq ".version=$new_ver" ${{ inputs.working_dir }}/version.json) > ${{ inputs.working_dir }}/version.json
+   |                                           ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:36:43
+   |
+30 |       run: |
+   |       --- this run block
+...
+36 |         echo $(jq ".version=$new_ver" ${{ inputs.working_dir }}/version.json) > ${{ inputs.working_dir }}/version.json
+   |                                           ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:42:37
+   |
+41 |       run: |
+   |       --- this run block
+42 |         old_ver=$(jq '.version' ${{ inputs.working_dir }}/version.json | tr -d '"')
+   |                                     ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:45:43
+   |
+41 |       run: |
+   |       --- this run block
+...
+45 |         echo $(jq ".version=$new_ver" ${{ inputs.working_dir }}/version.json) > ${{ inputs.working_dir }}/version.json
+   |                                           ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:45:85
+   |
+41 |       run: |
+   |       --- this run block
+...
+45 |         echo $(jq ".version=$new_ver" ${{ inputs.working_dir }}/version.json) > ${{ inputs.working_dir }}/version.json
+   |                                                                                     ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:65:34
+   |
+64 |       run: |
+   |       --- this run block
+65 |         BRANCH_NAME_WITH_REF=${{ inputs.branch_name }}
+   |                                  ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:69:20
+   |
+64 |       run: |
+   |       --- this run block
+...
+69 |         if [[ "${{ inputs.version_number }}" != "" ]]; then
+   |                    ^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:70:33
+   |
+64 |       run: |
+   |       --- this run block
+...
+70 |           echo "new_version=${{ inputs.version_number }}" >> $GITHUB_OUTPUT
+   |                                 ^^^^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:71:22
+   |
+64 |       run: |
+   |       --- this run block
+...
+71 |         elif [[ "${{ inputs.type }}" == "Snapshot" ]]; then
+   |                      ^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:72:24
+   |
+64 |       run: |
+   |       --- this run block
+...
+72 |           if [[ -f ${{ inputs.working_dir }}/pom.xml ]]; then
+   |                        ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+error[template-injection]: code injection via template expansion
+  --> ./actions/version_number/action.yaml:73:63
+   |
+64 |       run: |
+   |       --- this run block
+...
+73 |             MVN_VERSION=$(grep -o '<version>.*</version>' ${{ inputs.working_dir }}/pom.xml | head -1 | sed 's/<version>\(.*\)<\/ver...
+   |                                                               ^^^^^^^^^^^^^^^^^^ may expand into attacker-controllable code
+   |
+   = note: audit confidence → High
+   = note: this finding has an auto-fix
+   = help: audit documentation → https://docs.zizmor.sh/audits/#template-injection
+
+214 findings (54 ignored, 65 suppressed, 82 unsafe fixes): 0 informational, 0 low, 0 medium, 95 high
