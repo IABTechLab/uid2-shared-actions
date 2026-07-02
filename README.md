@@ -22,6 +22,19 @@ For pre-release (`prerelease: 'true'`) cuts the changelog's `fromTag` is resolve
 
 When adding a new publish workflow, call `IABTechLab/uid2-shared-actions/actions/shared_create_releases@v3` rather than inlining mikepenz. Do not set `continue-on-error: true` on it — the workflow must fail if release-notes generation fails. Decision documented in [UID2-6762](https://thetradedesk.atlassian.net/browse/UID2-6762).
 
+## Jira-key ruleset compliance for automated release commits
+
+In-scope UID2/EUID repos enforce a GitHub `commit_message_pattern` ruleset (`require_jira_key`, UID2-7312) on the default branch: every commit must contain a `UID2-<n>` key or a reasoned opt-out `[no-jira - reason: <reason>]`. The ruleset has **no bypass actors**, so the release service account is subject to it like any human author.
+
+The automated release / version-bump commits produced by `actions/commit_pr_and_merge` (`[CI Pipeline] Released <type> version: X.Y.Z`) carry no Jira key, so the action appends a reasoned opt-out marker — `[no-jira - reason: automated release v1.2.3]` — to keep the merge recorded in history (the `uid2-github-alerts` archiver captures it) rather than granting a silent bypass (UID2-7400). The release `tag` (when set) is woven into the reason so each marker is self-describing; override the reason per call via the `no_jira_reason` input (must be non-empty). The composed message is asserted against the ruleset regex at compose time, so a format drift fails the release run early rather than only at merge.
+
+The marker is applied in **two** places because the ruleset evaluates *every* commit a push introduces to the default branch, not just one:
+
+- **The branch commit** (`Commit to new branch` step) — always.
+- **The merge commit** (`Merge PR` step) — only on protected branches, where the action merges with `merge_method=merge` and GitHub generates an extra merge commit. Its default `Merge pull request #N ...` message carries no marker and would be rejected, so the action sets the merge commit message explicitly. On unprotected branches the action uses `merge_method=rebase`, which replays the already-marked branch commit and creates no merge commit.
+
+The marker goes in the commit message, not the branch name or PR title. This is a centralized change in the shared flow — it propagates to all consumers via `@v3`, so no per-repo edit is needed.
+
 ## Zizmor workflow-security scanning
 
 `shared-zizmor-scan.yaml` runs [zizmor](https://docs.zizmor.sh) over a repo's GitHub
