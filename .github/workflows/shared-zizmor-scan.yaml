@@ -1,0 +1,203 @@
+name: Shared Zizmor Scan
+
+# Reusable workflow that runs zizmor (https://docs.zizmor.sh) over a repo's GitHub
+# Actions workflows to surface workflow-security issues.
+
+on:
+  workflow_call:
+    inputs:
+      min_severity:
+        description: >-
+          Lowest zizmor severity to report (informational|low|medium|high).
+          Defaults to `high` — the tier that maps to genuinely exploitable findings
+          in our estate (e.g. attacker-controllable template-injection). Lower to
+          `low`/`medium` to also surface defense-in-depth/hardening findings.
+        type: string
+        default: 'high'
+      min_confidence:
+        description: >-
+          Lowest zizmor confidence to report (low|medium|high). Keep at `low`:
+          `artipacked` is reported at LOW confidence for every finding, so a higher
+          floor silently drops the whole rule.
+        type: string
+        default: 'low'
+      fail_severity:
+        description: >-
+          Block (fail the job) on findings at or above this severity:
+          never|informational|low|medium|high. Independent of the report floor.
+          Defaults to `never` (non-blocking). Set to `high` to gate on High only.
+        type: string
+        default: 'never'
+      config:
+        description: >-
+          Path to a zizmor config file in the calling repo. NOTE: this FULLY
+          REPLACES the built-in default (zizmor loads a single config; it does not
+          merge). The default disables `unpinned-uses`, so if you pass your own config
+          you must re-include that `disable` or the rule will start firing. Prefer
+          inline `# zizmor: ignore[<rule>]` comments for one-off suppressions and
+          leave this unset.
+        type: string
+        default: ''
+      scan_paths:
+        description: >-
+          Space-separated paths zizmor should audit. Defaults to `.` (the whole
+          repo, zizmor's own default) so composite actions (`action.yml`, wherever
+          they live) are covered too — not just `.github/workflows`. zizmor honors
+          `.gitignore` when collecting inputs. Ensure the caller's trigger `paths`
+          cover everywhere scannable files live, or changes can slip through.
+        type: string
+        default: '.'
+      zizmor_version:
+        description: Pinned zizmor version to install, for reproducible runs.
+        type: string
+        default: '1.26.1'
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # We never push from this job; don't leave the token in .git/config
+          # (this is the artipacked finding we're helping repos fix).
+          persist-credentials: false
+
+      - name: Install uv
+        # uv isn't preinstalled on ubuntu-latest (unlike pipx); set it up so we can
+        # run zizmor via uvx. Same approach Grafana and OpenPass use.
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+
+      - name: Run zizmor
+        env:
+          ZIZMOR_VERSION: ${{ inputs.zizmor_version }}
+          SCAN_PATHS: ${{ inputs.scan_paths }}
+          MIN_SEVERITY: ${{ inputs.min_severity }}
+          MIN_CONFIDENCE: ${{ inputs.min_confidence }}
+          FAIL_SEVERITY: ${{ inputs.fail_severity }}
+          CONFIG: ${{ inputs.config }}
+        run: |
+          set -euo pipefail
+
+          # Use the caller's config if given (it FULLY REPLACES the default — zizmor
+          # loads a single config, no merge), else write our default. We disable
+          # only unpinned-uses: SHA-pinning enforcement was deliberately declined for
+          # UID2 (UID2-6912), and it's High-severity/high-volume so it would otherwise
+          # dominate the report. Everything else stays on and is governed by
+          # min_severity. (Inline `# zizmor: ignore[rule]` comments still work here.)
+          config="${CONFIG}"
+          if [ -z "${config}" ]; then
+            config="${RUNNER_TEMP}/zizmor-default.yml"
+            cat > "${config}" <<'YAML'
+          rules:
+            unpinned-uses:
+              disable: true
+          YAML
+          fi
+
+          # Run zizmor. Exit codes (https://docs.zizmor.sh/usage/#exit-codes):
+          #   0 = clean; 11/12/13/14 = findings, highest severity info/low/medium/high.
+          #   1 = audit error, 2 = bad args, 3 = no inputs collected. A failed uvx
+          #   install / network error surfaces here too (non-zero, not 0/11-14).
+          # Split scan_paths (space-separated) into an array: intended word-splitting,
+          # but no globbing, and an empty value fails loudly instead of letting zizmor
+          # fall back to the cwd.
+          read -ra scan_paths <<< "${SCAN_PATHS}"
+          if [ "${#scan_paths[@]}" -eq 0 ]; then
+            echo "scan_paths is empty; nothing to scan."; exit 1
+          fi
+          set +e
+          NO_COLOR=1 uvx "zizmor@${ZIZMOR_VERSION}" \
+            --offline \
+            --config "${config}" \
+            --min-severity "${MIN_SEVERITY}" \
+            --min-confidence "${MIN_CONFIDENCE}" \
+            --format plain \
+            "${scan_paths[@]}" > report.txt 2> zizmor.log
+          code=$?
+          set -e
+
+          # Fail hard on anything that isn't a clean run (0) or a findings run
+          # (11-14). An errored or empty scan (bad scan_paths, install failure, arg
+          # error) must NOT pass silently under fail_severity: never — for a security
+          # control, fail-open is the worst outcome. Dump both streams so the real
+          # cause is visible.
+          case "${code}" in
+            0|11|12|13|14) : ;;
+            *)
+              echo "zizmor did not complete a scan (exit ${code}); failing."
+              cat zizmor.log report.txt
+              exit 1
+              ;;
+          esac
+
+          # Evidence so a green run is falsifiable: how many inputs zizmor actually
+          # audited (it logs "completed <path>" to stderr per input) and the config used.
+          audited=$(grep -c 'completed' zizmor.log 2>/dev/null || true)
+          if [ -n "${CONFIG}" ]; then
+            config_desc="custom (\`${CONFIG}\`)"
+          else
+            config_desc="default"
+          fi
+
+          # Job summary: status line + scan evidence + report/log (collapsed).
+          case "${code}" in
+            0)  status="✅ no findings at or above '${MIN_SEVERITY}'." ;;
+            14) status="findings present — highest severity: High." ;;
+            13) status="findings present — highest severity: Medium." ;;
+            12) status="findings present — highest severity: Low." ;;
+            11) status="findings present — highest severity: Informational." ;;
+          esac
+          {
+            echo "## 🌈 zizmor — GitHub Actions security scan"
+            echo ""
+            echo "${status}"
+            echo ""
+            echo "| scan | |"
+            echo "| --- | --- |"
+            echo "| zizmor version | \`${ZIZMOR_VERSION}\` |"
+            echo "| scan paths | \`${SCAN_PATHS}\` |"
+            echo "| inputs audited | ${audited:-0} |"
+            echo "| severity floor | \`${MIN_SEVERITY}\` |"
+            echo "| confidence floor | \`${MIN_CONFIDENCE}\` |"
+            echo "| rule config | ${config_desc} |"
+            echo "| gate | $([ "${FAIL_SEVERITY}" = "never" ] && echo "report-only" || echo "block on \`${FAIL_SEVERITY}\`+") |"
+            if [ "${code}" -ne 0 ]; then
+              echo ""
+              echo "<details><summary>Findings</summary>"
+              echo ""
+              echo '```'
+              cat report.txt
+              echo '```'
+              echo ""
+              echo "</details>"
+            fi
+            # Always surface the scan log (stderr): the list of audited inputs plus any
+            # warnings (skipped/unparseable files) that don't fail the run but matter.
+            echo ""
+            echo "<details><summary>Scan log</summary>"
+            echo ""
+            echo '```'
+            cat zizmor.log
+            echo '```'
+            echo ""
+            echo "</details>"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          # Blocking gate: fail only when the highest finding meets fail_severity.
+          if [ "${FAIL_SEVERITY}" != "never" ]; then
+            case "${FAIL_SEVERITY}" in
+              informational) threshold=11 ;;
+              low)           threshold=12 ;;
+              medium)        threshold=13 ;;
+              high)          threshold=14 ;;
+              *) echo "Invalid fail_severity: ${FAIL_SEVERITY}"; exit 1 ;;
+            esac
+            if [ "${code}" -ge "${threshold}" ]; then
+              echo "Failing: findings at or above '${FAIL_SEVERITY}' severity."
+              exit 1
+            fi
+          fi

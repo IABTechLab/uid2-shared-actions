@@ -35,6 +35,40 @@ The marker is applied in **two** places because the ruleset evaluates *every* co
 
 The marker goes in the commit message, not the branch name or PR title. This is a centralized change in the shared flow — it propagates to all consumers via `@v3`, so no per-repo edit is needed.
 
+## Zizmor workflow-security scanning
+
+`shared-zizmor-scan.yaml` runs [zizmor](https://docs.zizmor.sh) over a repo's GitHub
+Actions workflows to catch workflow-security issues.
+By default it runs all offline zizmor rules except `unpinned-uses` (disabled in
+config — SHA-pinning was declined for UID2), reports **High-severity** findings
+(`min_severity`), and is non-blocking (`fail_severity: never`).
+
+Adopt it by adding a small caller workflow to the target repo:
+
+```yaml
+# .github/workflows/zizmor.yaml
+name: Zizmor Scan
+on:
+  pull_request:
+    paths:
+      - '.github/**'   # workflows + composite actions under .github/actions/
+      # If your repo keeps composite actions elsewhere (e.g. top-level actions/),
+      # add those paths too — the scan covers the whole repo, so the trigger must
+      # fire on every scannable location or changes there slip through.
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  zizmor:
+    uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-zizmor-scan.yaml@v3
+    with:
+      fail_severity: never   # report-only; set to `high` to block PRs on High-severity findings
+```
+
+For one-off false positives in a consuming repo, add an inline
+`# zizmor: ignore[<rule>]` comment on the offending line. See the workflow's input
+descriptions for `min_severity`, `min_confidence`, `fail_severity`, and `config`.
+
 ## Tips and tricks
 
 If you're trying to do something that should be simple, but can't find something that quite supports what you're trying to do, the [GitHub Script action](https://github.com/actions/github-script) gives you an authenticated GitHub API client and you can just provide a JavaScript script. For an example, see the "Tag commit" step in the [Commit, PR, and Merge](actions\commit-pr-and-merge\action.yaml) shared action.
