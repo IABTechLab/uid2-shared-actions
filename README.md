@@ -28,10 +28,12 @@ In-scope UID2/EUID repos enforce a GitHub `commit_message_pattern` ruleset (`req
 
 The automated release / version-bump commits produced by `actions/commit_pr_and_merge` (`[CI Pipeline] Released <type> version: X.Y.Z`) carry no Jira key, so the action appends a reasoned opt-out marker — `[no-jira - reason: automated release v1.2.3]` — to keep the merge recorded in history (the `uid2-github-alerts` archiver captures it) rather than granting a silent bypass (UID2-7400). The release `tag` (when set) is woven into the reason so each marker is self-describing; override the reason per call via the `no_jira_reason` input (must be non-empty). The composed message is asserted against the ruleset regex at compose time, so a format drift fails the release run early rather than only at merge.
 
-The marker is applied in **two** places because the ruleset evaluates *every* commit a push introduces to the default branch, not just one:
+The version-bump PR is **squash-merged**, producing a single commit on the default branch. The marker is applied in **two** complementary spots so the rule is satisfied whether GitHub evaluates the resulting squash commit or every commit on the branch:
 
-- **The branch commit** (`Commit to new branch` step) — always.
-- **The merge commit** (`Merge PR` step) — only on protected branches, where the action merges with `merge_method=merge` and GitHub generates an extra merge commit. Its default `Merge pull request #N ...` message carries no marker and would be rejected, so the action sets the merge commit message explicitly. On unprotected branches the action uses `merge_method=rebase`, which replays the already-marked branch commit and creates no merge commit.
+- **The branch commit** (`Commit to new branch` step) — the single commit on the `ci-*` branch, marked via the compose step.
+- **The squash commit** (`Merge PR` step) — the action sets the squash commit message explicitly on the `gh api … /merge` call so it carries the marker too.
+
+The flow always squashes rather than selecting merge/rebase by branch-protection state. `github.ref_protected` reflects only *classic* branch protection, not rulesets, so on the ruleset-governed default branches we target it reads `false` and the previous logic silently rebased (the merge-commit path never fired). Squashing unconditionally keeps behaviour uniform across consumers and complies with the squash-only merge rule without granting the release account a ruleset bypass. Consumers must allow squash merging (guaranteed where the squash-only rule applies).
 
 The marker goes in the commit message, not the branch name or PR title. This is a centralized change in the shared flow — it propagates to all consumers via `@v3`, so no per-repo edit is needed.
 
