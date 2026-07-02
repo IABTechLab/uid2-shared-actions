@@ -17,10 +17,16 @@ runs:
     - name: Update major version tag
       id: updateTag
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      env:
+        # Read via process.env rather than expanded into the script source:
+        # caller-controlled inputs inside a template literal are JS injection
+        # (zizmor: template-injection).
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_SHA: ${{ inputs.sha }}
       with:
         script: |
-          const inputVersion = `${{ inputs.version }}`;
-          const inputSha = `${{ inputs.sha }}`;
+          const inputVersion = process.env.INPUT_VERSION;
+          const inputSha = process.env.INPUT_SHA;
           const match = /^(v\d+)\.\d[\d\.]*$/.exec(inputVersion);
           if (match == null) {
               console.log('Unable to match a valid SEMVER string in input version.');

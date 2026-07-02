@@ -18,8 +18,12 @@ runs:
     - name: Lowercase image reference
       id: ref
       shell: bash
+      env:
+        # Passed via env rather than expanded into the script: caller-controlled
+        # input, expanding it inline is shell injection (zizmor: template-injection).
+        SUBJECT_NAME: ${{ inputs.subject_name }}
       run: |
-        value="$(printf '%s' '${{ inputs.subject_name }}' | tr '[:upper:]' '[:lower:]')"
+        value="$(printf '%s' "${SUBJECT_NAME}" | tr '[:upper:]' '[:lower:]')"
         echo "value=${value}" >> "$GITHUB_OUTPUT"
 
     - name: Attest build provenance
@@ -36,9 +40,11 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        SUBJECT_DIGEST: ${{ inputs.subject_digest }}
+        IMAGE_REF: ${{ steps.ref.outputs.value }}
       run: |
         # Accept either signer SAN: the reusable workflow under IABTechLab/uid2-shared-actions, or the caller's workflow via the composite path. --owner alone would reject the former (see https://github.com/cli/cli/issues/9045).
         gh attestation verify \
-          "oci://${{ steps.ref.outputs.value }}@${{ inputs.subject_digest }}" \
+          "oci://${IMAGE_REF}@${SUBJECT_DIGEST}" \
           --owner "${{ github.repository_owner }}" \
           --cert-identity-regex "^https://github\.com/(IABTechLab/uid2-shared-actions|${{ github.repository }})/"

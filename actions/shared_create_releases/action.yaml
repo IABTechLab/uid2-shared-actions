@@ -234,9 +234,12 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
+        # Passed via env rather than expanded into the script: caller-controlled
+        # input, expanding it inline is shell injection (zizmor: template-injection).
+        NEW_VERSION: ${{ inputs.new_version }}
       run: |
         set -uo pipefail
-        tag="v${{ inputs.new_version }}"
+        tag="v${NEW_VERSION}"
         if gh api "repos/${{ github.repository }}/git/ref/tags/$tag" >/dev/null 2>&1; then
           echo "Verified release tag $tag exists."
         else

@@ -52,9 +52,12 @@ runs:
     - name: Get image digest
       id: image_digest
       shell: bash
+      env:
+        # Passed via env rather than expanded into the script: caller-controlled
+        # input, expanding it inline is shell injection (zizmor: template-injection).
+        IMAGE_TAG: ${{ inputs.operator_image_version }}
       run: |
         IMAGE_NAME="us-docker.pkg.dev/uid2-prod-project/iabtechlab/uid2-operator"
-        IMAGE_TAG="${{ inputs.operator_image_version }}"
 
         # Pull the image to make sure it's available locally
         docker pull "${IMAGE_NAME}:${IMAGE_TAG}"

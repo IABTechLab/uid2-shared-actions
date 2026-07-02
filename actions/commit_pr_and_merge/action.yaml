@@ -133,14 +133,21 @@ runs:
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       if: steps.changes.outputs.changes_exist == 'true'
       id: create-pr
+      env:
+        # Passed via env and read with process.env rather than expanded into the
+        # script source: message is caller-controlled and github.ref_name is a
+        # user-controlled branch name, so template expansion inside the script
+        # is JS injection (zizmor: template-injection).
+        MESSAGE: ${{ inputs.message }}
+        BASE_BRANCH: ${{ inputs.base_branch == '' && github.ref_name || inputs.base_branch }}
       with:
         script: |
           const newPr = (await github.rest.pulls.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            title: '[CI Pipeline] ${{ inputs.message }}',
+            title: `[CI Pipeline] ${process.env.MESSAGE}`,
             head: '${{ steps.branch.outputs.name }}',
-            base: '${{ inputs.base_branch == '' && github.ref_name || inputs.base_branch }}',
+            base: process.env.BASE_BRANCH,
             body: '[CI Pipeline] Automated update'
           })).data;
           core.setOutput('pull-request-url', newPr.html_url);
@@ -186,6 +193,10 @@ runs:
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
       id: tag-commit
       if: ${{ inputs.tag != '' && steps.changes.outputs.changes_exist == 'true' }}
+      env:
+        # Caller-controlled input, read via process.env to avoid JS injection
+        # (zizmor: template-injection).
+        TAG: ${{ inputs.tag }}
       with:
         script: |
           const pr = (await github.rest.pulls.get({
@@ -193,14 +204,14 @@ runs:
             repo: context.repo.repo,
             pull_number: ${{ steps.create-pr.outputs.pull-request-number }}
           })).data;
-          console.log(`Creating tag refs/tags/${{ inputs.tag }} pointing at commit SHA ${pr.merge_commit_sha}`);
+          console.log(`Creating tag refs/tags/${process.env.TAG} pointing at commit SHA ${pr.merge_commit_sha}`);
           await github.rest.git.createRef({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            ref: 'refs/tags/${{ inputs.tag }}',
+            ref: `refs/tags/${process.env.TAG}`,
             sha: pr.merge_commit_sha
           });
-          core.setOutput('commit_tag', '${{ inputs.tag }}');
+          core.setOutput('commit_tag', process.env.TAG);
 
     - name: Get commit SHA
       uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
