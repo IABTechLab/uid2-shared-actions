@@ -32,10 +32,10 @@ on:
         description: >-
           Path to a zizmor config file in the calling repo. NOTE: this FULLY
           REPLACES the built-in default (zizmor loads a single config; it does not
-          merge). The default disables `unpinned-uses` and `secrets-inherit`, so if
-          you pass your own config you must re-include those `disable`s or those two
-          rules will start firing. Prefer inline `# zizmor: ignore[<rule>]` comments
-          for one-off suppressions and leave this unset.
+          merge). The default disables `unpinned-uses`, so if you pass your own config
+          you must re-include that `disable` or the rule will start firing. Prefer
+          inline `# zizmor: ignore[<rule>]` comments for one-off suppressions and
+          leave this unset.
         type: string
         default: ''
       scan_paths:
@@ -78,17 +78,17 @@ jobs:
           set -euo pipefail
 
           # Use the caller's config if given (it FULLY REPLACES the default — zizmor
-          # loads a single config, no merge), else write our default that disables
-          # the rules UID2 has ruled out. (Inline `# zizmor: ignore[rule]` comments
-          # in a repo still work regardless of which config is loaded.)
+          # loads a single config, no merge), else write our default. We disable
+          # only unpinned-uses: SHA-pinning enforcement was deliberately declined for
+          # UID2 (UID2-6912), and it's High-severity/high-volume so it would otherwise
+          # dominate the report. Everything else stays on and is governed by
+          # min_severity. (Inline `# zizmor: ignore[rule]` comments still work here.)
           config="${CONFIG}"
           if [ -z "${config}" ]; then
             config="${RUNNER_TEMP}/zizmor-default.yml"
             cat > "${config}" <<'YAML'
           rules:
             unpinned-uses:
-              disable: true
-            secrets-inherit:
               disable: true
           YAML
           fi
