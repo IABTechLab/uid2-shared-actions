@@ -75,8 +75,8 @@ runs:
         # [no-jira - reason: <reason>] marker satisfies the require_jira_key
         # commit-message ruleset on the default branch (UID2-7400 / UID2-7312):
         # these commits are automated and have no Jira key, so they carry a
-        # reasoned opt-out instead. Reused for the branch commit and, on
-        # protected branches, the merge commit (see the Merge PR step).
+        # reasoned opt-out instead. Reused for the branch commit and the squash
+        # commit (see the Merge PR step).
         #
         # Fail fast on an empty/whitespace reason: the ruleset requires a
         # non-empty reason (\S), so "[no-jira - reason: ]" would otherwise be
@@ -153,27 +153,29 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token == '' && github.token || inputs.github_token }}
         PR_NUMBER: ${{ steps.create-pr.outputs.pull-request-number }}
         BRANCH: ${{ steps.branch.outputs.name }}
-        MERGE_METHOD: ${{ github.ref_protected == 'true' && 'merge' || 'rebase' }}
         COMMIT_MESSAGE: ${{ steps.compose.outputs.message }}
       run: |
-        # Merge the PR.
+        # Squash-merge the PR.
         #
-        # On protected branches this merges with merge_method=merge, which
-        # creates an extra merge commit. The require_jira_key ruleset
-        # (UID2-7400 / UID2-7312) evaluates *every* commit a push adds to the
-        # default branch - both the branch commit and this merge commit - and
-        # the default "Merge pull request #N ..." message carries no Jira key or
-        # opt-out marker, so the merge would be rejected. Set the merge commit
-        # message explicitly so it also complies.
+        # The flow always squashes - it does not pick merge/rebase by
+        # branch-protection state. github.ref_protected only reflects *classic*
+        # branch protection, not rulesets, so on the ruleset-governed default
+        # branches we target it reads false and the old logic silently rebased;
+        # the merge-commit path never fired. Squashing unconditionally makes the
+        # result uniform across consumers regardless of how their default branch
+        # is protected, and complies with the squash-only merge rule without
+        # granting the release account a ruleset bypass.
         #
-        # rebase merges (unprotected branches) replay the branch commit, which
-        # already carries the marker, and create no merge commit - so these
-        # fields are only sent for merge_method=merge.
-        merge_args=(--method PUT "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" -f merge_method="$MERGE_METHOD")
-        if [[ "$MERGE_METHOD" == "merge" ]]; then
-          merge_args+=(-f commit_title="$COMMIT_MESSAGE" -f commit_message="Automated release merge (PR #$PR_NUMBER).")
-        fi
-        gh api "${merge_args[@]}"
+        # A squash merge lands a single commit whose message we set explicitly,
+        # so it carries the require_jira_key marker (UID2-7400 / UID2-7312). The
+        # ci-* branch also holds exactly one already-marked commit (see Compose
+        # commit message), so the rule is satisfied whether GitHub evaluates the
+        # resulting squash commit or every commit on the branch.
+        gh api --method PUT \
+          "repos/${{ github.repository }}/pulls/$PR_NUMBER/merge" \
+          -f merge_method="squash" \
+          -f commit_title="$COMMIT_MESSAGE" \
+          -f commit_message="Automated release (PR #$PR_NUMBER)."
 
         # Delete the branch
         # || true - so the step doesn't fail if the branch is already deleted
