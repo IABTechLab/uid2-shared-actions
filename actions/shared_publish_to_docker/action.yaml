@@ -37,10 +37,13 @@ inputs:
     default: 'true'
   failure_severity:
     description: >
-      Trivy severities that fail the build and block the push. Must be one of
-      'CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM' (no spaces), matching
-      the Java publish path. Defaults to CRITICAL,HIGH. DO NOT drop HIGH (i.e. set
-      'CRITICAL') unless a vulnerability_exception_ticket is supplied.
+      Trivy severities that fail the build and block the push. Must be EXACTLY one
+      of 'CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM' (uppercase, no
+      spaces), matching the Java publish path — any other value is rejected before
+      the build. The SARIF report floor is auto-widened to a superset so anything
+      that can fail the build is also reported. Defaults to CRITICAL,HIGH. DO NOT
+      drop HIGH (i.e. set 'CRITICAL') unless a vulnerability_exception_ticket is
+      supplied.
     default: CRITICAL,HIGH
   vulnerability_exception_ticket:
     description: >
@@ -63,6 +66,7 @@ runs:
     # without a tracked Jira exception. Logic + tests live in the script so it is
     # unit-testable; inputs go via env, never interpolated into run:.
     - name: Validate vulnerability floor + exception ticket
+      id: vulnFloor
       shell: bash
       env:
         FAILURE_SEVERITY: ${{ inputs.failure_severity }}
@@ -118,8 +122,8 @@ runs:
       uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
       with:
         publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
-        failure_severity: ${{ inputs.failure_severity }}
-        scan_severity: CRITICAL,HIGH
+        failure_severity: ${{ steps.vulnFloor.outputs.failure_severity }}
+        scan_severity: ${{ steps.vulnFloor.outputs.scan_severity }}
         image_ref: ${{ steps.extractImageTag.outputs.firstTag }}
         scan_type: ${{ inputs.scan_type }}
 
