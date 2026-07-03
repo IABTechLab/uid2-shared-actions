@@ -42,8 +42,8 @@ The marker goes in the commit message, not the branch name or PR title. This is 
 `shared-zizmor-scan.yaml` runs [zizmor](https://docs.zizmor.sh) over a repo's GitHub
 Actions workflows to catch workflow-security issues.
 By default it runs all offline zizmor rules except `unpinned-uses` (disabled in
-config — SHA-pinning was declined for UID2), reports **High-severity** findings
-(`min_severity`), and is non-blocking (`fail_severity: never`).
+config — SHA-pinning was declined for UID2), reports **High-severity** findings,
+and is non-blocking.
 
 Adopt it by adding a small caller workflow to the target repo:
 
@@ -63,9 +63,16 @@ permissions:
 jobs:
   zizmor:
     uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-zizmor-scan.yaml@v3
-    with:
-      fail_severity: never   # report-only; set to `high` to block PRs on High-severity findings
 ```
+
+Keep the caller **bare** (no `with:`) so the severity floors stay centrally
+controllable. Three levers, in precedence order:
+
+1. **Explicit `with:` input** in the caller — per-repo pin, needs a PR to change.
+2. **Repo Actions variables** `ZIZMOR_MIN_SEVERITY` / `ZIZMOR_FAIL_SEVERITY` — per-repo
+   override with no PR (`gh variable set ZIZMOR_FAIL_SEVERITY -b high -R <repo>`).
+3. **Central defaults** in `shared-zizmor-scan.yaml` (report floor `high`, gate
+   `never`) — one PR here retunes every bare caller via `@v3`.
 
 For one-off false positives in a consuming repo, add an inline
 `# zizmor: ignore[<rule>]` comment on the offending line. See the workflow's input
