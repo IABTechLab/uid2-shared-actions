@@ -12,7 +12,6 @@ on:
           Defaults to `high` — the tier that maps to genuinely exploitable findings
           in our estate (e.g. attacker-controllable template-injection). Lower to
           `low`/`medium` to also surface defense-in-depth/hardening findings.
-          Leave unset in callers so this default stays the single tuning point.
         type: string
         default: 'high'
       min_confidence:
@@ -26,8 +25,7 @@ on:
         description: >-
           Block (fail the job) on findings at or above this severity:
           never|informational|low|medium|high. Independent of the report floor.
-          Defaults to `never` (non-blocking). Leave unset in callers so gating
-          can be introduced by changing this default.
+          Defaults to `never` (non-blocking).
         type: string
         default: 'never'
       config:
