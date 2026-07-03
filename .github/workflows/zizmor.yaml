@@ -16,4 +16,6 @@ jobs:
   zizmor:
     uses: ./.github/workflows/shared-zizmor-scan.yaml
     with:
-      fail_severity: never   # report-only for now; set to `high` later to gate on High-severity
+      # Gate on High-severity findings: the repo reached zero High in PRs
+      # #249-#251, so a red check now means a genuine new High finding.
+      fail_severity: high
