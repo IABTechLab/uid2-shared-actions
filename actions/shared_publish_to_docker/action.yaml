@@ -74,8 +74,13 @@ runs:
     - name: Lowercase image reference
       id: imageRef
       shell: bash
+      env:
+        # Passed via env rather than expanded into the script: caller-controlled
+        # inputs, expanding them inline is shell injection (zizmor: template-injection).
+        DOCKER_REGISTRY: ${{ inputs.docker_registry }}
+        DOCKER_IMAGE_NAME: ${{ inputs.docker_image_name }}
       run: |
-        value="$(printf '%s' '${{ inputs.docker_registry }}/${{ inputs.docker_image_name }}' | tr '[:upper:]' '[:lower:]')"
+        value="$(printf '%s' "${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
         echo "value=${value}" >> "$GITHUB_OUTPUT"
 
     - name: Build and export to Docker
