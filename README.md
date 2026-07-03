@@ -66,13 +66,10 @@ jobs:
 ```
 
 Keep the caller **bare** (no `with:`) so the severity floors stay centrally
-controllable. Three levers, in precedence order:
-
-1. **Explicit `with:` input** in the caller — per-repo pin, needs a PR to change.
-2. **Repo Actions variables** `ZIZMOR_MIN_SEVERITY` / `ZIZMOR_FAIL_SEVERITY` — per-repo
-   override with no PR (`gh variable set ZIZMOR_FAIL_SEVERITY -b high -R <repo>`).
-3. **Central defaults** in `shared-zizmor-scan.yaml` (report floor `high`, gate
-   `never`) — one PR here retunes every bare caller via `@v3`.
+controllable: an explicit `with:` input pins a repo (and needs a per-repo PR to
+change), while bare callers inherit the central defaults in
+`shared-zizmor-scan.yaml` (report floor `high`, gate `never`) — one PR here
+retunes every bare caller via `@v3`.
 
 For one-off false positives in a consuming repo, add an inline
 `# zizmor: ignore[<rule>]` comment on the offending line. See the workflow's input

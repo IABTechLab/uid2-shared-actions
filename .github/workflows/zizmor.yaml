@@ -15,6 +15,5 @@ permissions:
 jobs:
   zizmor:
     # Bare call: severity floors inherit from the shared workflow's central
-    # defaults (report-only, High) and can be overridden per-repo via the
-    # ZIZMOR_MIN_SEVERITY / ZIZMOR_FAIL_SEVERITY Actions variables — no PR needed.
+    # defaults (report-only, High), so org-wide retunes are a single change there.
     uses: ./.github/workflows/shared-zizmor-scan.yaml

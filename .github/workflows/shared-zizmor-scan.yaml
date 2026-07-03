@@ -9,15 +9,14 @@ on:
       min_severity:
         description: >-
           Lowest zizmor severity to report (informational|low|medium|high).
-          Precedence: this input if set, else the calling repo's `ZIZMOR_MIN_SEVERITY`
-          Actions variable, else `high` — the tier that maps to genuinely exploitable
-          findings in our estate (e.g. attacker-controllable template-injection).
-          Lower to `low`/`medium` to also surface defense-in-depth/hardening findings.
-          Prefer leaving this unset in callers: unset callers can be retuned centrally
-          (change the fallback here — ships to all `@v3` consumers) or per-repo with
-          no PR at all (set the repo variable).
+          Defaults to `high` — the tier that maps to genuinely exploitable findings
+          in our estate (e.g. attacker-controllable template-injection). Lower to
+          `low`/`medium` to also surface defense-in-depth/hardening findings.
+          Prefer leaving this unset in callers: bare callers inherit this default,
+          so the whole estate can be retuned by changing it here (ships to all
+          `@v3` consumers) without touching caller files.
         type: string
-        default: ''
+        default: 'high'
       min_confidence:
         description: >-
           Lowest zizmor confidence to report (low|medium|high). Keep at `low`:
@@ -29,13 +28,12 @@ on:
         description: >-
           Block (fail the job) on findings at or above this severity:
           never|informational|low|medium|high. Independent of the report floor.
-          Precedence: this input if set, else the calling repo's `ZIZMOR_FAIL_SEVERITY`
-          Actions variable, else `never` (non-blocking). Prefer leaving this unset in
-          callers: unset callers can be flipped to gating centrally (change the
-          fallback here — ships to all `@v3` consumers) or per-repo with no PR at all
-          (set the repo variable).
+          Defaults to `never` (non-blocking). Prefer leaving this unset in callers:
+          bare callers inherit this default, so gating can be introduced centrally
+          by changing it here (ships to all `@v3` consumers) without touching
+          caller files.
         type: string
-        default: ''
+        default: 'never'
       config:
         description: >-
           Path to a zizmor config file in the calling repo. NOTE: this FULLY
@@ -86,13 +84,9 @@ jobs:
         env:
           ZIZMOR_VERSION: ${{ inputs.zizmor_version }}
           SCAN_PATHS: ${{ inputs.scan_paths }}
-          # Report/gate floors resolve: explicit caller input > calling repo's
-          # ZIZMOR_* Actions variable (vars resolves against the repo the run
-          # belongs to, i.e. the caller) > central default. Central default and
-          # repo variable are both changeable without touching caller files.
-          MIN_SEVERITY: ${{ inputs.min_severity || vars.ZIZMOR_MIN_SEVERITY || 'high' }}
+          MIN_SEVERITY: ${{ inputs.min_severity }}
           MIN_CONFIDENCE: ${{ inputs.min_confidence }}
-          FAIL_SEVERITY: ${{ inputs.fail_severity || vars.ZIZMOR_FAIL_SEVERITY || 'never' }}
+          FAIL_SEVERITY: ${{ inputs.fail_severity }}
           CONFIG: ${{ inputs.config }}
         run: |
           set -euo pipefail
