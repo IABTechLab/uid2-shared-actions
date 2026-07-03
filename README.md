@@ -65,12 +65,6 @@ jobs:
     uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-zizmor-scan.yaml@v3
 ```
 
-Keep the caller **bare** (no `with:`) so the severity floors stay centrally
-controllable: an explicit `with:` input pins a repo (and needs a per-repo PR to
-change), while bare callers inherit the central defaults in
-`shared-zizmor-scan.yaml` (report floor `high`, gate `never`) — one PR here
-retunes every bare caller via `@v3`.
-
 For one-off false positives in a consuming repo, add an inline
 `# zizmor: ignore[<rule>]` comment on the offending line. See the workflow's input
 descriptions for `min_severity`, `min_confidence`, `fail_severity`, and `config`.
