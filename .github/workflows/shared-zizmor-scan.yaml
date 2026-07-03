@@ -53,6 +53,9 @@ on:
           they live) are covered too — not just `.github/workflows`. zizmor honors
           `.gitignore` when collecting inputs. Ensure the caller's trigger `paths`
           cover everywhere scannable files live, or changes can slip through.
+          With the default `.`, a repo with no scannable files skips green
+          (legitimate for ruleset-injected runs); with explicit paths, an empty
+          collection fails closed (probable typo).
         type: string
         default: '.'
       zizmor_version:
@@ -133,12 +136,32 @@ jobs:
           set -e
 
           # Fail hard on anything that isn't a clean run (0) or a findings run
-          # (11-14). An errored or empty scan (bad scan_paths, install failure, arg
-          # error) must NOT pass silently under fail_severity: never — for a security
-          # control, fail-open is the worst outcome. Dump both streams so the real
-          # cause is visible.
+          # (11-14). An errored scan (install failure, arg error) must NOT pass
+          # silently under fail_severity: never — for a security control,
+          # fail-open is the worst outcome. Dump both streams so the real cause
+          # is visible.
+          #
+          # Exit 3 ("no inputs collected") splits by intent: when scanning the
+          # default '.', it just means the repo has no GitHub Actions content —
+          # legitimate for ruleset-injected runs that target every repo, so skip
+          # green with a notice. When the caller set scan_paths explicitly, an
+          # empty collection is more likely a typo'd path, so keep failing closed.
           case "${code}" in
             0|11|12|13|14) : ;;
+            3)
+              if [ "${SCAN_PATHS}" = "." ]; then
+                echo "No GitHub Actions workflows or composite actions in this repo; nothing to scan."
+                {
+                  echo "## 🌈 zizmor — GitHub Actions security scan"
+                  echo ""
+                  echo "Nothing to scan: this repo has no GitHub Actions workflows or composite actions. Skipped."
+                } >> "${GITHUB_STEP_SUMMARY}"
+                exit 0
+              fi
+              echo "zizmor collected no inputs from scan_paths='${SCAN_PATHS}' (exit 3); failing."
+              cat zizmor.log report.txt
+              exit 1
+              ;;
             *)
               echo "zizmor did not complete a scan (exit ${code}); failing."
               cat zizmor.log report.txt
