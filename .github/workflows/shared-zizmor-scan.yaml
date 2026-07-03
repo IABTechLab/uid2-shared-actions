@@ -12,9 +12,7 @@ on:
           Defaults to `high` — the tier that maps to genuinely exploitable findings
           in our estate (e.g. attacker-controllable template-injection). Lower to
           `low`/`medium` to also surface defense-in-depth/hardening findings.
-          Prefer leaving this unset in callers: bare callers inherit this default,
-          so the whole estate can be retuned by changing it here (ships to all
-          `@v3` consumers) without touching caller files.
+          Leave unset in callers so this default stays the single tuning point.
         type: string
         default: 'high'
       min_confidence:
@@ -28,10 +26,8 @@ on:
         description: >-
           Block (fail the job) on findings at or above this severity:
           never|informational|low|medium|high. Independent of the report floor.
-          Defaults to `never` (non-blocking). Prefer leaving this unset in callers:
-          bare callers inherit this default, so gating can be introduced centrally
-          by changing it here (ships to all `@v3` consumers) without touching
-          caller files.
+          Defaults to `never` (non-blocking). Leave unset in callers so gating
+          can be introduced by changing this default.
         type: string
         default: 'never'
       config:
@@ -51,9 +47,8 @@ on:
           they live) are covered too — not just `.github/workflows`. zizmor honors
           `.gitignore` when collecting inputs. Ensure the caller's trigger `paths`
           cover everywhere scannable files live, or changes can slip through.
-          With the default `.`, a repo with no scannable files skips green
-          (legitimate for ruleset-injected runs); with explicit paths, an empty
-          collection fails closed (probable typo).
+          With the default `.` an empty repo skips green; with explicit paths an
+          empty scan fails closed.
         type: string
         default: '.'
       zizmor_version:
@@ -130,16 +125,10 @@ jobs:
           set -e
 
           # Fail hard on anything that isn't a clean run (0) or a findings run
-          # (11-14). An errored scan (install failure, arg error) must NOT pass
-          # silently under fail_severity: never — for a security control,
-          # fail-open is the worst outcome. Dump both streams so the real cause
-          # is visible.
-          #
-          # Exit 3 ("no inputs collected") splits by intent: when scanning the
-          # default '.', it just means the repo has no GitHub Actions content —
-          # legitimate for ruleset-injected runs that target every repo, so skip
-          # green with a notice. When the caller set scan_paths explicitly, an
-          # empty collection is more likely a typo'd path, so keep failing closed.
+          # (11-14): an errored scan must not pass silently under
+          # fail_severity: never. Exception: exit 3 ("no inputs collected") on
+          # the default '.' scan means the repo has no Actions content — skip
+          # green; with explicit scan_paths it's more likely a typo — fail.
           case "${code}" in
             0|11|12|13|14) : ;;
             3)

@@ -14,6 +14,5 @@ permissions:
 
 jobs:
   zizmor:
-    # Bare call: severity floors inherit from the shared workflow's central
-    # defaults (report-only, High), so org-wide retunes are a single change there.
+    # Bare call: severity floors come from the shared workflow's defaults.
     uses: ./.github/workflows/shared-zizmor-scan.yaml
