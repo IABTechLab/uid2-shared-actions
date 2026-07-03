@@ -1,0 +1,36 @@
+name: Test Scripts
+
+# Runs the bash unit tests colocated with composite actions (actions/**/tests/*.sh).
+on:
+  push:
+    paths:
+      - 'actions/**/*.sh'
+      - '.github/workflows/test-scripts.yaml'
+  pull_request:
+    paths:
+      - 'actions/**/*.sh'
+      - '.github/workflows/test-scripts.yaml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run script tests
+        run: |
+          shopt -s nullglob globstar
+          tests=(actions/**/tests/*.sh)
+          if [[ ${#tests[@]} -eq 0 ]]; then
+            echo "No tests found under actions/**/tests/"
+            exit 0
+          fi
+          fail=0
+          for t in "${tests[@]}"; do
+            echo "::group::$t"
+            bash "$t" || fail=1
+            echo "::endgroup::"
+          done
+          exit $fail
