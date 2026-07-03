@@ -9,12 +9,15 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Create Pull Request
         run: |
-          echo "branch ${{ github.ref }} was pushed to"
-          if [ ${{ github.ref }} == "refs/heads/main" ]; then
+          # Use the runner-provided $GITHUB_REF env var instead of expanding the
+          # github.ref expression into the script — branch names are user-controlled,
+          # so template expansion here is shell injection (zizmor: template-injection).
+          echo "branch ${GITHUB_REF} was pushed to"
+          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
             base="test"
-          elif [ ${{ github.ref }} == "refs/heads/test" ]; then
+          elif [ "${GITHUB_REF}" == "refs/heads/test" ]; then
             base="integ"
-          elif [ ${{ github.ref }} == "refs/heads/integ" ]; then
+          elif [ "${GITHUB_REF}" == "refs/heads/integ" ]; then
             base="prod"
           else
             exit 0

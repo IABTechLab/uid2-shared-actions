@@ -127,8 +127,12 @@ jobs:
 
       - name: Update pom.xml
         id: updatePom
+        env:
+          # Passed via env rather than expanded into the script: caller-controlled
+          # input, expanding it inline is shell injection (zizmor: template-injection).
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
-          pushd ${{ inputs.working_dir }}
+          pushd "${WORKING_DIR}"
           current_version=$(grep -o '<version>.*</version>' pom.xml | head -1 | sed 's/<version>\(.*\)<\/version>/\1/')
           new_version=${{ steps.version.outputs.new_version }} 
           mvn versions:set versions:commit -DnewVersion="$new_version"
@@ -138,8 +142,10 @@ jobs:
 
       - name: Package JAR
         id: package
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
-          pushd ${{ inputs.working_dir }}
+          pushd "${WORKING_DIR}"
           cat pom.xml
           if [[ "${{ inputs.skip_tests }}" == "false" ]]; then
             mvn -B package -P default
@@ -194,8 +200,13 @@ jobs:
 
       - name: Lowercase image reference
         id: imageRef
+        env:
+          # REGISTRY/IMAGE_NAME are workflow-level env vars already in the shell;
+          # append_image_name is a caller-controlled input passed via env rather
+          # than expanded into the script (zizmor: template-injection).
+          APPEND_IMAGE_NAME: ${{ inputs.append_image_name }}
         run: |
-          value="$(printf '%s' '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ inputs.append_image_name }}' | tr '[:upper:]' '[:lower:]')"
+          value="$(printf '%s' "${REGISTRY}/${IMAGE_NAME}${APPEND_IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
           echo "value=${value}" >> "$GITHUB_OUTPUT"
 
       - name: Build and export to Docker

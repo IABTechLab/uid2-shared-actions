@@ -69,22 +69,28 @@ jobs:
           swiftlint lint --config .swiftlint.yml --reporter github-actions-logging
 
       - name: Update UID2.Client.ios
+        env:
+          # Passed via env rather than expanded into the script: caller-controlled
+          # input, expanding it inline is shell injection (zizmor: template-injection).
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
-          formatted_current_version=$(grep -o '\d*,\s*\d*,\s*\d*' ${{ inputs.working_dir }}/Sources/UID2/Properties/UID2SDKProperties.swift | head -1)
+          formatted_current_version=$(grep -o '\d*,\s*\d*,\s*\d*' "${WORKING_DIR}/Sources/UID2/Properties/UID2SDKProperties.swift" | head -1)
           current_version=$(echo "$formatted_current_version" | sed 's/\(.*\),[[:space:]]*\(.*\),[[:space:]]*\(.*\)/\1.\2.\3/')
-          new_version=${{ steps.version.outputs.new_version }} 
+          new_version=${{ steps.version.outputs.new_version }}
           formatted_new_version=$(echo "$new_version" | sed 's/\([[:digit:]]\)\.\([[:digit:]]\)\.\([[:digit:]]\)/\1, \2, \3/')
-          sed -i '' -e "s/$formatted_current_version/$formatted_new_version/g" ${{ inputs.working_dir }}/Sources/UID2/Properties/UID2SDKProperties.swift
-          jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}/UID2.podspec.json >${{ inputs.working_dir }}/UID2.podspec.json.tmp && mv ${{ inputs.working_dir }}/UID2.podspec.json.tmp ${{ inputs.working_dir }}/UID2.podspec.json
-          jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' ${{ inputs.working_dir }}/UID2Prebid.podspec.json > ${{ inputs.working_dir }}/UID2Prebid.podspec.json.tmp && mv ${{ inputs.working_dir }}/UID2Prebid.podspec.json.tmp ${{ inputs.working_dir }}/UID2Prebid.podspec.json
+          sed -i '' -e "s/$formatted_current_version/$formatted_new_version/g" "${WORKING_DIR}/Sources/UID2/Properties/UID2SDKProperties.swift"
+          jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' "${WORKING_DIR}/UID2.podspec.json" >"${WORKING_DIR}/UID2.podspec.json.tmp" && mv "${WORKING_DIR}/UID2.podspec.json.tmp" "${WORKING_DIR}/UID2.podspec.json"
+          jq --arg VERSION "$new_version" --arg TAG "v$new_version" '. | .version |= $VERSION | .source.tag |= $TAG' "${WORKING_DIR}/UID2Prebid.podspec.json" > "${WORKING_DIR}/UID2Prebid.podspec.json.tmp" && mv "${WORKING_DIR}/UID2Prebid.podspec.json.tmp" "${WORKING_DIR}/UID2Prebid.podspec.json"
           echo "Version number updated from $current_version to $new_version"
 
       - name: Select Xcode 26.2
         run: sudo xcode-select -s /Applications/Xcode_26.2.app
 
       - name: Build, Test
-        run: | 
-          cd ./${{ inputs.working_dir }}
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
+        run: |
+          cd "./${WORKING_DIR}"
           xcodebuild -scheme UID2 -destination "generic/platform=iOS"
           xcodebuild test -scheme UID2 -destination "OS=26.2,name=iPhone 17"
           xcodebuild -scheme UID2Prebid -destination "generic/platform=iOS"
