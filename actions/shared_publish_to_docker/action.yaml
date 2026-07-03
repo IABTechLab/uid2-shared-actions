@@ -35,7 +35,7 @@ inputs:
   attestation_enabled:
     description: Set to 'false' to skip SLSA build-provenance attestation + verification. Default 'true'.
     default: 'true'
-  failure_severity:
+  vulnerability_severity:
     description: >
       Trivy severities that fail the build and block the push. Must be EXACTLY one
       of 'CRITICAL', 'CRITICAL,HIGH' or 'CRITICAL,HIGH,MEDIUM' (uppercase, no
@@ -47,9 +47,9 @@ inputs:
     default: CRITICAL,HIGH
   vulnerability_exception_ticket:
     description: >
-      Jira ticket link justifying a CRITICAL-only failure_severity, e.g.
+      Jira ticket link justifying a CRITICAL-only vulnerability_severity, e.g.
       https://thetradedesk.atlassian.net/browse/UID2-1234. Required
-      and format-validated only when failure_severity is 'CRITICAL' (HIGH dropped);
+      and format-validated only when vulnerability_severity is 'CRITICAL' (HIGH dropped);
       the default CRITICAL,HIGH floor ignores it. Format-check only — no live Jira call.
     default: ''
 
@@ -69,7 +69,7 @@ runs:
       id: vulnFloor
       shell: bash
       env:
-        FAILURE_SEVERITY: ${{ inputs.failure_severity }}
+        FAILURE_SEVERITY: ${{ inputs.vulnerability_severity }}
         EXCEPTION_TICKET: ${{ inputs.vulnerability_exception_ticket }}
       run: bash "${{ github.action_path }}/validate_vuln_floor.sh"
 

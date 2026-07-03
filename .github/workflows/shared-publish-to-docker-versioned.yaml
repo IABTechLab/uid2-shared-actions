@@ -46,7 +46,7 @@ on:
         description: If false, skips SLSA build-provenance attestation + verification. Defaults to true.
         type: boolean
         default: true
-      failure_severity:
+      vulnerability_severity:
         description: >
           The severity to fail the workflow if such vulnerability is detected. DO NOT
           override it unless a Jira ticket is raised. Must be EXACTLY one of
@@ -96,7 +96,7 @@ jobs:
           publish_vulnerabilities: ${{ inputs.publish_vulnerabilities }}
           scan_type: image
           attestation_enabled: ${{ inputs.attestation_enabled }}
-          failure_severity: ${{ inputs.failure_severity }}
+          vulnerability_severity: ${{ inputs.vulnerability_severity }}
           vulnerability_exception_ticket: ${{ inputs.vulnerability_exception_ticket }}
 
       - name: Create Release
