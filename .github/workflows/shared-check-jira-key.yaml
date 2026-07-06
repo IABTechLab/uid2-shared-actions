@@ -1,26 +1,39 @@
 name: Shared Check Jira Key
 # Required-status-check for IABTechLab uid2* repos (UID2-7426).
 #
-# WHY THIS EXISTS: the UnifiedID2 / European-Unified-ID orgs enforce the Jira-key
-# rule natively with a GitHub `commit_message_pattern` ruleset (UID2-7312).
-# IABTechLab is a GitHub *team* plan, where commit-metadata ruleset rules are
-# Enterprise-gated and silently never evaluated — so the native rule is inert there.
-# This reusable workflow reproduces the same rule as a required status check, the
-# only team-plan-compatible mechanism.
+# WHY THIS EXISTS: the UnifiedID2 / European-Unified-ID orgs enforce the Jira-key rule natively
+# with a GitHub `commit_message_pattern` ruleset (UID2-7312). IABTechLab is a GitHub *team* plan,
+# where commit-metadata ruleset rules are Enterprise-gated and silently never evaluated — so the
+# native rule is inert there. This reusable workflow reproduces the same rule as a required status
+# check, the only team-plan-compatible mechanism.
 #
-# WHAT IT CHECKS: the message that will actually land in the immutable default-branch
-# history — i.e. the squash commit GitHub will produce — must contain either a
-# `UID2-<n>` Jira key or a reasoned `[no-jira - reason: <reason>]` opt-out. Because
-# in-scope repos are squash-only, we reconstruct that squash commit from the PR's
-# commits + title + body according to this repo's squash settings (see below), rather
-# than trusting the PR title alone (which is NOT what lands for a single-commit PR on
-# a repo whose squash title source is COMMIT_OR_PR_TITLE).
+# WHAT IT CHECKS: the message that will actually land in the immutable default-branch history —
+# the squash commit GitHub will produce — must contain a `UID2-<n>` key or a reasoned
+# `[no-jira - reason: <reason>]` opt-out. It reconstructs that squash commit from the PR's commits
+# + title + body according to this repo's squash settings, rather than trusting the PR title alone
+# (which is NOT what lands for a single-commit PR on a COMMIT_OR_PR_TITLE repo).
+#
+# PREREQUISITES before this is wired as a REQUIRED check (UID2-7426 rollout — do not skip):
+#   1. require-squash-merge must be ACTIVE on the repo. In-scope repos are NOT squash-only yet
+#      (require-squash-merge is still in evaluate, and merge-commit/rebase remain enabled), so until
+#      that flips a "Rebase and merge" can land raw keyless commits even with this check green — the
+#      check reconstructs the *squash* commit. Squash-only is what makes this check mean what it says.
+#   2. The CI release flow (actions/commit_pr_and_merge, UID2-7400) merges via an immediate merge
+#      API call that does NOT wait for checks — a required check makes that PUT return 405
+#      ("required status check is expected"). Before flipping to required, either add a
+#      wait-for-checks/retry to commit_pr_and_merge, or bypass the release actor on the
+#      required_status_checks rule (compliance-safe: its commits already carry the marker, asserted
+#      at compose time in commit_pr_and_merge).
 on:
   workflow_call:
 
 permissions:
   contents: read
   pull-requests: read
+  # administration: read is required so the token can read this repo's squash-merge settings
+  # (squash_merge_commit_title / _message). Those fields come back null to a token that lacks it,
+  # and the step below fails closed rather than guessing. Callers MUST also grant this permission.
+  administration: read
 
 jobs:
   check-jira-key:
@@ -31,19 +44,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_BODY: ${{ github.event.pull_request.body }}
         shell: bash
         run: |
           set -euo pipefail
+          export LC_ALL=C.UTF-8   # grep -P (PCRE) errors under a non-UTF-8 locale (matches commit_pr_and_merge)
 
-          # SINGLE SOURCE OF TRUTH regex. This MUST stay identical to
-          # `local.jira_key_pattern` in uid2-okta-configuration (github_repo_rulesets /
-          # github_rulesets) and the self-assertion in actions/commit_pr_and_merge, so the
-          # rule can't diverge between the native ruleset (UID2/EUID) and this Action (IAB).
-          #   - key:     \bUID2-[0-9]+  (uppercase, \b-anchored so FOOUID2-1 does NOT match)
-          #   - opt-out: [no-jira - reason: <reason>]  (lowercase; \S after the colon means a
-          #              blank/whitespace-only reason fails, so an opt-out is never silent)
+          # SINGLE SOURCE OF TRUTH regex. Keep in sync with local.jira_key_pattern in
+          # uid2-okta-configuration (github_repo_rulesets / github_rulesets) and the self-assertion
+          # in actions/commit_pr_and_merge. The \b prevents FOOUID2-1 from matching; a blank
+          # [no-jira - reason: ] fails because \S requires a non-space reason.
           PATTERN='\bUID2-[0-9]+|\[no-jira - reason:\s*\S[^\]]*\]'
 
           if [ -z "${PR_NUMBER:-}" ] || [ "${PR_NUMBER}" = "null" ]; then
@@ -51,32 +60,36 @@ jobs:
             exit 1
           fi
 
-          # This repo's squash-merge composition settings decide what the squash commit
-          # message will be (GitHub defaults: title=COMMIT_OR_PR_TITLE, body=COMMIT_MESSAGES).
-          CFG=$(gh api "repos/${REPO}" --jq '{t: (.squash_merge_commit_title // "COMMIT_OR_PR_TITLE"), m: (.squash_merge_commit_message // "COMMIT_MESSAGES")}')
-          TMODE=$(printf '%s' "$CFG" | jq -r '.t')
-          MMODE=$(printf '%s' "$CFG" | jq -r '.m')
+          # Title/body fetched LIVE (not from the frozen github.event payload) so a manual re-run
+          # after a title edit re-evaluates the CURRENT title/body. Callers should also trigger on
+          # types: [opened, edited, synchronize, reopened] so title edits auto-re-check.
+          PR_JSON=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}")
+          PR_TITLE=$(printf '%s' "$PR_JSON" | jq -r '.title // ""')
+          PR_BODY=$(printf '%s' "$PR_JSON" | jq -r '.body // ""')
 
-          # PR commits, first page of 100 (a PR with >100 commits is pathological and out of
-          # scope; not using --paginate keeps this a single valid JSON array to parse).
-          # Each element's .commit.message is the full message.
+          # This repo's squash composition decides what the squash commit message will be. These
+          # fields are permission-gated: a token without administration:read gets null even on a
+          # configured repo. Do NOT default — defaulting would silently evaluate the wrong
+          # composition (e.g. false-pass a PR_TITLE/PR_BODY repo like uid2-android-sdk). Fail closed.
+          read -r TMODE MMODE < <(gh api "repos/${REPO}" --jq '[(.squash_merge_commit_title // "null"), (.squash_merge_commit_message // "null")] | @tsv')
+          if [ "$TMODE" = "null" ] || [ "$MMODE" = "null" ]; then
+            echo "::error::Could not read ${REPO} squash-merge settings (got null) — refusing to guess the squash composition. Grant the workflow token 'administration: read' in the caller's permissions."
+            exit 1
+          fi
+
           COMMITS=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/commits?per_page=100")
           N=$(printf '%s' "$COMMITS" | jq 'length')
-          N=${N:-0}
           ALL_MSGS=$(printf '%s' "$COMMITS" | jq -r '.[].commit.message')
-          FIRST_MSG=$(printf '%s' "$COMMITS" | jq -r '.[0].commit.message // ""')
+          FIRST_LINE=$(printf '%s' "$COMMITS" | jq -r '(.[0].commit.message // "") | split("\n")[0]')
 
-          # Reconstruct the squash commit exactly as GitHub will compose it:
-          #   subject: PR_TITLE            -> always the PR title
-          #            COMMIT_OR_PR_TITLE  -> the commit message for a single-commit PR,
-          #                                   else the PR title (multi-commit)
-          #   body:    COMMIT_MESSAGES     -> every commit message, concatenated
-          #            PR_BODY             -> the PR description
-          #            BLANK               -> empty
-          if [ "$TMODE" = "PR_TITLE" ]; then
-            SUBJECT="$PR_TITLE"
-          elif [ "$N" -eq 1 ]; then
-            SUBJECT="$FIRST_MSG"
+          # Reconstruct the squash commit GitHub will compose for this repo:
+          #   subject: PR_TITLE mode -> the PR title. COMMIT_OR_PR_TITLE -> the single commit's
+          #            FIRST LINE for a 1-commit PR (GitHub uses only the first line as the squash
+          #            title, not the whole message), else the PR title (multi-commit).
+          #   body:    COMMIT_MESSAGES -> every commit message. PR_BODY -> the PR description.
+          #            BLANK -> empty.
+          if [ "$TMODE" = "COMMIT_OR_PR_TITLE" ] && [ "$N" -eq 1 ]; then
+            SUBJECT="$FIRST_LINE"
           else
             SUBJECT="$PR_TITLE"
           fi
@@ -86,29 +99,35 @@ jobs:
             *)               BODY="" ;;
           esac
 
-          # Search subject and body INDEPENDENTLY — never concatenate them. For a
-          # single-commit COMMIT_OR_PR_TITLE+COMMIT_MESSAGES repo the subject and body are
-          # the same commit message; concatenating would create a spurious cross-boundary
-          # match (e.g. a blank "[no-jira - reason: ]" would falsely pass by pairing its own
-          # "]" with the "]" of the duplicate copy).
+          # Search subject and body INDEPENDENTLY — never concatenate. For a single-commit
+          # COMMIT_OR_PR_TITLE+COMMIT_MESSAGES repo subject and body are the same message;
+          # concatenating would create a spurious cross-boundary match (e.g. a blank
+          # "[no-jira - reason: ]" pairing its own "]" with the "]" of the duplicate copy).
           if printf '%s' "$SUBJECT" | grep -Pq "$PATTERN" || printf '%s' "$BODY" | grep -Pq "$PATTERN"; then
             echo "✓ A UID2-<n> key or reasoned [no-jira - reason: …] opt-out is present in the commit that will land on ${GITHUB_REF_NAME:-the default branch}."
             exit 0
           fi
 
-          # Fail-closed with actionable guidance. squash title/body sources are printed so a
-          # confused author can see exactly which text was evaluated for THIS repo.
-          echo "::error title=Missing Jira key::The squash commit that will merge to the default branch has no UID2-<n> Jira key and no reasoned opt-out."
+          # Fail-closed with guidance SPECIFIC to what actually lands for this repo/PR (TMODE/N),
+          # so an author isn't told to amend a commit when the PR title is what lands (or vice-versa).
+          if [ "$TMODE" = "PR_TITLE" ]; then
+            WHATLANDS="the **PR title** (and description)"
+            FIX="edit the PR title (or description) to include it"
+          elif [ "$N" -eq 1 ]; then
+            WHATLANDS="your **single commit's message**"
+            FIX="reword the commit (e.g. \`git commit --amend\`) to include it"
+          else
+            WHATLANDS="the **PR title** plus your **commit messages**"
+            FIX="put it in the PR title or one of your commit messages"
+          fi
+          echo "::error title=Missing Jira key::The squash commit that will merge to the default branch has no UID2-<n> key and no reasoned opt-out."
           {
             echo "### ❌ Jira-key check failed"
             echo ""
-            echo "Every change merged to the default branch must carry a Jira key **in the commit that lands** — either:"
-            echo "- a **\`UID2-<n>\`** key (uppercase), or"
-            echo "- a reasoned opt-out **\`[no-jira - reason: <reason>]\`** (lowercase, reason mandatory)."
+            echo "Every change merged to the default branch must carry, **in the commit that lands**, either a \`UID2-<n>\` key (uppercase) or a reasoned \`[no-jira - reason: <reason>]\` opt-out (lowercase, reason mandatory)."
             echo ""
-            echo "This repo squashes with **title=\`${TMODE}\`**, **body=\`${MMODE}\`**, and your PR has **${N}** commit(s), so what lands is driven by your **commit message(s)**"
-            echo "(for a single-commit PR, the **PR title is not used** — put the key in the commit)."
+            echo "This repo squashes with **title=\`${TMODE}\`**, **body=\`${MMODE}\`**, and your PR has **${N}** commit(s), so what lands is ${WHATLANDS}."
             echo ""
-            echo "Fixes: reword a commit (e.g. \`git commit --amend\`) to include \`UID2-1234\`, or add \`[no-jira - reason: <why>]\` for a legitimately ticketless change."
+            echo "Fix: ${FIX}."
           } >> "$GITHUB_STEP_SUMMARY"
           exit 1
