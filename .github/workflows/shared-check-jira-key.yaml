@@ -1,0 +1,114 @@
+name: Shared Check Jira Key
+# Required-status-check for IABTechLab uid2* repos (UID2-7426).
+#
+# WHY THIS EXISTS: the UnifiedID2 / European-Unified-ID orgs enforce the Jira-key
+# rule natively with a GitHub `commit_message_pattern` ruleset (UID2-7312).
+# IABTechLab is a GitHub *team* plan, where commit-metadata ruleset rules are
+# Enterprise-gated and silently never evaluated — so the native rule is inert there.
+# This reusable workflow reproduces the same rule as a required status check, the
+# only team-plan-compatible mechanism.
+#
+# WHAT IT CHECKS: the message that will actually land in the immutable default-branch
+# history — i.e. the squash commit GitHub will produce — must contain either a
+# `UID2-<n>` Jira key or a reasoned `[no-jira - reason: <reason>]` opt-out. Because
+# in-scope repos are squash-only, we reconstruct that squash commit from the PR's
+# commits + title + body according to this repo's squash settings (see below), rather
+# than trusting the PR title alone (which is NOT what lands for a single-commit PR on
+# a repo whose squash title source is COMMIT_OR_PR_TITLE).
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  check-jira-key:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require a UID2 Jira key or reasoned opt-out in the landed squash commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # SINGLE SOURCE OF TRUTH regex. This MUST stay identical to
+          # `local.jira_key_pattern` in uid2-okta-configuration (github_repo_rulesets /
+          # github_rulesets) and the self-assertion in actions/commit_pr_and_merge, so the
+          # rule can't diverge between the native ruleset (UID2/EUID) and this Action (IAB).
+          #   - key:     \bUID2-[0-9]+  (uppercase, \b-anchored so FOOUID2-1 does NOT match)
+          #   - opt-out: [no-jira - reason: <reason>]  (lowercase; \S after the colon means a
+          #              blank/whitespace-only reason fails, so an opt-out is never silent)
+          PATTERN='\bUID2-[0-9]+|\[no-jira - reason:\s*\S[^\]]*\]'
+
+          if [ -z "${PR_NUMBER:-}" ] || [ "${PR_NUMBER}" = "null" ]; then
+            echo "::error::shared-check-jira-key must be called from a pull_request-triggered workflow (no PR number in context)."
+            exit 1
+          fi
+
+          # This repo's squash-merge composition settings decide what the squash commit
+          # message will be (GitHub defaults: title=COMMIT_OR_PR_TITLE, body=COMMIT_MESSAGES).
+          CFG=$(gh api "repos/${REPO}" --jq '{t: (.squash_merge_commit_title // "COMMIT_OR_PR_TITLE"), m: (.squash_merge_commit_message // "COMMIT_MESSAGES")}')
+          TMODE=$(printf '%s' "$CFG" | jq -r '.t')
+          MMODE=$(printf '%s' "$CFG" | jq -r '.m')
+
+          # PR commits, first page of 100 (a PR with >100 commits is pathological and out of
+          # scope; not using --paginate keeps this a single valid JSON array to parse).
+          # Each element's .commit.message is the full message.
+          COMMITS=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/commits?per_page=100")
+          N=$(printf '%s' "$COMMITS" | jq 'length')
+          N=${N:-0}
+          ALL_MSGS=$(printf '%s' "$COMMITS" | jq -r '.[].commit.message')
+          FIRST_MSG=$(printf '%s' "$COMMITS" | jq -r '.[0].commit.message // ""')
+
+          # Reconstruct the squash commit exactly as GitHub will compose it:
+          #   subject: PR_TITLE            -> always the PR title
+          #            COMMIT_OR_PR_TITLE  -> the commit message for a single-commit PR,
+          #                                   else the PR title (multi-commit)
+          #   body:    COMMIT_MESSAGES     -> every commit message, concatenated
+          #            PR_BODY             -> the PR description
+          #            BLANK               -> empty
+          if [ "$TMODE" = "PR_TITLE" ]; then
+            SUBJECT="$PR_TITLE"
+          elif [ "$N" -eq 1 ]; then
+            SUBJECT="$FIRST_MSG"
+          else
+            SUBJECT="$PR_TITLE"
+          fi
+          case "$MMODE" in
+            COMMIT_MESSAGES) BODY="$ALL_MSGS" ;;
+            PR_BODY)         BODY="$PR_BODY" ;;
+            *)               BODY="" ;;
+          esac
+
+          # Search subject and body INDEPENDENTLY — never concatenate them. For a
+          # single-commit COMMIT_OR_PR_TITLE+COMMIT_MESSAGES repo the subject and body are
+          # the same commit message; concatenating would create a spurious cross-boundary
+          # match (e.g. a blank "[no-jira - reason: ]" would falsely pass by pairing its own
+          # "]" with the "]" of the duplicate copy).
+          if printf '%s' "$SUBJECT" | grep -Pq "$PATTERN" || printf '%s' "$BODY" | grep -Pq "$PATTERN"; then
+            echo "✓ A UID2-<n> key or reasoned [no-jira - reason: …] opt-out is present in the commit that will land on ${GITHUB_REF_NAME:-the default branch}."
+            exit 0
+          fi
+
+          # Fail-closed with actionable guidance. squash title/body sources are printed so a
+          # confused author can see exactly which text was evaluated for THIS repo.
+          echo "::error title=Missing Jira key::The squash commit that will merge to the default branch has no UID2-<n> Jira key and no reasoned opt-out."
+          {
+            echo "### ❌ Jira-key check failed"
+            echo ""
+            echo "Every change merged to the default branch must carry a Jira key **in the commit that lands** — either:"
+            echo "- a **\`UID2-<n>\`** key (uppercase), or"
+            echo "- a reasoned opt-out **\`[no-jira - reason: <reason>]\`** (lowercase, reason mandatory)."
+            echo ""
+            echo "This repo squashes with **title=\`${TMODE}\`**, **body=\`${MMODE}\`**, and your PR has **${N}** commit(s), so what lands is driven by your **commit message(s)**"
+            echo "(for a single-commit PR, the **PR title is not used** — put the key in the commit)."
+            echo ""
+            echo "Fixes: reword a commit (e.g. \`git commit --amend\`) to include \`UID2-1234\`, or add \`[no-jira - reason: <why>]\` for a legitimately ticketless change."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
