@@ -30,10 +30,6 @@ on:
 permissions:
   contents: read
   pull-requests: read
-  # administration: read is required so the token can read this repo's squash-merge settings
-  # (squash_merge_commit_title / _message). Those fields come back null to a token that lacks it,
-  # and the step below fails closed rather than guessing. Callers MUST also grant this permission.
-  administration: read
 
 jobs:
   check-jira-key:
@@ -68,12 +64,12 @@ jobs:
           PR_BODY=$(printf '%s' "$PR_JSON" | jq -r '.body // ""')
 
           # This repo's squash composition decides what the squash commit message will be. These
-          # fields are permission-gated: a token without administration:read gets null even on a
-          # configured repo. Do NOT default — defaulting would silently evaluate the wrong
+          # fields can be permission-gated (a token without repo-settings access gets null even on a
+          # configured repo). Do NOT default — defaulting would silently evaluate the wrong
           # composition (e.g. false-pass a PR_TITLE/PR_BODY repo like uid2-android-sdk). Fail closed.
           read -r TMODE MMODE < <(gh api "repos/${REPO}" --jq '[(.squash_merge_commit_title // "null"), (.squash_merge_commit_message // "null")] | @tsv')
           if [ "$TMODE" = "null" ] || [ "$MMODE" = "null" ]; then
-            echo "::error::Could not read ${REPO} squash-merge settings (got null) — refusing to guess the squash composition. Grant the workflow token 'administration: read' in the caller's permissions."
+            echo "::error::Could not read ${REPO} squash-merge settings (squash_merge_commit_title/_message came back null) — refusing to guess the squash composition. Either normalize the repo to COMMIT_OR_PR_TITLE + COMMIT_MESSAGES so the check needn't read them, or run with a token that can read repo merge settings."
             exit 1
           fi
 
