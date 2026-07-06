@@ -7,23 +7,31 @@ name: Shared Check Jira Key
 # native rule is inert there. This reusable workflow reproduces the same rule as a required status
 # check, the only team-plan-compatible mechanism.
 #
-# WHAT IT CHECKS: the message that will actually land in the immutable default-branch history —
-# the squash commit GitHub will produce — must contain a `UID2-<n>` key or a reasoned
+# WHAT IT CHECKS: the message that will actually land in the immutable default-branch history — the
+# squash commit GitHub will produce — must contain a `UID2-<n>` key or a reasoned
 # `[no-jira - reason: <reason>]` opt-out. It reconstructs that squash commit from the PR's commits
-# + title + body according to this repo's squash settings, rather than trusting the PR title alone
-# (which is NOT what lands for a single-commit PR on a COMMIT_OR_PR_TITLE repo).
+# and title, rather than trusting the PR title alone (which is NOT what lands for a single-commit PR).
+#
+# SQUASH-COMPOSITION ASSUMPTION (important): every in-scope repo is configured
+# squash_merge_commit_title = COMMIT_OR_PR_TITLE and squash_merge_commit_message = COMMIT_MESSAGES
+# (GitHub's default, and what all UID2/EUID gated repos use). The check ASSUMES that config rather
+# than reading it, because the workflow GITHUB_TOKEN cannot read squash_merge_commit_* — those
+# fields return null without admin access, and `administration` is not a grantable workflow
+# `permissions:` key. Under that config the squash commit is: subject = the single commit's first
+# line (1-commit PR) or the PR title (multi-commit); body = all commit messages concatenated.
 #
 # PREREQUISITES before this is wired as a REQUIRED check (UID2-7426 rollout — do not skip):
-#   1. require-squash-merge must be ACTIVE on the repo. In-scope repos are NOT squash-only yet
-#      (require-squash-merge is still in evaluate, and merge-commit/rebase remain enabled), so until
-#      that flips a "Rebase and merge" can land raw keyless commits even with this check green — the
-#      check reconstructs the *squash* commit. Squash-only is what makes this check mean what it says.
-#   2. The CI release flow (actions/commit_pr_and_merge, UID2-7400) merges via an immediate merge
-#      API call that does NOT wait for checks — a required check makes that PUT return 405
-#      ("required status check is expected"). Before flipping to required, either add a
-#      wait-for-checks/retry to commit_pr_and_merge, or bypass the release actor on the
-#      required_status_checks rule (compliance-safe: its commits already carry the marker, asserted
-#      at compose time in commit_pr_and_merge).
+#   1. Uniform squash config: every gated repo must be COMMIT_OR_PR_TITLE + COMMIT_MESSAGES, else
+#      the assumption above is wrong for that repo. uid2-android-sdk is currently PR_TITLE/PR_BODY —
+#      normalize it (or exclude it) before wiring its caller. Enforce the setting (terraform /
+#      go-live merge-method audit) so a repo can't silently drift out of the assumption.
+#   2. require-squash-merge must be ACTIVE. In-scope repos are NOT squash-only yet (it is still in
+#      evaluate, and merge-commit/rebase remain enabled), so until it flips a "Rebase and merge" can
+#      land raw keyless commits even with this check green. Squash-only makes the check mean what it says.
+#   3. The CI release flow (actions/commit_pr_and_merge, UID2-7400) merges via an immediate merge API
+#      call that does NOT wait for checks — a required check makes that PUT return 405. Before
+#      flipping to required, add a wait-for-checks/retry to commit_pr_and_merge, or bypass the release
+#      actor on the required_status_checks rule (compliance-safe: its commits already carry the marker).
 on:
   workflow_call:
 
@@ -56,65 +64,39 @@ jobs:
             exit 1
           fi
 
-          # Title/body fetched LIVE (not from the frozen github.event payload) so a manual re-run
-          # after a title edit re-evaluates the CURRENT title/body. Callers should also trigger on
+          # Title fetched LIVE (not from the frozen github.event payload) so a manual re-run after a
+          # title edit re-evaluates the CURRENT title. Callers should also trigger on
           # types: [opened, edited, synchronize, reopened] so title edits auto-re-check.
-          PR_JSON=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}")
-          PR_TITLE=$(printf '%s' "$PR_JSON" | jq -r '.title // ""')
-          PR_BODY=$(printf '%s' "$PR_JSON" | jq -r '.body // ""')
-
-          # This repo's squash composition decides what the squash commit message will be. These
-          # fields can be permission-gated (a token without repo-settings access gets null even on a
-          # configured repo). Do NOT default — defaulting would silently evaluate the wrong
-          # composition (e.g. false-pass a PR_TITLE/PR_BODY repo like uid2-android-sdk). Fail closed.
-          read -r TMODE MMODE < <(gh api "repos/${REPO}" --jq '[(.squash_merge_commit_title // "null"), (.squash_merge_commit_message // "null")] | @tsv')
-          if [ "$TMODE" = "null" ] || [ "$MMODE" = "null" ]; then
-            echo "::error::Could not read ${REPO} squash-merge settings (squash_merge_commit_title/_message came back null) — refusing to guess the squash composition. Either normalize the repo to COMMIT_OR_PR_TITLE + COMMIT_MESSAGES so the check needn't read them, or run with a token that can read repo merge settings."
-            exit 1
-          fi
+          PR_TITLE=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.title // ""')
 
           COMMITS=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/commits?per_page=100")
           N=$(printf '%s' "$COMMITS" | jq 'length')
           ALL_MSGS=$(printf '%s' "$COMMITS" | jq -r '.[].commit.message')
+          # GitHub's squash title for a 1-commit PR is the commit's FIRST LINE, not the whole message.
           FIRST_LINE=$(printf '%s' "$COMMITS" | jq -r '(.[0].commit.message // "") | split("\n")[0]')
 
-          # Reconstruct the squash commit GitHub will compose for this repo:
-          #   subject: PR_TITLE mode -> the PR title. COMMIT_OR_PR_TITLE -> the single commit's
-          #            FIRST LINE for a 1-commit PR (GitHub uses only the first line as the squash
-          #            title, not the whole message), else the PR title (multi-commit).
-          #   body:    COMMIT_MESSAGES -> every commit message. PR_BODY -> the PR description.
-          #            BLANK -> empty.
-          if [ "$TMODE" = "COMMIT_OR_PR_TITLE" ] && [ "$N" -eq 1 ]; then
-            SUBJECT="$FIRST_LINE"
-          else
-            SUBJECT="$PR_TITLE"
-          fi
-          case "$MMODE" in
-            COMMIT_MESSAGES) BODY="$ALL_MSGS" ;;
-            PR_BODY)         BODY="$PR_BODY" ;;
-            *)               BODY="" ;;
-          esac
+          # Reconstruct the squash commit under the assumed config (see header):
+          #   subject: 1-commit PR -> that commit's first line; multi-commit -> the PR title.
+          #   body:    all commit messages (COMMIT_MESSAGES).
+          if [ "$N" -eq 1 ]; then SUBJECT="$FIRST_LINE"; else SUBJECT="$PR_TITLE"; fi
+          BODY="$ALL_MSGS"
 
-          # Search subject and body INDEPENDENTLY — never concatenate. For a single-commit
-          # COMMIT_OR_PR_TITLE+COMMIT_MESSAGES repo subject and body are the same message;
-          # concatenating would create a spurious cross-boundary match (e.g. a blank
-          # "[no-jira - reason: ]" pairing its own "]" with the "]" of the duplicate copy).
+          # Search subject and body INDEPENDENTLY — never concatenate. For a single-commit PR the
+          # subject (first line) is contained in the body (its full message); concatenating would
+          # create a spurious cross-boundary match (e.g. a blank "[no-jira - reason: ]" pairing its
+          # own "]" with the "]" of the body copy).
           if printf '%s' "$SUBJECT" | grep -Pq "$PATTERN" || printf '%s' "$BODY" | grep -Pq "$PATTERN"; then
             echo "✓ A UID2-<n> key or reasoned [no-jira - reason: …] opt-out is present in the commit that will land on ${GITHUB_REF_NAME:-the default branch}."
             exit 0
           fi
 
-          # Fail-closed with guidance SPECIFIC to what actually lands for this repo/PR (TMODE/N),
-          # so an author isn't told to amend a commit when the PR title is what lands (or vice-versa).
-          if [ "$TMODE" = "PR_TITLE" ]; then
-            WHATLANDS="the **PR title** (and description)"
-            FIX="edit the PR title (or description) to include it"
-          elif [ "$N" -eq 1 ]; then
+          # Fail-closed with guidance specific to what lands (single- vs multi-commit).
+          if [ "$N" -eq 1 ]; then
             WHATLANDS="your **single commit's message**"
             FIX="reword the commit (e.g. \`git commit --amend\`) to include it"
           else
-            WHATLANDS="the **PR title** plus your **commit messages**"
-            FIX="put it in the PR title or one of your commit messages"
+            WHATLANDS="the **PR title** or one of your **commit messages**"
+            FIX="put it in the PR title or a commit message"
           fi
           echo "::error title=Missing Jira key::The squash commit that will merge to the default branch has no UID2-<n> key and no reasoned opt-out."
           {
@@ -122,7 +104,7 @@ jobs:
             echo ""
             echo "Every change merged to the default branch must carry, **in the commit that lands**, either a \`UID2-<n>\` key (uppercase) or a reasoned \`[no-jira - reason: <reason>]\` opt-out (lowercase, reason mandatory)."
             echo ""
-            echo "This repo squashes with **title=\`${TMODE}\`**, **body=\`${MMODE}\`**, and your PR has **${N}** commit(s), so what lands is ${WHATLANDS}."
+            echo "Your PR has **${N}** commit(s), so what lands is ${WHATLANDS}."
             echo ""
             echo "Fix: ${FIX}."
           } >> "$GITHUB_STEP_SUMMARY"
