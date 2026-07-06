@@ -42,8 +42,8 @@ The marker goes in the commit message, not the branch name or PR title. This is 
 `shared-zizmor-scan.yaml` runs [zizmor](https://docs.zizmor.sh) over a repo's GitHub
 Actions workflows to catch workflow-security issues.
 By default it runs all offline zizmor rules except `unpinned-uses` (disabled in
-config — SHA-pinning was declined for UID2), reports **High-severity** findings
-(`min_severity`), and is non-blocking (`fail_severity: never`).
+config — SHA-pinning was declined for UID2), reports **High-severity** findings,
+and is non-blocking.
 
 Adopt it by adding a small caller workflow to the target repo:
 
@@ -63,8 +63,6 @@ permissions:
 jobs:
   zizmor:
     uses: IABTechLab/uid2-shared-actions/.github/workflows/shared-zizmor-scan.yaml@v3
-    with:
-      fail_severity: never   # report-only; set to `high` to block PRs on High-severity findings
 ```
 
 For one-off false positives in a consuming repo, add an inline
