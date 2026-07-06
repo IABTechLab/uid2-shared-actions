@@ -124,24 +124,19 @@ jobs:
 
           # Fail hard on anything that isn't a clean run (0) or a findings run
           # (11-14): an errored scan must not pass silently under
-          # fail_severity: never. Exception: exit 3 ("no inputs collected") on
-          # the default '.' scan means the repo has no Actions content — skip
-          # green; with explicit scan_paths it's more likely a typo — fail.
+          # fail_severity: never. Exception: exit 3 ("no inputs collected",
+          # reason verified from the log) on the default '.' scan means the
+          # repo has no Actions content — it flows through the normal summary
+          # and gate as a skip; with explicit scan_paths it's more likely a
+          # typo — fail.
           case "${code}" in
             0|11|12|13|14) : ;;
             3)
-              if [ "${SCAN_PATHS}" = "." ]; then
-                echo "No GitHub Actions workflows or composite actions in this repo; nothing to scan."
-                {
-                  echo "## 🌈 zizmor — GitHub Actions security scan"
-                  echo ""
-                  echo "Nothing to scan: this repo has no GitHub Actions workflows or composite actions. Skipped."
-                } >> "${GITHUB_STEP_SUMMARY}"
-                exit 0
+              if [ "${SCAN_PATHS}" != "." ] || ! grep -q 'no inputs collected' zizmor.log; then
+                echo "zizmor collected no inputs from scan_paths='${SCAN_PATHS}' (exit 3); failing."
+                cat zizmor.log report.txt
+                exit 1
               fi
-              echo "zizmor collected no inputs from scan_paths='${SCAN_PATHS}' (exit 3); failing."
-              cat zizmor.log report.txt
-              exit 1
               ;;
             *)
               echo "zizmor did not complete a scan (exit ${code}); failing."
@@ -162,6 +157,7 @@ jobs:
           # Job summary: status line + scan evidence + report/log (collapsed).
           case "${code}" in
             0)  status="✅ no findings at or above '${MIN_SEVERITY}'." ;;
+            3)  status="nothing to scan: no GitHub Actions workflows or composite actions in this repo — skipped." ;;
             14) status="findings present — highest severity: High." ;;
             13) status="findings present — highest severity: Medium." ;;
             12) status="findings present — highest severity: Low." ;;
@@ -181,7 +177,7 @@ jobs:
             echo "| confidence floor | \`${MIN_CONFIDENCE}\` |"
             echo "| rule config | ${config_desc} |"
             echo "| gate | $([ "${FAIL_SEVERITY}" = "never" ] && echo "report-only" || echo "block on \`${FAIL_SEVERITY}\`+") |"
-            if [ "${code}" -ne 0 ]; then
+            if [ "${code}" -ge 11 ]; then
               echo ""
               echo "<details><summary>Findings</summary>"
               echo ""
