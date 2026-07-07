@@ -104,7 +104,7 @@ runs:
         # merge rejection across every @v3 consumer ("all releases blocked").
         # Assert against the exact pattern so drift fails here instead. Pin a
         # UTF-8 locale: grep -P (PCRE) errors under a non-UTF-8 locale.
-        if ! printf '%s' "$message" | LC_ALL=C.UTF-8 grep -Pq 'UID2-[0-9]+|\[no-jira - reason:\s*\S[^\]]*\]'; then
+        if ! printf '%s' "$message" | LC_ALL=C.UTF-8 grep -Pq '\bUID2-[0-9]+|\[no-jira - reason:\s*\S[^\]]*\]'; then
           echo "::error::composed commit message does not satisfy the require_jira_key ruleset: ${message}"
           exit 1
         fi

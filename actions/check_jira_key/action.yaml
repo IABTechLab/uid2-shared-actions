@@ -1,0 +1,70 @@
+name: Check Jira Key
+description: >-
+  Required-status-check enforcement of the UID2 Jira-key rule for IABTechLab uid2* repos
+  (UID2-7426). Fails a PR unless the squash commit that will land carries a UID2-<n> key or a
+  reasoned [no-jira - reason: <reason>] opt-out.
+#
+# WHY AN ACTION (not a native ruleset): IABTechLab is a GitHub team plan, where commit-metadata
+# ruleset rules (commit_message_pattern) are Enterprise-gated and never evaluated. UnifiedID2 / EUID
+# enforce the same rule natively (UID2-7312); IABTechLab uses this Action + a required status check.
+#
+# SQUASH-CONFIG ASSUMPTION: assumes squash_merge_commit_title=COMMIT_OR_PR_TITLE and
+# squash_merge_commit_message=COMMIT_MESSAGES (the config all gated repos use). The workflow token
+# CANNOT read squash_merge_commit_* (they return null without admin, and `administration` is not a
+# grantable workflow permission), so the config is assumed, not read — with a runtime tripwire below
+# that fails loudly if the settings ARE readable and differ from the assumption.
+#
+# ROLLOUT PREREQUISITES before wiring as a REQUIRED check (UID2-7426 — do not skip):
+#   1. Every gated repo is COMMIT_OR_PR_TITLE + COMMIT_MESSAGES (enforced via terraform so it can't
+#      drift). uid2-android-sdk (was PR_TITLE/PR_BODY) is normalized to match.
+#   2. require-squash-merge is active (else a rebase-merge can land raw keyless commits).
+#   3. commit_pr_and_merge waits for checks, or the release actor is bypassed on the required-check
+#      rule (its immediate merge PUT would otherwise 405).
+#
+# Callers pin the job name `check_jira_key` so all repos produce one status-check context
+# ("check_jira_key") for a single terraform required_status_checks entry.
+runs:
+  using: composite
+  steps:
+    - name: Require a UID2 Jira key or reasoned opt-out in the landed squash commit
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        set -euo pipefail
+
+        if [ -z "${PR_NUMBER:-}" ] || [ "${PR_NUMBER}" = "null" ]; then
+          echo "::error::check_jira_key must run on a pull_request event (no PR number in context)."
+          exit 1
+        fi
+
+        # Runtime tripwire (zero cost on the normal path). The check ASSUMES COMMIT_OR_PR_TITLE +
+        # COMMIT_MESSAGES; the token usually can't read these (null -> unreadable -> trust the
+        # terraform/audit enforcement and proceed). But if they ARE readable and DIFFER, fail loudly
+        # — that turns "an admin flips the setting in the UI and the check silently evaluates the
+        # wrong text for months" into an immediate red check. `|| true` so a read failure is treated
+        # as unreadable (proceed), not a crash.
+        TMODE=""; MMODE=""
+        read -r TMODE MMODE < <(gh api "repos/${REPO}" --jq '[(.squash_merge_commit_title // "null"), (.squash_merge_commit_message // "null")] | @tsv' 2>/dev/null) || true
+        if [ -n "$TMODE" ] && [ "$TMODE" != "null" ] && { [ "$TMODE" != "COMMIT_OR_PR_TITLE" ] || [ "$MMODE" != "COMMIT_MESSAGES" ]; }; then
+          echo "::error::${REPO} squash settings are title=${TMODE}, message=${MMODE}, but this check assumes COMMIT_OR_PR_TITLE / COMMIT_MESSAGES. Restore them (UID2-7426 requires a uniform squash config) or update the check."
+          exit 1
+        fi
+
+        # Gather inputs for the pure matcher. Title fetched LIVE (not the frozen github.event payload)
+        # so a manual re-run after a title edit re-evaluates the current title.
+        PR_TITLE=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.title // ""')
+        # --paginate + `jq -s '[.[][]]'` flattens ALL pages: the squash body concatenates every
+        # commit, so fetching only the first page (per_page=100) could false-fail a >100-commit PR
+        # whose key is only in a later commit and not the PR title. GitHub caps PR commits at 250;
+        # match.sh surfaces that cap in the failure message for the (pathological) >250 case.
+        COMMITS=$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/commits?per_page=100" | jq -s '[.[][]]')
+        COMMIT_COUNT=$(printf '%s' "$COMMITS" | jq 'length')
+        ALL_MSGS=$(printf '%s' "$COMMITS" | jq -r '.[].commit.message')
+        FIRST_LINE=$(printf '%s' "$COMMITS" | jq -r '(.[0].commit.message // "") | split("\n")[0]')
+
+        export PR_TITLE COMMIT_COUNT ALL_MSGS FIRST_LINE
+        bash "${ACTION_PATH}/match.sh"
