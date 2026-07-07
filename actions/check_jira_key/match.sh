@@ -42,13 +42,19 @@ else
   FIX="put it in the PR title or a commit message"
 fi
 echo "::error title=Missing Jira key::The squash commit that will merge to the default branch has no UID2-<n> key and no reasoned opt-out."
+# GitHub returns at most 250 commits per PR, so a >250-commit PR may not have every commit message
+# evaluated. Surface that only when we're at the cap, so a rare large-PR false-fail is diagnosable.
+CAP_NOTE=""
+if [ "$COMMIT_COUNT" -ge 250 ]; then
+  CAP_NOTE=" GitHub returns at most 250 commits per PR; if this PR has more, later commit messages were not evaluated — put the key in the PR title."
+fi
 if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
   {
     echo "### ❌ Jira-key check failed"
     echo ""
     echo "Every change merged to the default branch must carry, **in the commit that lands**, either a \`UID2-<n>\` key (uppercase) or a reasoned \`[no-jira - reason: <reason>]\` opt-out (lowercase, reason mandatory)."
     echo ""
-    echo "Your PR has **${COMMIT_COUNT}** commit(s), so what lands is ${WHATLANDS}."
+    echo "Your PR has **${COMMIT_COUNT}** commit(s), so what lands is ${WHATLANDS}.${CAP_NOTE}"
     echo ""
     echo "Fix: ${FIX}."
   } >> "$GITHUB_STEP_SUMMARY"

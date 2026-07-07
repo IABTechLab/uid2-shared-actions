@@ -57,7 +57,11 @@ runs:
         # Gather inputs for the pure matcher. Title fetched LIVE (not the frozen github.event payload)
         # so a manual re-run after a title edit re-evaluates the current title.
         PR_TITLE=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.title // ""')
-        COMMITS=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}/commits?per_page=100")
+        # --paginate + `jq -s '[.[][]]'` flattens ALL pages: the squash body concatenates every
+        # commit, so fetching only the first page (per_page=100) could false-fail a >100-commit PR
+        # whose key is only in a later commit and not the PR title. GitHub caps PR commits at 250;
+        # match.sh surfaces that cap in the failure message for the (pathological) >250 case.
+        COMMITS=$(gh api --paginate "repos/${REPO}/pulls/${PR_NUMBER}/commits?per_page=100" | jq -s '[.[][]]')
         COMMIT_COUNT=$(printf '%s' "$COMMITS" | jq 'length')
         ALL_MSGS=$(printf '%s' "$COMMITS" | jq -r '.[].commit.message')
         FIRST_LINE=$(printf '%s' "$COMMITS" | jq -r '(.[0].commit.message // "") | split("\n")[0]')
