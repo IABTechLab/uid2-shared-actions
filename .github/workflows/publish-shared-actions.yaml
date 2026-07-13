@@ -51,28 +51,6 @@ jobs:
               sha: process.env.SHA,
             });
 
-      - name: Resolve previous release tag
-        id: prev
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GH_MERGE_TOKEN }}
-        run: |
-          # Pin the changelog start to the last published release. mikepenz's tag
-          # auto-detection mis-sorts non-sequential tags (v3.7 vs v3.70). Empty
-          # result (first release) falls back to auto-detect.
-          tag=$(gh api "repos/${{ github.repository }}/releases?per_page=100" \
-            --jq 'map(select(.draft == false)) | .[0].tag_name // ""')
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-
-      - name: Build changelog
-        id: changelog
-        uses: mikepenz/release-changelog-builder-action@348e88fab4c37338b1e803ceb2d4a7a5db6c0833 # v6.2.2
-        with:
-          fromTag: ${{ steps.prev.outputs.tag }}
-          toTag: ${{ steps.version.outputs.tag }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_MERGE_TOKEN }}
-
       - name: Create release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
@@ -80,7 +58,8 @@ jobs:
           # Tag already created above; softprops must not auto-create it.
           tag_name: ${{ steps.version.outputs.tag }}
           name: ${{ steps.version.outputs.tag }}
-          body: ${{ steps.changelog.outputs.changelog }}
+          # GitHub's built-in notes: merged PRs since the previous release.
+          generate_release_notes: true
           draft: false
           prerelease: false
 
