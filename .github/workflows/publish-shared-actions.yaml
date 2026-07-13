@@ -49,7 +49,7 @@ jobs:
           TAG: ${{ steps.version.outputs.tag }}
           SHA: ${{ github.sha }}
         with:
-          github-token: ${{ secrets.GH_MERGE_TOKEN }}
+          github-token: ${{ secrets.GH_TAG_TOKEN }}
           script: |
             await github.rest.git.createRef({
               owner: context.repo.owner,
@@ -79,4 +79,4 @@ jobs:
           # Must include the leading "v" — the action's regex requires it.
           version: ${{ steps.version.outputs.tag }}
           sha: ${{ github.sha }}
-          github_token: ${{ secrets.GH_MERGE_TOKEN }}
+          github_token: ${{ secrets.GH_TAG_TOKEN }}
