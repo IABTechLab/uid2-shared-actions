@@ -12,7 +12,6 @@ permissions:
   contents: read
 
 # Serialize releases so two dispatches can't race the version compute.
-# cancel-in-progress false: never kill a release mid-flight (partial state).
 concurrency:
   group: publish-shared-actions
   cancel-in-progress: false
