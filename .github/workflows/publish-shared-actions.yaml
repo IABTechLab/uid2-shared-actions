@@ -35,11 +35,9 @@ jobs:
         shell: bash
         run: |
           # Versions are tag-only (no version.json): bump the minor of the highest
-          # vMAJOR.MINOR tag. Major bumps (v4) aren't handled here.
+          # vMAJOR.MINOR tag. Major bumps (v4) aren't handled here. No match → grep
+          # exits 1 → pipefail+errexit fail the step here (can't silently yield v.1).
           latest=$(git tag -l 'v*.*' | grep -E '^v[0-9]+\.[0-9]+$' | sort -V | tail -1)
-          if [[ -z "$latest" ]]; then
-            echo "::error::No vMAJOR.MINOR release tag found"; exit 1
-          fi
           # Parse via bash param expansion (strip v, then before/after the dot).
           ver=${latest#v}
           major=${ver%%.*}
