@@ -35,7 +35,9 @@ runs:
           const inputSha = process.env.INPUT_SHA;
           const match = /^(v\d+)\.\d[\d\.]*$/.exec(inputVersion);
           if (match == null) {
-              console.log('Unable to match a valid SEMVER string in input version.');
+              // Fail loudly rather than no-op: a silent skip here would leave the
+              // major tag (e.g. v3) stale while a new version tag exists.
+              core.setFailed(`Version "${inputVersion}" is not in vMAJOR.MINOR form (e.g. v3.4); refusing to move the major tag.`);
           }
           else {
               const majorVersion = match[1];
