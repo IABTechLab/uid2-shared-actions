@@ -1,0 +1,79 @@
+name: Publish shared-actions release
+
+# Dispatch-only release for uid2-shared-actions (UID2-7445), replacing manual UI
+# releases. All tag/release writes run as UID2SourceAdmin via the `release`
+# environment, which holds the PAT (the v* tag ruleset's only bypass actor) and
+# pins the run to main.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Compute next version
+        id: version
+        shell: bash
+        run: |
+          # Versions are tag-only (no version.json): bump the highest vMAJOR.MINOR
+          # tag. Major bumps are done manually.
+          latest=$(git tag -l 'v*.*' | grep -E '^v[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          major=$(echo "$latest" | sed -E 's/^v([0-9]+)\..*/\1/')
+          minor=$(echo "$latest" | sed -E 's/^v[0-9]+\.([0-9]+)$/\1/')
+          next="v${major}.$((minor + 1))"
+          echo "Latest: ${latest}; next: ${next}"
+          echo "tag=${next}" >> "$GITHUB_OUTPUT"
+          echo "num=${next#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Create version tag
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          SHA: ${{ github.sha }}
+        with:
+          github-token: ${{ secrets.GH_MERGE_TOKEN }}
+          script: |
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${process.env.TAG}`,
+              sha: process.env.SHA,
+            });
+
+      - name: Build changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@348e88fab4c37338b1e803ceb2d4a7a5db6c0833 # v6.2.2
+        with:
+          toTag: ${{ steps.version.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_MERGE_TOKEN }}
+
+      - name: Create release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          token: ${{ secrets.GH_MERGE_TOKEN }}
+          # Tag already created above; softprops must not auto-create it.
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+      - name: Move major version tag
+        uses: ./actions/update-major-version-tag
+        with:
+          version: ${{ steps.version.outputs.num }}
+          sha: ${{ github.sha }}
+          github_token: ${{ secrets.GH_MERGE_TOKEN }}

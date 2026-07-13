@@ -1,10 +1,15 @@
 name: Update major version tag
+description: Point the major version tag (e.g. v3) at the commit for a full release version (e.g. v3.4), creating it if absent.
 inputs:
   version:
     description: 'The full version number of the release'
     required: true
   sha:
     description: 'The SHA of the commit to point the major version tag to. If not provided, it will be looked up from the tag matching the version.'
+    required: false
+    default: ''
+  github_token:
+    description: 'Token for the tag write. Pass a v* tag-ruleset bypass token (the UID2SourceAdmin PAT) where the ruleset applies; defaults to GITHUB_TOKEN.'
     required: false
     default: ''
 outputs:
@@ -24,6 +29,7 @@ runs:
         INPUT_VERSION: ${{ inputs.version }}
         INPUT_SHA: ${{ inputs.sha }}
       with:
+        github-token: ${{ inputs.github_token != '' && inputs.github_token || github.token }}
         script: |
           const inputVersion = process.env.INPUT_VERSION;
           const inputSha = process.env.INPUT_SHA;
