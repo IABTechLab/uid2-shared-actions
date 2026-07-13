@@ -2,14 +2,17 @@ name: Publish shared-actions release
 
 # Dispatch-only release for uid2-shared-actions (UID2-7445), replacing manual UI
 # releases. All tag/release writes run as UID2SourceAdmin via the `release`
-# environment, which holds the PAT (the v* tag ruleset's only bypass actor) and
-# pins the run to main.
+# environment, which holds the PAT and pins the run to main. The v* tag ruleset
+# is bypassed by release automation (and by uid-admins via JITA for break-glass).
 
 on:
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# Serialize releases so two dispatches can't race the version compute.
+concurrency: publish-shared-actions
 
 jobs:
   publish:
@@ -58,7 +61,9 @@ jobs:
           # Tag already created above; softprops must not auto-create it.
           tag_name: ${{ steps.version.outputs.tag }}
           name: ${{ steps.version.outputs.tag }}
-          # GitHub's built-in notes: merged PRs since the previous release.
+          # Built-in notes rather than the canonical shared_create_releases
+          # (UID2-6762): shared-actions ships no installable artifact, so its
+          # per-platform install templating doesn't apply here.
           generate_release_notes: true
           draft: false
           prerelease: false
