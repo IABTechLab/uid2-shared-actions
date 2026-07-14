@@ -1,0 +1,85 @@
+name: Publish shared-actions release
+
+# Dispatch-only release for uid2-shared-actions (UID2-7445), replacing manual UI
+# releases. All tag/release writes run as UID2SourceAdmin via the `release`
+# environment, which holds the PAT and pins the run to main. The v* tag ruleset
+# is bypassed by release automation (and by uid-admins via JITA for break-glass).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  # write so the ephemeral GITHUB_TOKEN can create the release; the PAT is used
+  # only by the first-party tag-write steps, never by third-party actions.
+  contents: write
+
+# Serialize releases so two dispatches can't race the version compute.
+concurrency:
+  group: publish-shared-actions
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: main
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Compute next version
+        id: version
+        shell: bash
+        run: |
+          # Versions are tag-only (no version.json): bump the minor of the highest
+          # vMAJOR.MINOR tag. Major bumps (v4) aren't handled here. No match → grep
+          # exits 1 → pipefail+errexit fail the step here (can't silently yield v.1).
+          latest=$(git tag -l 'v*.*' | grep -E '^v[0-9]+\.[0-9]+$' | sort -V | tail -1)
+          # Parse via bash param expansion (strip v, then before/after the dot).
+          ver=${latest#v}
+          major=${ver%%.*}
+          minor=${ver##*.}
+          next="v${major}.$((minor + 1))"
+          echo "Latest: ${latest}; next: ${next}"
+          echo "tag=${next}" >> "$GITHUB_OUTPUT"
+
+      - name: Create version tag
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          SHA: ${{ github.sha }}
+        with:
+          github-token: ${{ secrets.GH_TAG_TOKEN }}
+          script: |
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${process.env.TAG}`,
+              sha: process.env.SHA,
+            });
+
+      - name: Create release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          # Default GITHUB_TOKEN, not the PAT: the tag already exists (created
+          # above), so creating the release needs no ruleset bypass — keeps the
+          # org-spanning PAT out of this third-party action.
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          # Built-in notes rather than the canonical shared_create_releases
+          # (UID2-6762): shared-actions ships no installable artifact, so its
+          # per-platform install templating doesn't apply here.
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
+      - name: Move major version tag
+        uses: ./actions/update-major-version-tag
+        with:
+          # Must include the leading "v" — the action's regex requires it.
+          version: ${{ steps.version.outputs.tag }}
+          sha: ${{ github.sha }}
+          github_token: ${{ secrets.GH_TAG_TOKEN }}
