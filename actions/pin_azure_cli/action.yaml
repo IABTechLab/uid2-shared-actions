@@ -1,0 +1,29 @@
+name: Pin Azure CLI
+description: >
+  Pin the runner's Azure CLI to a specific version via apt (downgrading if
+  needed), so az runs on the Python interpreter that version bundles. Works
+  around Azure/azure-cli#32869: on Python 3.14, msal's lazy `import requests` on
+  the CLI's long-running-operation poller thread deadlocks
+  (_frozen_importlib._DeadlockError) and crashes commands such as
+  `az network vnet create`, `az aks create`, and `az group delete`. Pin to a
+  build on Python <= 3.13 until upstream ships Python 3.14 support.
+
+inputs:
+  azure_cli_version:
+    description: azure-cli version to pin; that version's apt build is installed, e.g. "2.87.0".
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Pin azure-cli
+      shell: bash
+      env:
+        AZURE_CLI_VERSION: ${{ inputs.azure_cli_version }}
+      run: |
+        : "${AZURE_CLI_VERSION:?azure_cli_version input is required}"
+        # Idempotent: a no-op when az is already at the pinned version. The glob
+        # matches the -1~<dist> apt revision so it need not be spelled out.
+        pkg="azure-cli=${AZURE_CLI_VERSION}*"
+        sudo apt-get update
+        sudo apt-get install -y --allow-downgrades "${pkg}"
