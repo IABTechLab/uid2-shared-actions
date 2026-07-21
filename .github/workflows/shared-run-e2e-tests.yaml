@@ -76,6 +76,10 @@ on:
 env:
   REGISTRY: ghcr.io
 
+  # Last azure-cli built on Python 3.13; works around the Python 3.14 az deadlock
+  # (Azure/azure-cli#32869). Bump or remove once azure-cli supports Python 3.14.
+  AZURE_CLI_PINNED_VERSION: "2.87.0"
+
   E2E_UID2_INTEG_GCP_ARGS_JSON: ${{ secrets.E2E_UID2_INTEG_GCP_ARGS_JSON }}
   E2E_UID2_INTEG_AWS_ARGS_JSON: ${{ secrets.E2E_UID2_INTEG_AWS_ARGS_JSON }}
   E2E_UID2_INTEG_AZURE_ARGS_JSON: ${{ secrets.E2E_UID2_INTEG_AZURE_ARGS_JSON }}
@@ -203,6 +207,12 @@ jobs:
           identity_scope: ${{ inputs.identity_scope }}
           target_environment: ${{ inputs.target_environment }}
           aws_pcr0: ${{ inputs.aws_pcr0 }}
+
+      - name: Pin Azure CLI (Azure/azure-cli#32869)
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/pin_azure_cli@v3
+        with:
+          azure_cli_version: ${{ env.AZURE_CLI_PINNED_VERSION }}
 
       - name: Start AKS cluster
         id: start_aks_cluster
@@ -403,6 +413,12 @@ jobs:
         with:
           aws_stack_name: ${{ needs.e2e-test.outputs.aws_stack_name }}
           aws_region: ${{ inputs.aws_region }}
+
+      - name: Pin Azure CLI (Azure/azure-cli#32869)
+        if: ${{ inputs.operator_type == 'aks' }}
+        uses: IABTechLab/uid2-shared-actions/actions/pin_azure_cli@v3
+        with:
+          azure_cli_version: ${{ env.AZURE_CLI_PINNED_VERSION }}
 
       - name: Stop AKS private operator
         if: ${{ inputs.operator_type == 'aks' }}
