@@ -61,11 +61,13 @@ if az aks show --resource-group ${RESOURCE_GROUP} --name ${AKS_CLUSTER_NAME} &>/
   echo "AKS cluster '${AKS_CLUSTER_NAME}' already exists, skipping creation."
 else
   echo "Creating AKS cluster '${AKS_CLUSTER_NAME}'..."
+  # AKS drops each minor version to LTS-only ~12 months after GA, and cluster
+  # creation then fails with K8sVersionNotSupported. Bump before Jun 2027.
   az aks create \
       --resource-group ${RESOURCE_GROUP} \
       --name ${AKS_CLUSTER_NAME} \
       --location ${LOCATION} \
-      --kubernetes-version 1.33 \
+      --kubernetes-version 1.36 \
       --network-plugin azure \
       --network-policy calico \
       --vnet-subnet-id ${AKS_SUBNET_ID} \
