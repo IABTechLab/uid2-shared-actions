@@ -53,6 +53,19 @@ jobs:
           branch_name: ${{ github.ref }}
           working_dir: ${{ inputs.working_dir }}
 
+      # Skip adding package-lock.json on repos where it does not already exist
+      # e.g if they are using yarn instead
+      - name: Check for existing ${{ inputs.working_dir }}/package-lock.json
+        id: checkPackageLock
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
+        run: |
+          if [ -f "${WORKING_DIR}/package-lock.json" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Update ${{ inputs.working_dir }}/package.json
         id: updatePackageJson
         env:
@@ -67,20 +80,34 @@ jobs:
           echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
 
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        if: steps.checkPackageLock.outputs.exists == 'true'
         with:
           node-version: 24
 
       - name: Update ${{ inputs.working_dir }}/package-lock.json
         id: updatePackageLockJson
+        if: steps.checkPackageLock.outputs.exists == 'true'
         run: |
           npm install --package-lock-only
+
+      - name: Determine files to commit
+        id: filesToCommit
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
+          PACKAGE_LOCK_EXISTS: ${{ steps.checkPackageLock.outputs.exists }}
+        run: |
+          files="${WORKING_DIR}/package.json ${WORKING_DIR}/version.json"
+          if [ "$PACKAGE_LOCK_EXISTS" == "true" ]; then
+            files="${WORKING_DIR}/package.json ${WORKING_DIR}/package-lock.json ${WORKING_DIR}/version.json"
+          fi
+          echo "files=$files" >> $GITHUB_OUTPUT
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/package-lock.json and ${{ inputs.working_dir }}/version.json
         if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE != 'true' }}
         id: commit-without-tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
-          add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
+          add: '${{ steps.filesToCommit.outputs.files }}'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
@@ -89,7 +116,7 @@ jobs:
         id: commit-and-tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
-          add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
+          add: '${{ steps.filesToCommit.outputs.files }}'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
