@@ -53,51 +53,35 @@ jobs:
           branch_name: ${{ github.ref }}
           working_dir: ${{ inputs.working_dir }}
 
-      # Skip adding package-lock.json on repos where it does not already exist
-      # e.g if they are using yarn instead
-      - name: Check for existing ${{ inputs.working_dir }}/package-lock.json
-        id: checkPackageLock
-        env:
-          WORKING_DIR: ${{ inputs.working_dir }}
-        run: |
-          if [ -f "${WORKING_DIR}/package-lock.json" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
 
-      - name: Update ${{ inputs.working_dir }}/package.json
+      - name: Update ${{ inputs.working_dir }}/package.json and package-lock.json
         id: updatePackageJson
         env:
           # Passed via env rather than expanded into the script: caller-controlled
           # input, expanding it inline is shell injection (zizmor: template-injection).
           WORKING_DIR: ${{ inputs.working_dir }}
+          NEW_VERSION: ${{ steps.version.outputs.new_version }}
         run: |
-          current_version=$(jq -r '.version')
-          new_version=${{ steps.version.outputs.new_version }}
-          jq --arg v "$new_version" ".version = \$v" "${WORKING_DIR}/package.json" > tmp.json && mv tmp.json "${WORKING_DIR}/package.json"
-          echo "Version number updated from $current_version to $new_version"
-          echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
+          current_version=$(jq -r '.version' "${WORKING_DIR}/package.json")
+          # npm version patches package.json's version field, and package-lock.json's
+          # too if that file already exists - it never creates a lockfile that isn't
+          # already there, so this naturally skips lockfile creation for yarn repos.
+          npm --prefix "${WORKING_DIR}" version "$NEW_VERSION" --no-git-tag-version --allow-same-version
+          echo "Version number updated from $current_version to $NEW_VERSION"
+          echo "image_tag=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        if: steps.checkPackageLock.outputs.exists == 'true'
-        with:
-          node-version: 24
-
-      - name: Update ${{ inputs.working_dir }}/package-lock.json
-        id: updatePackageLockJson
-        if: steps.checkPackageLock.outputs.exists == 'true'
-        run: |
-          npm install --package-lock-only
-
+      # Skip adding package-lock.json on repos where it does not already exist
+      # e.g if they are using yarn instead
       - name: Determine files to commit
         id: filesToCommit
         env:
           WORKING_DIR: ${{ inputs.working_dir }}
-          PACKAGE_LOCK_EXISTS: ${{ steps.checkPackageLock.outputs.exists }}
         run: |
           files="${WORKING_DIR}/package.json ${WORKING_DIR}/version.json"
-          if [ "$PACKAGE_LOCK_EXISTS" == "true" ]; then
+          if [ -f "${WORKING_DIR}/package-lock.json" ]; then
             files="${WORKING_DIR}/package.json ${WORKING_DIR}/package-lock.json ${WORKING_DIR}/version.json"
           fi
           echo "files=$files" >> $GITHUB_OUTPUT
