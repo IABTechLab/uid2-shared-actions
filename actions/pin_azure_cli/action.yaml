@@ -22,8 +22,18 @@ runs:
         AZURE_CLI_VERSION: ${{ inputs.azure_cli_version }}
       run: |
         : "${AZURE_CLI_VERSION:?azure_cli_version input is required}"
-        # Idempotent: a no-op when az is already at the pinned version. The glob
-        # matches the -1~<dist> apt revision so it need not be spelled out.
-        pkg="azure-cli=${AZURE_CLI_VERSION}*"
+        # https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+        AZ_DIST="$(lsb_release -cs)"
+        sudo mkdir -p /etc/apt/keyrings
+        curl -sLS https://packages.microsoft.com/keys/microsoft.asc |
+          gpg --dearmor | sudo tee /etc/apt/keyrings/microsoft.gpg > /dev/null
+        sudo chmod go+r /etc/apt/keyrings/microsoft.gpg
+        echo "Types: deb
+        URIs: https://packages.microsoft.com/repos/azure-cli/
+        Suites: ${AZ_DIST}
+        Components: main
+        Architectures: $(dpkg --print-architecture)
+        Signed-by: /etc/apt/keyrings/microsoft.gpg" | sudo tee /etc/apt/sources.list.d/azure-cli.sources
         sudo apt-get update
-        sudo apt-get install -y --allow-downgrades "${pkg}"
+        # Idempotent: a no-op when az is already at the pinned version.
+        sudo apt-get install -y --allow-downgrades "azure-cli=${AZURE_CLI_VERSION}-1~${AZ_DIST}"
