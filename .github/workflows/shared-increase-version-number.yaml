@@ -53,34 +53,45 @@ jobs:
           branch_name: ${{ github.ref }}
           working_dir: ${{ inputs.working_dir }}
 
-      - name: Update ${{ inputs.working_dir }}/package.json
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+
+      - name: Update ${{ inputs.working_dir }}/package.json and package-lock.json
         id: updatePackageJson
         env:
           # Passed via env rather than expanded into the script: caller-controlled
           # input, expanding it inline is shell injection (zizmor: template-injection).
           WORKING_DIR: ${{ inputs.working_dir }}
+          NEW_VERSION: ${{ steps.version.outputs.new_version }}
         run: |
-          current_version=$(jq -r '.version')
-          new_version=${{ steps.version.outputs.new_version }}
-          jq --arg v "$new_version" ".version = \$v" "${WORKING_DIR}/package.json" > tmp.json && mv tmp.json "${WORKING_DIR}/package.json"
-          echo "Version number updated from $current_version to $new_version"
-          echo "image_tag=${{ steps.version.outputs.new_version }}" >> $GITHUB_OUTPUT
+          current_version=$(jq -r '.version' "${WORKING_DIR}/package.json")
+          # npm version patches package.json's version field, and package-lock.json's
+          # too if that file already exists - it never creates a lockfile that isn't
+          # already there, so this naturally skips lockfile creation for yarn repos.
+          npm --prefix "${WORKING_DIR}" version "$NEW_VERSION" --no-git-tag-version --allow-same-version
+          echo "Version number updated from $current_version to $NEW_VERSION"
+          echo "image_tag=$NEW_VERSION" >> $GITHUB_OUTPUT
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-        with:
-          node-version: 24
-
-      - name: Update ${{ inputs.working_dir }}/package-lock.json
-        id: updatePackageLockJson
+      # Skip adding package-lock.json on repos where it does not already exist
+      # e.g if they are using yarn instead
+      - name: Determine files to commit
+        id: filesToCommit
+        env:
+          WORKING_DIR: ${{ inputs.working_dir }}
         run: |
-          npm install --package-lock-only
+          files="${WORKING_DIR}/package.json ${WORKING_DIR}/version.json"
+          if [ -f "${WORKING_DIR}/package-lock.json" ]; then
+            files="${WORKING_DIR}/package.json ${WORKING_DIR}/package-lock.json ${WORKING_DIR}/version.json"
+          fi
+          echo "files=$files" >> $GITHUB_OUTPUT
 
       - name: Commit ${{ inputs.working_dir }}/package.json, ${{ inputs.working_dir }}/package-lock.json and ${{ inputs.working_dir }}/version.json
         if: ${{ inputs.version_number_input == '' && steps.setup.outputs.IS_RELEASE != 'true' }}
         id: commit-without-tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
-          add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
+          add: '${{ steps.filesToCommit.outputs.files }}'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
 
@@ -89,7 +100,7 @@ jobs:
         id: commit-and-tag
         uses: IABTechLab/uid2-shared-actions/actions/commit_pr_and_merge@v3
         with:
-          add: '${{ inputs.working_dir }}/package.json ${{ inputs.working_dir }}/package-lock.json ${{ inputs.working_dir }}/version.json'
+          add: '${{ steps.filesToCommit.outputs.files }}'
           message: 'Released ${{ inputs.release_type }} version: ${{ steps.version.outputs.new_version }}'
           tag: v${{ steps.version.outputs.new_version }}
           github_token: ${{ inputs.merge_environment != '' && secrets.GH_MERGE_TOKEN || '' }}
