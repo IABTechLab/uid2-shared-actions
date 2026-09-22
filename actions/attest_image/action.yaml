@@ -43,7 +43,7 @@ runs:
         SUBJECT_DIGEST: ${{ inputs.subject_digest }}
         IMAGE_REF: ${{ steps.ref.outputs.value }}
       run: |
-        # Accept either signer SAN: the reusable workflow under IABTechLab/uid2-shared-actions, or the caller's workflow via the composite path. GitHub certificate identities are case-normalized, so match repository names case-insensitively. --owner alone would reject the former (see https://github.com/cli/cli/issues/9045).
+        # Accept either signer SAN: the reusable workflow under IABTechLab/uid2-shared-actions, or the caller's workflow via the composite path. Certificate identities can differ in repository-name casing, so match them case-insensitively. --owner alone would reject the former (see https://github.com/cli/cli/issues/9045).
         gh attestation verify \
           "oci://${IMAGE_REF}@${SUBJECT_DIGEST}" \
           --owner "${{ github.repository_owner }}" \
