@@ -61,8 +61,32 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 jobs:
+  # The image scan can't see dependencies without Maven metadata inside the fat jar (e.g. BouncyCastle).
+  # Separate job so its output files don't land in the workspace buildImage commits from.
+  fsScan:
+    name: Vulnerability Scan (fs)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.version_number_input != '' && format('v{0}', inputs.version_number_input) || '' }}
+          persist-credentials: false
+
+      - name: Vulnerability Scan (fs)
+        uses: IABTechLab/uid2-shared-actions/actions/vulnerability_scan@v3
+        with:
+          scan_severity: HIGH,CRITICAL
+          failure_severity: ${{ inputs.vulnerability_severity }}
+          # build-and-test already publishes fs results from main
+          publish_vulnerabilities: 'false'
+          scan_type: fs
+
   buildImage:
     name: Build Image
+    needs: fsScan
     runs-on: ubuntu-latest
     environment: ${{ inputs.merge_environment }}
     permissions:
