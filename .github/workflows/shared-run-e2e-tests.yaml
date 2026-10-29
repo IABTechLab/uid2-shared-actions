@@ -104,7 +104,8 @@ env:
 jobs:
   e2e-test:
     name: E2E Test
-    runs-on: ubuntu-latest
+    # The pinned azure-cli is not in Microsoft's apt repo for Ubuntu 26.04 (ubuntu-latest).
+    runs-on: ${{ inputs.operator_type == 'aks' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     permissions:
       contents: write
       packages: read
@@ -377,7 +378,8 @@ jobs:
     name: E2E Test Cleanup (Delayed Operator Shutdown)
     if: ${{ always() && inputs.delay_operator_shutdown && inputs.operator_type != 'public' }}
     needs: [e2e-test]
-    runs-on: ubuntu-latest
+    # The pinned azure-cli is not in Microsoft's apt repo for Ubuntu 26.04 (ubuntu-latest).
+    runs-on: ${{ inputs.operator_type == 'aks' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     environment: 'e2e-test-cleanup'
     permissions:
       contents: write
