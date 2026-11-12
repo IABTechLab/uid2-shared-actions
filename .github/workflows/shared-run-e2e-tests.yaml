@@ -73,6 +73,16 @@ on:
         description: The AWS PCR0
         type: string
 
+      azure_client_id:
+        description: The Azure application client ID for OIDC login
+        type: string
+      azure_tenant_id:
+        description: The Azure tenant ID for OIDC login
+        type: string
+      azure_subscription_id:
+        description: The Azure subscription ID for OIDC login
+        type: string
+
 env:
   REGISTRY: ghcr.io
 
@@ -220,6 +230,9 @@ jobs:
         if: ${{ inputs.operator_type == 'aks' }}
         uses: IABTechLab/uid2-shared-actions/actions/start_aks_cluster@v3
         with:
+          azure_client_id: ${{ inputs.azure_client_id }}
+          azure_tenant_id: ${{ inputs.azure_tenant_id }}
+          azure_subscription_id: ${{ inputs.azure_subscription_id }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
 
@@ -283,6 +296,9 @@ jobs:
           bore_url_optout: ${{ steps.bore.outputs.bore_url_optout }}
           template_file: ${{ steps.prepare_azure_metadata.outputs.template_file }}
           parameters_file: ${{ steps.prepare_azure_metadata.outputs.parameters_file }}
+          azure_client_id: ${{ inputs.azure_client_id }}
+          azure_tenant_id: ${{ inputs.azure_tenant_id }}
+          azure_subscription_id: ${{ inputs.azure_subscription_id }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           target_environment: ${{ inputs.target_environment }}
 
@@ -306,6 +322,9 @@ jobs:
         uses: IABTechLab/uid2-shared-actions/actions/start_aks_private_operator@v3
         with:
           template_file: ${{ steps.prepare_aks_metadata.outputs.template_file }}
+          azure_client_id: ${{ inputs.azure_client_id }}
+          azure_tenant_id: ${{ inputs.azure_tenant_id }}
+          azure_subscription_id: ${{ inputs.azure_subscription_id }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
 
@@ -406,6 +425,9 @@ jobs:
         if: ${{ inputs.operator_type == 'azure' }}
         uses: IABTechLab/uid2-shared-actions/actions/stop_azure_private_operator@v3
         with:
+          azure_client_id: ${{ inputs.azure_client_id }}
+          azure_tenant_id: ${{ inputs.azure_tenant_id }}
+          azure_subscription_id: ${{ inputs.azure_subscription_id }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           azure_container_group_name: ${{ needs.e2e-test.outputs.azure_container_group_name }}
 
@@ -426,5 +448,8 @@ jobs:
         if: ${{ inputs.operator_type == 'aks' }}
         uses: IABTechLab/uid2-shared-actions/actions/stop_aks_private_operator@v3
         with:
+          azure_client_id: ${{ inputs.azure_client_id }}
+          azure_tenant_id: ${{ inputs.azure_tenant_id }}
+          azure_subscription_id: ${{ inputs.azure_subscription_id }}
           azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
