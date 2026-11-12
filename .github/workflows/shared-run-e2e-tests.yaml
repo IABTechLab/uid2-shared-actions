@@ -76,12 +76,15 @@ on:
       azure_client_id:
         description: The Azure application client ID for OIDC login
         type: string
+        default: cb9577ac-2972-46a9-b882-d3c0da07b4ce
       azure_tenant_id:
         description: The Azure tenant ID for OIDC login
         type: string
+        default: 67714990-53f7-4cc5-b369-edabfd7d01d9
       azure_subscription_id:
         description: The Azure subscription ID for OIDC login
         type: string
+        default: 63e97a70-d825-4b08-af6d-c0d8ad98bed3
 
 env:
   REGISTRY: ghcr.io
