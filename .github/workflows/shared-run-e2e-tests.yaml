@@ -236,7 +236,6 @@ jobs:
           azure_client_id: ${{ inputs.azure_client_id }}
           azure_tenant_id: ${{ inputs.azure_tenant_id }}
           azure_subscription_id: ${{ inputs.azure_subscription_id }}
-          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
 
       - name: Get AKS operator key
@@ -302,7 +301,6 @@ jobs:
           azure_client_id: ${{ inputs.azure_client_id }}
           azure_tenant_id: ${{ inputs.azure_tenant_id }}
           azure_subscription_id: ${{ inputs.azure_subscription_id }}
-          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           target_environment: ${{ inputs.target_environment }}
 
       - name: Start AWS private operator
@@ -328,7 +326,6 @@ jobs:
           azure_client_id: ${{ inputs.azure_client_id }}
           azure_tenant_id: ${{ inputs.azure_tenant_id }}
           azure_subscription_id: ${{ inputs.azure_subscription_id }}
-          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
 
       - name: Decide E2E test environment variables
@@ -431,7 +428,6 @@ jobs:
           azure_client_id: ${{ inputs.azure_client_id }}
           azure_tenant_id: ${{ inputs.azure_tenant_id }}
           azure_subscription_id: ${{ inputs.azure_subscription_id }}
-          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           azure_container_group_name: ${{ needs.e2e-test.outputs.azure_container_group_name }}
 
       - name: Stop AWS private operator
@@ -454,5 +450,4 @@ jobs:
           azure_client_id: ${{ inputs.azure_client_id }}
           azure_tenant_id: ${{ inputs.azure_tenant_id }}
           azure_subscription_id: ${{ inputs.azure_subscription_id }}
-          azure_credentials: ${{ secrets.AZURE_CREDENTIALS }}
           run_id: ${{ github.run_id }}
