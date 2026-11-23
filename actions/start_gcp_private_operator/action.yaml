@@ -21,7 +21,7 @@ inputs:
     description: The operator key
     required: true
   target_environment:
-    description: The target environment [mock, integ, prod]
+    description: The target environment [mock, integ, prod]. Empty behaves like integ.
     required: false
     default: ''
 
