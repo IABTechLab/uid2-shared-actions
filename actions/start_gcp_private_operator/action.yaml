@@ -22,8 +22,6 @@ inputs:
     required: true
   target_environment:
     description: The target environment [mock, integ, prod]. Anything other than prod behaves like integ.
-    required: false
-    default: ''
 
 outputs:
   gcp_instance_name:
