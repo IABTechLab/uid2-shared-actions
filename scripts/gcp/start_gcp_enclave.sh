@@ -33,11 +33,8 @@ fi
 
 if [ "${TARGET_ENVIRONMENT}" == "prod" ]; then
   ENV_METADATA="tee-env-DEPLOYMENT_ENVIRONMENT=prod"
-elif [ -z "${TARGET_ENVIRONMENT}" ] || [ "${TARGET_ENVIRONMENT}" == "mock" ] || [ "${TARGET_ENVIRONMENT}" == "integ" ]; then
-  ENV_METADATA="tee-env-SKIP_VALIDATIONS=true~tee-env-DEPLOYMENT_ENVIRONMENT=integ"
 else
-  echo "Arguments not supported: TARGET_ENVIRONMENT=${TARGET_ENVIRONMENT}"
-  exit 1
+  ENV_METADATA="tee-env-SKIP_VALIDATIONS=true~tee-env-DEPLOYMENT_ENVIRONMENT=integ"
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
