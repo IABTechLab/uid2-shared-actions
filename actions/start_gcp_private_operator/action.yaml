@@ -20,6 +20,8 @@ inputs:
   operator_key:
     description: The operator key
     required: true
+  target_environment:
+    description: The target environment [mock, integ, prod]. Anything other than prod behaves like integ.
 
 outputs:
   gcp_instance_name:
@@ -43,5 +45,6 @@ runs:
         SERVICE_ACCOUNT: ${{ inputs.gcp_service_account }}
         OPERATOR_KEY: ${{ inputs.operator_key }}
         IMAGE_HASH: ${{ inputs.image_hash }}
+        TARGET_ENVIRONMENT: ${{ inputs.target_environment }}
       run: |
         bash uid2-shared-actions/scripts/gcp/start_gcp_enclave.sh
